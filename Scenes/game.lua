@@ -34,40 +34,40 @@ function arcadeGame.update(dt) -- Runs every frame.
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
-    love.graphics.draw(background1, 0, background1Y) -- Draws the road sprites
-    love.graphics.draw(background2, 0, background2Y)
+    love.graphics.draw(road.image, road.x, road.v1y) -- Draws the road sprites
+    love.graphics.draw(road.image, road.x, road.v2y)
     love.graphics.draw(carSprite.image, carSprite.x, carSprite.y, carSprite.rotation, carSprite.scaleX, carSprite.scaleY) -- Draws the car sprite
 end
 
 function loadCar()
     carSprite = love.graphics.newImage("Sprites/yellowcar.png")
-    carSprite = loadObject(objectName, 0, 1000, (-math.pi/2), 1, 1, 30, "Sprites/yellowcar.png")
+    carSprite = loadObject(objectName, ((screenWidth/2)), 1000, (-math.pi/2), 1, 1, 30, "Sprites/yellowcar.png", 60, 30)
 end
 
-function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image)
+function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, width, height)
     local object = {
         x = x,
         y = y,
         rotation = rotation,
         scaleX = scaleX,
         scaleY = scaleY,
-        velocityX = 0,
-        velocityY = 0,
         speed = 0,
-        accel = 50,
+        accel = 250,
         rotationSpeed = 0,
-        radius = 15,
+        width = width,
+        height = height,
         image = love.graphics.newImage(image)
     }
     return object
 end
 
 function playerUpdate(dt)
-    if love.keyboard.isDown('right') then
+    if love.keyboard.isDown('right') then -- Turning
         carSprite.x = carSprite.x + carSprite.accel * dt
     elseif love.keyboard.isDown('left') then
         carSprite.x = carSprite.x - carSprite.accel * dt
-    elseif love.keyboard.isDown('up') then
+    end
+    if love.keyboard.isDown('up') then -- Moving
         backgroundSpeed = backgroundSpeed - carSprite.accel * dt
     elseif love.keyboard.isDown('down') then
         backgroundSpeed = backgroundSpeed + carSprite.accel * dt
@@ -75,32 +75,37 @@ function playerUpdate(dt)
 end
 
 function loadRoad()
-    background1 = love.graphics.newImage("Sprites/road.png") -- Art pass comes later ..
-    background2 = love.graphics.newImage("Sprites/road.png")
-    background1Y = 0
-    background2Y = background1:getHeight()
+    image = love.graphics.newImage("Sprites/road.png")
+
+    road = {
+        image = image, -- Art pass comes later ..
+        x = ((screenWidth/2)-(image:getWidth()/2)),
+        v2x = 0,
+        v1y = 0,
+        v2y = image:getHeight(),
+    }
 end
 
 function roadUpdate(dt)
-    background1Y = background1Y - backgroundSpeed * dt
-    background2Y = background2Y - backgroundSpeed * dt
+    road.v1y = road.v1y - backgroundSpeed * dt
+    road.v2y = road.v2y - backgroundSpeed * dt
 
-    if backgroundSpeed < 0 then
-        if background1Y < -background1:getHeight() then
-            background1Y = background2Y + background2:getHeight()
+    if backgroundSpeed > 0 then
+        if road.v1y < -road.image:getHeight() then
+            road.v1y = road.v2y + road.image:getHeight()
         end
 
-        if background2Y < -background2:getHeight() then
-            background2Y = background1Y + background1:getHeight()
+        if road.v2y < -road.image:getHeight() then
+            road.v2y = road.v1y + road.image:getHeight()
         end
 
-    elseif backgroundSpeed > 0 then
-        if background1Y > background1:getHeight() then
-            background1Y = background2Y - background2:getHeight()
+    elseif backgroundSpeed < 0 then
+        if road.v1y > road.image:getHeight() then
+            road.v1y = road.v2y - road.image:getHeight()
         end
 
-        if background2Y > background2:getHeight() then
-            background2Y = background1Y - background1:getHeight()
+        if road.v2y > road.image:getHeight() then
+            road.v2y = road.v1y - road.image:getHeight()
         end
     end
 end
