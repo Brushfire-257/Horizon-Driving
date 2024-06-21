@@ -42,12 +42,13 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     love.graphics.draw(road.image, road.x, road.v2y)
 
     love.graphics.draw(carSprite.image, carSprite.x, carSprite.y,
-    carSprite.rotation, carSprite.scaleX, carSprite.scaleY) -- Draws the car sprite
+    carSprite.rotation, carSprite.scaleX, carSprite.scaleY,
+    carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
 
     -- Draw the edges of car collider
     if debugMode then
         love.graphics.setColor(1, 0, 0) -- Set the color to red
-        points = {carCollider:points()}
+        local points = {carCollider._polygon:unpack()}
         for i = 1, #points, 2 do
             local next_i = i + 2
             if next_i > #points then next_i = 1 end
@@ -58,19 +59,28 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
 end
 
 function loadCar()
-    carSprite = love.graphics.newImage("Sprites/yellowcar.png")
-    carSprite = loadObject("playerCar", ((screenWidth/2)), 1000, (-math.pi/2), 1, 1, 30, "Sprites/yellowcar.png", 60, 30)
+    scaleX = 0.5
+    scaleY = 0.5
+    image = love.graphics.newImage("Sprites/yellowcar.png")
+    carSprite = loadObject("playerCar", ((screenWidth/2)), 1000, (-math.pi/2), scaleX, scaleY, 30, "Sprites/yellowcar.png",
+    (image:getWidth()*scaleX), (image:getHeight()*scaleY), (image:getWidth()/2), (image:getHeight()/2))
     
     --polygon collider for the car
-    carCollider = HC.polygon(carSprite.x, carSprite.y, carSprite.x + carSprite.width, carSprite.y,
-    carSprite.x + carSprite.width, carSprite.y + carSprite.height, carSprite.x, carSprite.y + carSprite.height)
+    carCollider = HC.polygon(
+        carSprite.x, carSprite.y,
+        carSprite.x + carSprite.width, carSprite.y,
+        carSprite.x + carSprite.width, carSprite.y + carSprite.height,
+        carSprite.x, carSprite.y + carSprite.height
+    )
 end
 
-function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, width, height)
+function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, width, height, rotationX, rotationY)
     local object = {
         x = x,
         y = y,
         rotation = rotation,
+        rotationX = rotationX,
+        rotationY = rotationY,
         scaleX = scaleX,
         scaleY = scaleY,
         speed = 0,
@@ -88,6 +98,11 @@ function playerUpdate(dt)
         carSprite.x = carSprite.x + carSprite.accel * dt
     elseif love.keyboard.isDown('left') then
         carSprite.x = carSprite.x - carSprite.accel * dt
+    end
+    if love.keyboard.isDown(',') then -- Rotation (Testing)
+        carSprite.rotation = carSprite.rotation - (math.pi/4) * dt
+    elseif love.keyboard.isDown('.') then
+        carSprite.rotation = carSprite.rotation + (math.pi/4) * dt
     end
     if love.keyboard.isDown('up') then -- Moving
         backgroundSpeed = backgroundSpeed - carSprite.accel * dt
