@@ -105,17 +105,14 @@ function playerUpdate(dt)
         carSprite.rotation = carSprite.rotation - carSprite.rotationSpeed * dt
     end
     if love.keyboard.isDown('up') then -- Moving
-        backgroundSpeed = backgroundSpeed - carSprite.accel * dt
         carSprite.speed = carSprite.speed + carSprite.accel * dt
     elseif love.keyboard.isDown('down') then
-        backgroundSpeed = backgroundSpeed + carSprite.accel * dt
         carSprite.speed = carSprite.speed - carSprite.accel * dt
     end
 
     local dx = carSprite.speed * math.cos(carSprite.rotation)
-    local dy = carSprite.speed * math.sin(carSprite.rotation)
+    roadFrameMove = carSprite.speed * math.sin(carSprite.rotation)
     carSprite.x = carSprite.x + dx * dt
-    -- carSprite.y = carSprite.y + dy * dt
 
     -- Update collider position and rotation
     carCollider:moveTo(carSprite.x, carSprite.y)
@@ -154,10 +151,10 @@ function loadRoad()
 end
 
 function roadUpdate(dt)
-    road.v1y = road.v1y - backgroundSpeed * dt
-    road.v2y = road.v2y - backgroundSpeed * dt
+    road.v1y = road.v1y - roadFrameMove * dt
+    road.v2y = road.v2y - roadFrameMove * dt
 
-    if backgroundSpeed > 0 then
+    if roadFrameMove > 0 then
         if road.v1y < -road.image:getHeight() then
             road.v1y = road.v2y + road.image:getHeight()
         end
@@ -166,7 +163,7 @@ function roadUpdate(dt)
             road.v2y = road.v1y + road.image:getHeight()
         end
 
-    elseif backgroundSpeed < 0 then
+    elseif roadFrameMove < 0 then
         if road.v1y > road.image:getHeight() then
             road.v1y = road.v2y - road.image:getHeight()
         end
@@ -183,9 +180,18 @@ function roadUpdate(dt)
 
     -- Check collider collisions
     if carCollider:collidesWith(rightRoadCollider) then
-        carSprite.x = (road.x + road.image:getWidth()/2) + rightRoadColliderOffset - 100
+        carSprite.x = (road.x + road.image:getWidth()/2) + rightRoadColliderOffset - (carSprite.image:getWidth()/3)
+        carSprite.rotation = -2*math.pi/3
+        carSprite.speed = carSprite.speed - 250
+        print(carSprite.speed)
     elseif carCollider:collidesWith(leftRoadCollider) then
-        carSprite.x = (road.x + road.image:getWidth()/2) - leftRoadColliderOffset + 100
+        carSprite.x = (road.x + road.image:getWidth()/2) - leftRoadColliderOffset + (carSprite.image:getWidth()/3)
+        carSprite.rotation = -math.pi/3
+        carSprite.speed = carSprite.speed - 250
+        print(carSprite.speed)
+    end
+    if carSprite.speed < 100 then
+        carSprite.speed = 100
     end
 end
 
