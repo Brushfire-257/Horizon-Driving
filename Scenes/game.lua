@@ -28,6 +28,7 @@ function arcadeGame.load() -- Runs once at the start of the game.
     loadCar()
     loadRoad()
     loadTraffic()
+    loadPolice()
 
     -- Create camera
     camerayOffset = 400
@@ -45,6 +46,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     playerUpdate(dt)
     roadUpdate(dt)
     updateTraffic(dt)
+    updatePolice(dt)
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
@@ -56,6 +58,9 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     trafficRight.rotationX, trafficRight.rotationY)
     love.graphics.draw(trafficLeft.image, trafficLeft.x, trafficLeft.y, trafficLeft.rotation, trafficLeft.scaleX, trafficLeft.scaleY,
     trafficLeft.rotationX, trafficLeft.rotationY)
+
+    love.graphics.draw(policeSprite.image, policeSprite.x, policeSprite.y, policeSprite.rotation, policeSprite.scaleX, policeSprite.scaleY,
+    policeSprite.rotationX, policeSprite.rotationY)
 
     love.graphics.draw(carSprite.image, carSprite.x, carSprite.y, carSprite.rotation, carSprite.scaleX, carSprite.scaleY,
         carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
@@ -394,6 +399,66 @@ function updateTraffic(dt)
 
     trafficRight.velocity = trafficRight.velocity * 0.98
     trafficLeft.velocity = trafficLeft.velocity * 0.98
+end
+
+function loadPolice()
+    local policeImage = love.graphics.newImage("Sprites/yellowcar.png")
+    scaleX = 0.5
+    scaleY = 0.5
+    policeHeat = 0
+    policeSprite = {
+        x = 1000,
+        y = 500,
+        rotation = -math.pi/2,
+        rotationX = trafficImage:getWidth() / 2,
+        rotationY = trafficImage:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        speed = 750,
+        acc = 200,
+        width = trafficImage:getWidth() * scaleX,
+        height = trafficImage:getHeight() * scaleY,
+        image = policeImage,
+        timer = 1,
+        flag = 0,
+        crashed = 0,
+        velocity = 0
+    }
+
+    -- polygon colliders for the police
+    policeCollider = HC.polygon(
+        policeSprite.x, policeSprite.y,
+        policeSprite.x + policeSprite.width, policeSprite.y,
+        policeSprite.x + policeSprite.width, policeSprite.y + policeSprite.height,
+        policeSprite.x, policeSprite.y + policeSprite.height
+    )
+end
+
+function updatePolice(dt)
+    local playerDifference = policeSprite.x - carSprite.x
+
+    if policeSprite.crashed == 0 then
+        if playerDifference > 0 then -- Right
+            policeSprite.rotation = policeSprite.rotation - dt * math.abs(playerDifference/100)
+        elseif playerDifference < 0 then -- Left 
+            policeSprite.rotation = policeSprite.rotation + dt * math.abs(playerDifference/100)
+        end
+
+        -- Rotation range
+        policeSprite.rotation = math.max(math.min(policeSprite.rotation, -math.pi/6), -5*math.pi/6)
+
+        local dx = policeSprite.speed * math.cos(policeSprite.rotation)
+        local dy = policeSprite.speed * math.sin(policeSprite.rotation)
+        policeSprite.x = policeSprite.x + dx * dt
+        policeSprite.y = policeSprite.y + (dy - roadFrameMove - policeSprite.speed) * dt
+    elseif policeSprite.crashed == 1 then
+        policeSprite.y = policeSprite.y + -roadFrameMove * dt
+    end
+
+    -- Update colliders
+    policeCollider:moveTo(policeSprite.x, policeSprite.y)
+    policeCollider:rotate(policeSprite.rotation - policeCollider:rotation(), policeCollider:center())
+    table.insert(colliders, policeCollider)
 end
 
 function loadRoad()
