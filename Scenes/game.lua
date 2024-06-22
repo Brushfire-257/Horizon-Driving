@@ -233,12 +233,34 @@ function loadTraffic()
         trafficRight.x + trafficRight.width - nearMissColliderHeightOffset, trafficRight.y + trafficRight.height + awesomeMissColliderWidthOffset,
         trafficRight.x + nearMissColliderHeightOffset, trafficRight.y + trafficRight.height + awesomeMissColliderWidthOffset
     )
+    trafficLeftNearMissCollider = HC.polygon(
+        trafficLeft.x + nearMissColliderHeightOffset, trafficLeft.y - nearMissColliderWidthOffset,
+        trafficLeft.x + trafficLeft.width - nearMissColliderHeightOffset, trafficLeft.y - nearMissColliderWidthOffset,
+        trafficLeft.x + trafficLeft.width - nearMissColliderHeightOffset, trafficLeft.y + trafficLeft.height + nearMissColliderWidthOffset,
+        trafficLeft.x + nearMissColliderHeightOffset, trafficLeft.y + trafficLeft.height + nearMissColliderWidthOffset
+    )
+    trafficLeftAwesomeMissCollider = HC.polygon(
+        trafficLeft.x + nearMissColliderHeightOffset, trafficLeft.y - awesomeMissColliderWidthOffset,
+        trafficLeft.x + trafficLeft.width - nearMissColliderHeightOffset, trafficLeft.y - awesomeMissColliderWidthOffset,
+        trafficLeft.x + trafficLeft.width - nearMissColliderHeightOffset, trafficLeft.y + trafficLeft.height + awesomeMissColliderWidthOffset,
+        trafficLeft.x + nearMissColliderHeightOffset, trafficLeft.y + trafficLeft.height + awesomeMissColliderWidthOffset
+    )
     
 end
 
 function updateTraffic(dt)
     trafficRight.timer = trafficRight.timer - dt
     trafficLeft.timer = trafficLeft.timer - dt
+    trafficRight.nmtimer = trafficRight.nmtimer - dt
+    trafficLeft.nmtimer = trafficLeft.nmtimer - dt
+
+    if trafficRight.nmtimer < 0 then
+        trafficRight.nmtimer = 0
+    end
+    if trafficLeft.nmtimer < 0 then
+        trafficLeft.nmtimer = 0
+    end
+
     if trafficRight.timer < 0 then
         trafficRight.timer = 0
     end
@@ -267,7 +289,6 @@ function updateTraffic(dt)
     elseif trafficLeft.crashed == 1 then
         trafficLeft.y = trafficLeft.y + -roadFrameMove * dt
     end
-    print(trafficLeft.timer)
 
     if trafficRight.y > screenHeight + 500 then
         trafficRight.timer = math.random(1.5, 4)
@@ -296,6 +317,25 @@ function updateTraffic(dt)
         trafficLeft.y = trafficLeft.y - trafficLeft.velocity * dt
     end
 
+    if trafficRight.nmtimer == 0 then
+        if trafficRight.flag == 2 then
+            print("Awesome near miss")
+            trafficRight.flag = 0
+        elseif trafficRight.flag == 1 then
+            print("Near miss")
+            trafficRight.flag = 0
+        end
+    end
+    if trafficLeft.nmtimer == 0 then
+        if trafficLeft.flag == 2 then
+            print("Awesome near miss")
+            trafficLeft.flag = 0
+        elseif trafficLeft.flag == 1 then
+            print("Near miss")
+            trafficLeft.flag = 0
+        end
+    end
+
     -- Update colliders
     trafficRightCollider:moveTo(trafficRight.x, trafficRight.y)
     trafficRightCollider:rotate(trafficRight.rotation - trafficRightCollider:rotation(), trafficRightCollider:center())
@@ -309,23 +349,48 @@ function updateTraffic(dt)
     trafficRightNearMissCollider:rotate(trafficRight.rotation - trafficRightNearMissCollider:rotation(), trafficRightNearMissCollider:center())
     trafficRightAwesomeMissCollider:moveTo(trafficRight.x, trafficRight.y)
     trafficRightAwesomeMissCollider:rotate(trafficRight.rotation - trafficRightAwesomeMissCollider:rotation(), trafficRightAwesomeMissCollider:center())
+    trafficLeftNearMissCollider:moveTo(trafficLeft.x, trafficLeft.y)
+    trafficLeftNearMissCollider:rotate(trafficLeft.rotation - trafficLeftNearMissCollider:rotation(), trafficLeftNearMissCollider:center())
+    trafficLeftAwesomeMissCollider:moveTo(trafficLeft.x, trafficLeft.y)
+    trafficLeftAwesomeMissCollider:rotate(trafficLeft.rotation - trafficLeftAwesomeMissCollider:rotation(), trafficLeftAwesomeMissCollider:center())
     table.insert(colliders, trafficRightNearMissCollider)
     table.insert(colliders, trafficRightAwesomeMissCollider)
+    table.insert(colliders, trafficLeftNearMissCollider)
+    table.insert(colliders, trafficLeftAwesomeMissCollider)
+
+    -- Deal with near misses
+    if carCollider:collidesWith(trafficRightAwesomeMissCollider) and trafficRight.crashed == 0 then
+        trafficRight.flag = 2
+        trafficRight.nmtimer = 0.05
+    elseif carCollider:collidesWith(trafficRightNearMissCollider) and trafficRight.crashed == 0 and trafficRight.flag ~= 2 then
+        trafficRight.flag = 1
+        trafficRight.nmtimer = 0.05
+    end
+    if carCollider:collidesWith(trafficLeftAwesomeMissCollider) and trafficLeft.crashed == 0 then
+        trafficLeft.flag = 2
+        trafficLeft.nmtimer = 0.05
+    elseif carCollider:collidesWith(trafficLeftNearMissCollider) and trafficLeft.crashed == 0 and trafficLeft.flag ~= 2  then
+        trafficLeft.flag = 1
+        trafficLeft.nmtimer = 0.05
+    end
 
     -- Deal with collisions
-    if carCollider:collidesWith(trafficRightCollider) and trafficRight.crashed == 0 then
+    if carCollider:collidesWith(trafficRightCollider) then --and trafficRight.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
         camerayShake = camerayShake + 1000
         trafficRight.crashed = 1
-        trafficRight.y = carSprite.y - 150
+        trafficRight.y = carSprite.y - 275
         trafficRight.velocity = carSprite.speed * 1.5
-    elseif carCollider:collidesWith(trafficLeftCollider) and trafficLeft.crashed == 0 then
+        trafficRight.flag = 0
+    elseif carCollider:collidesWith(trafficLeftCollider) then --and trafficLeft.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
         camerayShake = camerayShake + 1000
         trafficLeft.crashed = 1
-        trafficLeft.y = carSprite.y - 150
+        trafficLeft.y = carSprite.y - 275
         trafficLeft.velocity = carSprite.speed * 1.5
+        trafficLeft.flag = 0
     end
+
 
     trafficRight.velocity = trafficRight.velocity * 0.98
     trafficLeft.velocity = trafficLeft.velocity * 0.98
