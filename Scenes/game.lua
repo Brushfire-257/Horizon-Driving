@@ -180,7 +180,9 @@ function loadTraffic()
         image = trafficImage,
         timer = 1,
         flag = 0,
-        crashed = 0
+        crashed = 0,
+        velocity = 0,
+        nmtimer = 0
     }
     trafficLeft = {
         x = 0,
@@ -196,7 +198,9 @@ function loadTraffic()
         image = trafficImage,
         timer = 1,
         flag = 0,
-        crashed = 0
+        crashed = 0,
+        velocity = 0,
+        nmtimer = 0
     }
 
     -- polygon colliders for the traffic
@@ -212,12 +216,29 @@ function loadTraffic()
         trafficLeft.x + trafficLeft.width, trafficLeft.y + trafficLeft.height,
         trafficLeft.x, trafficLeft.y + trafficLeft.height
     )
+    local nearMissColliderHeightOffset = 10
+    local nearMissColliderWidthOffset = 75
+    local awesomeMissColliderWidthOffset = 30
+
+    -- polygon colliders for near miss
+    trafficRightNearMissCollider = HC.polygon(
+        trafficRight.x + nearMissColliderHeightOffset, trafficRight.y - nearMissColliderWidthOffset,
+        trafficRight.x + trafficRight.width - nearMissColliderHeightOffset, trafficRight.y - nearMissColliderWidthOffset,
+        trafficRight.x + trafficRight.width - nearMissColliderHeightOffset, trafficRight.y + trafficRight.height + nearMissColliderWidthOffset,
+        trafficRight.x + nearMissColliderHeightOffset, trafficRight.y + trafficRight.height + nearMissColliderWidthOffset
+    )
+    trafficRightAwesomeMissCollider = HC.polygon(
+        trafficRight.x + nearMissColliderHeightOffset, trafficRight.y - awesomeMissColliderWidthOffset,
+        trafficRight.x + trafficRight.width - nearMissColliderHeightOffset, trafficRight.y - awesomeMissColliderWidthOffset,
+        trafficRight.x + trafficRight.width - nearMissColliderHeightOffset, trafficRight.y + trafficRight.height + awesomeMissColliderWidthOffset,
+        trafficRight.x + nearMissColliderHeightOffset, trafficRight.y + trafficRight.height + awesomeMissColliderWidthOffset
+    )
+    
 end
 
 function updateTraffic(dt)
     trafficRight.timer = trafficRight.timer - dt
     trafficLeft.timer = trafficLeft.timer - dt
-
     if trafficRight.timer < 0 then
         trafficRight.timer = 0
     end
@@ -264,6 +285,17 @@ function updateTraffic(dt)
         trafficLeft.rotation = -math.rad(90)
     end
 
+    if trafficRight.crashed == 1 then
+        trafficRight.x = trafficRight.x + 100 * dt
+        trafficRight.rotation = trafficRight.rotation + math.rad(45) * dt
+        trafficRight.y = trafficRight.y - trafficRight.velocity * dt
+    end
+    if trafficLeft.crashed == 1 then
+        trafficLeft.x = trafficLeft.x - 100 * dt
+        trafficLeft.rotation = trafficLeft.rotation + math.rad(45) * dt
+        trafficLeft.y = trafficLeft.y - trafficLeft.velocity * dt
+    end
+
     -- Update colliders
     trafficRightCollider:moveTo(trafficRight.x, trafficRight.y)
     trafficRightCollider:rotate(trafficRight.rotation - trafficRightCollider:rotation(), trafficRightCollider:center())
@@ -272,27 +304,31 @@ function updateTraffic(dt)
     table.insert(colliders, trafficRightCollider)
     table.insert(colliders, trafficLeftCollider)
 
+    -- Update near miss colliders
+    trafficRightNearMissCollider:moveTo(trafficRight.x, trafficRight.y)
+    trafficRightNearMissCollider:rotate(trafficRight.rotation - trafficRightNearMissCollider:rotation(), trafficRightNearMissCollider:center())
+    trafficRightAwesomeMissCollider:moveTo(trafficRight.x, trafficRight.y)
+    trafficRightAwesomeMissCollider:rotate(trafficRight.rotation - trafficRightAwesomeMissCollider:rotation(), trafficRightAwesomeMissCollider:center())
+    table.insert(colliders, trafficRightNearMissCollider)
+    table.insert(colliders, trafficRightAwesomeMissCollider)
+
     -- Deal with collisions
     if carCollider:collidesWith(trafficRightCollider) and trafficRight.crashed == 0 then
-        carSprite.speed = carSprite.speed - 250
-        camerayShake = camerayShake + 350
+        carSprite.speed = carSprite.speed * 0.75
+        camerayShake = camerayShake + 1000
         trafficRight.crashed = 1
         trafficRight.y = carSprite.y - 150
+        trafficRight.velocity = carSprite.speed * 1.5
     elseif carCollider:collidesWith(trafficLeftCollider) and trafficLeft.crashed == 0 then
-        carSprite.speed = carSprite.speed - 250
-        camerayShake = camerayShake + 350
+        carSprite.speed = carSprite.speed * 0.75
+        camerayShake = camerayShake + 1000
         trafficLeft.crashed = 1
         trafficLeft.y = carSprite.y - 150
+        trafficLeft.velocity = carSprite.speed * 1.5
     end
 
-    if trafficRight.crashed == 1 then
-        trafficRight.x = trafficRight.x + 5 * dt
-        trafficRight.rotation = trafficRight.rotation + math.rad(45) * dt
-    end
-    if trafficLeft.crashed == 1 then
-        trafficLeft.x = trafficLeft.x - 5 * dt
-        trafficLeft.rotation = trafficLeft.rotation + math.rad(45) * dt
-    end
+    trafficRight.velocity = trafficRight.velocity * 0.98
+    trafficLeft.velocity = trafficLeft.velocity * 0.98
 end
 
 function loadRoad()
