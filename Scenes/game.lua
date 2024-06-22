@@ -27,6 +27,7 @@ function arcadeGame.load() -- Runs once at the start of the game.
     -- Load the player car
     loadCar()
     loadRoad()
+    loadTraffic()
 
     -- Create camera
     camerayOffset = 400
@@ -43,12 +44,16 @@ function arcadeGame.update(dt) -- Runs every frame.
 
     playerUpdate(dt)
     roadUpdate(dt)
+    updateTraffic(dt)
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
     camera:attach()
     love.graphics.draw(road.image, road.x, road.v1y, 0, road.scaleX, road.scaleY) -- Draws the road sprites
     love.graphics.draw(road.image, road.x, road.v2y, 0, road.scaleX, road.scaleY)
+
+    love.graphics.draw(trafficRight.image, trafficRight.x, trafficRight.y, trafficRight.rotation, trafficRight.scaleX, trafficRight.scaleY)
+    love.graphics.draw(trafficLeft.image, trafficLeft.x, trafficLeft.y, trafficLeft.rotation, trafficLeft.scaleX, trafficLeft.scaleY)
 
     love.graphics.draw(carSprite.image, carSprite.x, carSprite.y, carSprite.rotation, carSprite.scaleX, carSprite.scaleY,
         carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
@@ -96,7 +101,7 @@ function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, w
         scaleX = scaleX,
         scaleY = scaleY,
         speed = 0,
-        accel = 300,
+        accel = 600,
         rotationSpeed = 2,
         width = width,
         height = height,
@@ -115,7 +120,7 @@ function playerUpdate(dt)
         carSprite.speed = carSprite.speed + carSprite.accel * dt
         camerayShake = camerayShake - carSprite.accel / 5 * carSprite.speed / 1000
     elseif love.keyboard.isDown('down') then
-        carSprite.speed = carSprite.speed - carSprite.accel * dt
+        carSprite.speed = carSprite.speed - carSprite.accel * 1.5 * dt
         camerayShake = camerayShake + carSprite.accel / 5 * carSprite.speed / 1000
     end
 
@@ -127,6 +132,11 @@ function playerUpdate(dt)
     carCollider:moveTo(carSprite.x, carSprite.y)
     carCollider:rotate(carSprite.rotation - carCollider:rotation(), carCollider:center())
     table.insert(colliders, carCollider)
+
+    -- Max Speed
+    if carSprite.speed > 6500 then
+        carSprite.speed = 6500
+    end
 
     -- Update player camera
     cameraLERP(dt)
@@ -145,6 +155,68 @@ function cameraLERP(dt)
 
     local lerpFactor = 1.5 -- camera speed
     camera:move(dx * lerpFactor * dt, dy * lerpFactor * dt)
+end
+
+function loadTraffic()
+    local image = "Sprites/yellowcar.png"
+
+    trafficRight = {
+        x = 1750,
+        y = -500,
+        rotation = -math.pi/2,
+        rotationX = rotationX,
+        rotationY = rotationY,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        speed = 750,
+        width = width,
+        height = height,
+        image = love.graphics.newImage(image)
+    }
+    trafficLeft = {
+        x = 0,
+        y = -500,
+        rotation = -math.pi/2,
+        rotationX = rotationX,
+        rotationY = rotationY,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        speed = 750,
+        width = width,
+        height = height,
+        image = love.graphics.newImage(image)
+    }
+
+    -- polygon colliders for the traffic
+    trafficLeftCollider = HC.polygon(
+        carSprite.x, carSprite.y,
+        carSprite.x + carSprite.width, carSprite.y,
+        carSprite.x + carSprite.width, carSprite.y + carSprite.height,
+        carSprite.x, carSprite.y + carSprite.height
+    )
+    trafficRightCollider = HC.polygon(
+        carSprite.x, carSprite.y,
+        carSprite.x + carSprite.width, carSprite.y,
+        carSprite.x + carSprite.width, carSprite.y + carSprite.height,
+        carSprite.x, carSprite.y + carSprite.height
+    )
+end
+
+function updateTraffic(dt)
+    trafficRight.y = trafficRight.y + (-roadFrameMove - trafficRight.speed) * dt
+    trafficLeft.y = trafficLeft.y + (-roadFrameMove - trafficLeft.speed) * dt
+
+    if trafficRight.y > screenHeight + 500 then
+        trafficRight.y = 100
+
+        trafficRight.x = math.random(1500, 2000)
+    end
+
+    if trafficLeft.y > screenHeight + 500 then
+        trafficLeft.y = 100
+
+        trafficLeft.x = math.random(-100, 500)
+    end
 end
 
 function loadRoad()
@@ -221,8 +293,8 @@ function roadUpdate(dt)
         camerayShake = camerayShake + 200
         print(carSprite.speed)
     end
-    if carSprite.speed < 100 then
-        carSprite.speed = 100
+    if carSprite.speed < 800 then
+        carSprite.speed = 800
     end
 end
 
