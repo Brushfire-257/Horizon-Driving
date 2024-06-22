@@ -7,6 +7,7 @@ arcadeGame = {}
 local screenWidth = love.graphics.getWidth()
 local screenHeight = love.graphics.getHeight()
 local timer = 0
+local colliders = {}
 
 local backgroundSpeed = 0
 
@@ -32,8 +33,9 @@ function arcadeGame.load() -- Runs once at the start of the game.
 end
 
 function arcadeGame.update(dt) -- Runs every frame.
-    playerUpdate(dt)
+    colliders = {} -- clear the table for new values
 
+    playerUpdate(dt)
     roadUpdate(dt)
 end
 
@@ -48,11 +50,13 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     -- Draw the edges of car collider
     if debugMode then
         love.graphics.setColor(1, 0, 0) -- Set the color to red
-        local points = {carCollider._polygon:unpack()}
-        for i = 1, #points, 2 do
-            local next_i = i + 2
-            if next_i > #points then next_i = 1 end
-            love.graphics.line(points[i], points[i+1], points[next_i], points[next_i+1])
+        for _, collider in ipairs(colliders) do
+            local points = {collider._polygon:unpack()}
+            for i = 1, #points, 2 do
+                local next_i = i + 2
+                if next_i > #points then next_i = 1 end
+                love.graphics.line(points[i], points[i+1], points[next_i], points[next_i+1])
+            end
         end
         love.graphics.setColor(1, 1, 1) -- Reset the color to white
     end
@@ -72,6 +76,7 @@ function loadCar()
         carSprite.x + carSprite.width, carSprite.y + carSprite.height,
         carSprite.x, carSprite.y + carSprite.height
     )
+    table.insert(colliders, carCollider)
 end
 
 function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, width, height, rotationX, rotationY)
@@ -85,7 +90,7 @@ function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, w
         scaleY = scaleY,
         speed = 0,
         accel = 250,
-        rotationSpeed = 0,
+        rotationSpeed = 2,
         width = width,
         height = height,
         image = love.graphics.newImage(image)
@@ -95,24 +100,27 @@ end
 
 function playerUpdate(dt)
     if love.keyboard.isDown('right') then -- Turning
-        carSprite.x = carSprite.x + carSprite.accel * dt
+        carSprite.rotation = carSprite.rotation + carSprite.rotationSpeed * dt
     elseif love.keyboard.isDown('left') then
-        carSprite.x = carSprite.x - carSprite.accel * dt
-    end
-    if love.keyboard.isDown(',') then -- Rotation (Testing)
-        carSprite.rotation = carSprite.rotation - (math.pi/4) * dt
-    elseif love.keyboard.isDown('.') then
-        carSprite.rotation = carSprite.rotation + (math.pi/4) * dt
+        carSprite.rotation = carSprite.rotation - carSprite.rotationSpeed * dt
     end
     if love.keyboard.isDown('up') then -- Moving
         backgroundSpeed = backgroundSpeed - carSprite.accel * dt
+        carSprite.speed = carSprite.speed + carSprite.accel * dt
     elseif love.keyboard.isDown('down') then
         backgroundSpeed = backgroundSpeed + carSprite.accel * dt
+        carSprite.speed = carSprite.speed - carSprite.accel * dt
     end
+
+    local dx = carSprite.speed * math.cos(carSprite.rotation)
+    local dy = carSprite.speed * math.sin(carSprite.rotation)
+    carSprite.x = carSprite.x + dx * dt
+    -- carSprite.y = carSprite.y + dy * dt
 
     -- Update collider position and rotation
     carCollider:moveTo(carSprite.x, carSprite.y)
     carCollider:rotate(carSprite.rotation - carCollider:rotation(), carCollider:center())
+    table.insert(colliders, carCollider)
 end
 
 function loadRoad()
@@ -125,6 +133,24 @@ function loadRoad()
         v1y = 0,
         v2y = image:getHeight(),
     }
+
+    rightRoadColliderOffset = 350
+    leftRoadColliderOffset = 400
+
+    rightRoadCollider = HC.polygon(
+        ((road.x + road.image:getWidth()/2) + rightRoadColliderOffset), 0,
+        ((road.x + road.image:getWidth()/2) + rightRoadColliderOffset) + 50, 0,
+        ((road.x + road.image:getWidth()/2) + rightRoadColliderOffset) + 50, 2000,
+        ((road.x + road.image:getWidth()/2) + rightRoadColliderOffset), 2000
+    )
+    leftRoadCollider = HC.polygon(
+        ((road.x + road.image:getWidth()/2) - leftRoadColliderOffset), 0,
+        ((road.x + road.image:getWidth()/2) - leftRoadColliderOffset) - 50, 0,
+        ((road.x + road.image:getWidth()/2) - leftRoadColliderOffset) - 50, 2000,
+        ((road.x + road.image:getWidth()/2) - leftRoadColliderOffset), 2000
+    )
+    table.insert(colliders, rightRoadCollider)
+    table.insert(colliders, leftRoadCollider)
 end
 
 function roadUpdate(dt)
@@ -148,6 +174,18 @@ function roadUpdate(dt)
         if road.v2y > road.image:getHeight() then
             road.v2y = road.v1y - road.image:getHeight()
         end
+    end
+    -- Update colliders
+    rightRoadCollider:moveTo(((road.x + road.image:getWidth()/2) + rightRoadColliderOffset), 1000)
+    leftRoadCollider:moveTo(((road.x + road.image:getWidth()/2) - leftRoadColliderOffset), 1000)
+    table.insert(colliders, rightRoadCollider)
+    table.insert(colliders, leftRoadCollider)
+
+    -- Check collider collisions
+    if carCollider:collidesWith(rightRoadCollider) then
+        carSprite.x = (road.x + road.image:getWidth()/2) + rightRoadColliderOffset - 100
+    elseif carCollider:collidesWith(leftRoadCollider) then
+        carSprite.x = (road.x + road.image:getWidth()/2) - leftRoadColliderOffset + 100
     end
 end
 
