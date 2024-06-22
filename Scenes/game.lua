@@ -87,6 +87,7 @@ function loadCar()
     image = love.graphics.newImage("Sprites/yellowcar.png")
     carSprite = loadObject("playerCar", ((screenWidth / 2)), 1000, (-math.pi / 2), scaleX, scaleY, 30, "Sprites/yellowcar.png",
         (image:getWidth() * scaleX), (image:getHeight() * scaleY), (image:getWidth() / 2), (image:getHeight() / 2))
+    carSprite.prevX = 1000
 
     -- polygon collider for the car
     carCollider = HC.polygon(
@@ -414,7 +415,7 @@ function loadPolice()
         rotationY = trafficImage:getHeight() / 2,
         scaleX = scaleX,
         scaleY = scaleY,
-        speed = 750,
+        speed = 2200,
         acc = 200,
         width = trafficImage:getWidth() * scaleX,
         height = trafficImage:getHeight() * scaleY,
@@ -422,7 +423,8 @@ function loadPolice()
         timer = 1,
         flag = 0,
         crashed = 0,
-        velocity = 0
+        velocity = 0,
+        prevX = 1000,
     }
 
     -- polygon colliders for the police
@@ -435,25 +437,52 @@ function loadPolice()
 end
 
 function updatePolice(dt)
+    policeSprite.timer = policeSprite.timer - dt
+
+    if policeSprite.timer < 0 then
+        policeSprite.timer = 0
+    end
+
     local playerDifference = policeSprite.x - carSprite.x
+    local prevPlayerDifference = policeSprite.prevX - carSprite.prevX
+    local rateOfChange = playerDifference - prevPlayerDifference
+    local px = 0.003
+    local dx = 0.001
 
     if policeSprite.crashed == 0 then
-        if playerDifference > 0 then -- Right
-            policeSprite.rotation = policeSprite.rotation - dt * math.abs(playerDifference/100)
-        elseif playerDifference < 0 then -- Left 
-            policeSprite.rotation = policeSprite.rotation + dt * math.abs(playerDifference/100)
+        if playerDifference < 0 then
+            -- Right
+            policeSprite.rotation = policeSprite.rotation + dt * (px * math.abs(playerDifference) + dx * rateOfChange)
+        elseif playerDifference > 0 then
+            -- Left
+            policeSprite.rotation = policeSprite.rotation - dt * (px * math.abs(playerDifference) + dx * rateOfChange)
         end
 
-        -- Rotation range
-        policeSprite.rotation = math.max(math.min(policeSprite.rotation, -math.pi/6), -5*math.pi/6)
+        policeSprite.rotation = math.max(math.min(policeSprite.rotation, -math.pi/3), -2*math.pi/3)
 
         local dx = policeSprite.speed * math.cos(policeSprite.rotation)
         local dy = policeSprite.speed * math.sin(policeSprite.rotation)
         policeSprite.x = policeSprite.x + dx * dt
-        policeSprite.y = policeSprite.y + (dy - roadFrameMove - policeSprite.speed) * dt
+        policeSprite.y = policeSprite.y + (-roadFrameMove + dy) * dt
     elseif policeSprite.crashed == 1 then
         policeSprite.y = policeSprite.y + -roadFrameMove * dt
     end
+    print(policeSprite.y)
+    
+    if policeSprite.y > screenHeight + 500 then
+        policeSprite.timer = math.random(1, 3)
+        policeSprite.y = -500
+        policeSprite.x = math.random(750, 1500)
+        policeSprite.crashed = 0
+        policeSprite.rotation = -math.rad(90)
+    end
+
+    
+    policeSprite.speed = policeSprite.speed
+
+    -- Update PD control
+    policeSprite.prevX = policeSprite.x
+    carSprite.prevX = carSprite.x
 
     -- Update colliders
     policeCollider:moveTo(policeSprite.x, policeSprite.y)
