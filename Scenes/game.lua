@@ -52,8 +52,10 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     love.graphics.draw(road.image, road.x, road.v1y, 0, road.scaleX, road.scaleY) -- Draws the road sprites
     love.graphics.draw(road.image, road.x, road.v2y, 0, road.scaleX, road.scaleY)
 
-    love.graphics.draw(trafficRight.image, trafficRight.x, trafficRight.y, trafficRight.rotation, trafficRight.scaleX, trafficRight.scaleY)
-    love.graphics.draw(trafficLeft.image, trafficLeft.x, trafficLeft.y, trafficLeft.rotation, trafficLeft.scaleX, trafficLeft.scaleY)
+    love.graphics.draw(trafficRight.image, trafficRight.x, trafficRight.y, trafficRight.rotation, trafficRight.scaleX, trafficRight.scaleY,
+    trafficRight.rotationX, trafficRight.rotationY)
+    love.graphics.draw(trafficLeft.image, trafficLeft.x, trafficLeft.y, trafficLeft.rotation, trafficLeft.scaleX, trafficLeft.scaleY,
+    trafficLeft.rotationX, trafficLeft.rotationY)
 
     love.graphics.draw(carSprite.image, carSprite.x, carSprite.y, carSprite.rotation, carSprite.scaleX, carSprite.scaleY,
         carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
@@ -75,8 +77,8 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
 end
 
 function loadCar()
-    scaleX = 0.5
-    scaleY = 0.5
+    local scaleX = 0.5
+    local scaleY = 0.5
     image = love.graphics.newImage("Sprites/yellowcar.png")
     carSprite = loadObject("playerCar", ((screenWidth / 2)), 1000, (-math.pi / 2), scaleX, scaleY, 30, "Sprites/yellowcar.png",
         (image:getWidth() * scaleX), (image:getHeight() * scaleY), (image:getWidth() / 2), (image:getHeight() / 2))
@@ -134,6 +136,7 @@ function playerUpdate(dt)
     table.insert(colliders, carCollider)
 
     -- Max Speed
+    carSprite.speed = carSprite.speed * 0.999
     if carSprite.speed > 6500 then
         carSprite.speed = 6500
     end
@@ -153,70 +156,111 @@ function cameraLERP(dt)
     local dy = carSprite.y - camera.y - camerayOffset - camerayShake
     camerayShake = camerayShake * 0.9
 
-    local lerpFactor = 1.5 -- camera speed
+    local lerpFactor = 2 -- camera speed
     camera:move(dx * lerpFactor * dt, dy * lerpFactor * dt)
 end
 
 function loadTraffic()
-    local image = "Sprites/yellowcar.png"
+    trafficImage = love.graphics.newImage("Sprites/yellowcar.png")
+    trafficWarning = love.graphics.newImage("Sprites/trafficwarning.png")
+    local scaleX = 0.5
+    local scaleY = 0.5
 
     trafficRight = {
         x = 1750,
         y = -500,
         rotation = -math.pi/2,
-        rotationX = rotationX,
-        rotationY = rotationY,
+        rotationX = trafficImage:getWidth() / 2,
+        rotationY = trafficImage:getHeight() / 2,
         scaleX = scaleX,
         scaleY = scaleY,
         speed = 750,
-        width = width,
-        height = height,
-        image = love.graphics.newImage(image)
+        width = trafficImage:getWidth() * scaleX,
+        height = trafficImage:getHeight() * scaleY,
+        image = trafficImage,
+        timer = 1,
+        flag = 0
     }
     trafficLeft = {
         x = 0,
         y = -500,
         rotation = -math.pi/2,
-        rotationX = rotationX,
-        rotationY = rotationY,
+        rotationX = trafficImage:getWidth() / 2,
+        rotationY = trafficImage:getHeight() / 2,
         scaleX = scaleX,
         scaleY = scaleY,
         speed = 750,
-        width = width,
-        height = height,
-        image = love.graphics.newImage(image)
+        width = trafficImage:getWidth() * scaleX,
+        height = trafficImage:getHeight() * scaleY,
+        image = trafficImage,
+        timer = 1,
+        flag = 0
     }
 
     -- polygon colliders for the traffic
-    trafficLeftCollider = HC.polygon(
-        carSprite.x, carSprite.y,
-        carSprite.x + carSprite.width, carSprite.y,
-        carSprite.x + carSprite.width, carSprite.y + carSprite.height,
-        carSprite.x, carSprite.y + carSprite.height
-    )
     trafficRightCollider = HC.polygon(
-        carSprite.x, carSprite.y,
-        carSprite.x + carSprite.width, carSprite.y,
-        carSprite.x + carSprite.width, carSprite.y + carSprite.height,
-        carSprite.x, carSprite.y + carSprite.height
+        trafficRight.x, trafficRight.y,
+        trafficRight.x + trafficRight.width, trafficRight.y,
+        trafficRight.x + trafficRight.width, trafficRight.y + trafficRight.height,
+        trafficRight.x, trafficRight.y + trafficRight.height
+    )
+    trafficLeftCollider = HC.polygon(
+        trafficLeft.x, trafficLeft.y,
+        trafficLeft.x + trafficLeft.width, trafficLeft.y,
+        trafficLeft.x + trafficLeft.width, trafficLeft.y + trafficLeft.height,
+        trafficLeft.x, trafficLeft.y + trafficLeft.height
     )
 end
 
 function updateTraffic(dt)
-    trafficRight.y = trafficRight.y + (-roadFrameMove - trafficRight.speed) * dt
-    trafficLeft.y = trafficLeft.y + (-roadFrameMove - trafficLeft.speed) * dt
+    trafficRight.timer = trafficRight.timer - dt
+    trafficLeft.timer = trafficLeft.timer - dt
+
+    if trafficRight.timer < 0 then
+        trafficRight.timer = 0
+    end
+    if trafficLeft.timer < 0 then
+        trafficLeft.timer = 0
+    end
+
+    if trafficRight.timer < 1 and trafficRight.timer > 0 then
+        trafficRight.image = trafficWarning
+        trafficRight.y = 150
+    end
+    if trafficLeft.timer < 1 and trafficRight.timer > 0 then
+        trafficLeft.image = trafficWarning
+        trafficLeft.y = 150
+    end
+
+    if trafficRight.timer == 0 then
+        trafficRight.image = trafficImage
+        trafficRight.y = trafficRight.y + (-roadFrameMove - trafficRight.speed) * dt
+    end
+    if trafficLeft.timer == 0 then
+        trafficLeft.image = trafficImage
+        trafficLeft.y = trafficLeft.y + (-roadFrameMove - trafficLeft.speed) * dt
+    end
+
 
     if trafficRight.y > screenHeight + 500 then
-        trafficRight.y = 100
-
+        trafficRight.timer = math.random(1.5, 4)
+        trafficRight.y = -500
         trafficRight.x = math.random(1500, 2000)
     end
 
     if trafficLeft.y > screenHeight + 500 then
-        trafficLeft.y = 100
-
+        trafficLeft.timer = math.random(1.5, 4)
+        trafficLeft.y = -500
         trafficLeft.x = math.random(-100, 500)
     end
+
+    -- Update colliders
+    trafficRightCollider:moveTo(trafficRight.x, trafficRight.y)
+    trafficRightCollider:rotate(trafficRight.rotation - trafficRightCollider:rotation(), trafficRightCollider:center())
+    trafficLeftCollider:moveTo(trafficLeft.x, trafficLeft.y)
+    trafficLeftCollider:rotate(trafficLeft.rotation - trafficLeftCollider:rotation(), trafficLeftCollider:center())
+    table.insert(colliders, trafficRightCollider)
+    table.insert(colliders, trafficLeftCollider)
 end
 
 function loadRoad()
