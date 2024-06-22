@@ -227,7 +227,7 @@ function updateTraffic(dt)
         trafficRight.image = trafficWarning
         trafficRight.y = 150
     end
-    if trafficLeft.timer < 1 and trafficRight.timer > 0 then
+    if trafficLeft.timer < 1 and trafficLeft.timer > 0 then
         trafficLeft.image = trafficWarning
         trafficLeft.y = 150
     end
@@ -240,7 +240,7 @@ function updateTraffic(dt)
         trafficLeft.image = trafficImage
         trafficLeft.y = trafficLeft.y + (-roadFrameMove - trafficLeft.speed) * dt
     end
-
+    print(trafficLeft.timer)
 
     if trafficRight.y > screenHeight + 500 then
         trafficRight.timer = math.random(1.5, 4)
