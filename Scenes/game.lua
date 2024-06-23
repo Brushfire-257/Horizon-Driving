@@ -233,28 +233,38 @@ function loadGUI()
     }
 
     -- Prepare Near Miss notifications
-    local numberxOffset = 25
-    local numberyOffset = 200
+    local numberxOffset = 175
+    local numberyOffset = 225
     notificationSprite = {
-        x = screenWidth - (nitroImageList[1]:getWidth()) - numberxOffset,
+        x = screenWidth - numberxOffset,
         y = screenHeight - numberyOffset,
+        xOrig = screenWidth - numberxOffset,
+        yOrig = screenHeight - numberyOffset,
         rotation = 0,
-        rotationX = notificationImageList[1]:getWidth() / 2,
-        rotationY = notificationImageList[1]:getHeight() / 2,
+        rotationX = notificationImageList[2]:getWidth() / 2,
+        rotationY = notificationImageList[2]:getHeight(),
         scaleX = scaleX,
         scaleY = scaleY,
-        width = notificationImageList[1]:getWidth() * scaleX,
-        height = notificationImageList[1]:getHeight() * scaleY,
-        image = notificationImageList[1],
-        flag = 0,
+        width = notificationImageList[2]:getWidth() * scaleX,
+        height = notificationImageList[2]:getHeight() * scaleY,
+        image = notificationImageList[2],
+        notification = 0,
+        timer = 0,
+        displaying = 0
     }
 end
 
 function updateGUI(dt)
+    notificationSprite.timer = notificationSprite.timer - dt
+
+    if notificationSprite.timer < 0 then
+        notificationSprite.timer = 0
+    end
+    
     local speedMultiplier = 0.1
 
     local speedStr = tostring(math.floor(carSprite.speed * speedMultiplier))
-    print(speedStr)
+    print(notificationSprite.timer)
 
     local len = string.len(speedStr)
 
@@ -276,6 +286,38 @@ function updateGUI(dt)
     nitroImageIndex = math.max(1, math.min(nitroImageIndex, 26))
 
     nitroBar.image = nitroImageList[nitroImageIndex]
+
+    -- Update notification sprite
+    if notificationSprite.notification ~= 0 then -- we have a notification to display
+        local timerChangeBy = 0
+        if notificationSprite.timer == 0 and notificationSprite.displaying == 0 then -- notification just started
+            timerChangeBy = 1
+            notificationSprite.x = notificationSprite.xOrig
+            notificationSprite.y = notificationSprite.yOrig
+        end
+        local notificationImage = notificationImageList[notificationSprite.notification]
+        notificationSprite.rotationX = notificationImage:getWidth() / 2
+        notificationSprite.rotationY = notificationImage:getHeight()
+        notificationSprite.width = notificationImage:getWidth() * notificationSprite.scaleX
+        notificationSprite.height = notificationImage:getHeight() * notificationSprite.scaleY
+        notificationSprite.image = notificationImage
+
+        if notificationSprite.timer < 0.5 and notificationSprite.timer ~= 0 then
+            notificationSprite.x = notificationSprite.x + 700 * dt
+        else
+            notificationSprite.x = notificationSprite.x + 200 * dt
+        end
+        if notificationSprite.timer == 0 and notificationSprite.displaying == 1 then
+            notificationSprite.notification = 0
+            timerChangeBy = 0
+            notificationSprite.displaying = 0
+        end
+
+        notificationSprite.timer = notificationSprite.timer + timerChangeBy
+    else
+        notificationSprite.x = 5000
+    end
+
 
 end
 
@@ -588,10 +630,12 @@ function updateTraffic(dt)
     if trafficRight.nmtimer == 0 then
         if trafficRight.flag == 2 then
             print("Awesome near miss")
+            notificationSprite.notification = 2
             nitroSprite.amount = nitroSprite.amount + 5
             trafficRight.flag = 0
         elseif trafficRight.flag == 1 then
             print("Near miss")
+            notificationSprite.notification = 1
             nitroSprite.amount = nitroSprite.amount + 2
             trafficRight.flag = 0
         end
@@ -599,10 +643,12 @@ function updateTraffic(dt)
     if trafficLeft.nmtimer == 0 then
         if trafficLeft.flag == 2 then
             print("Awesome near miss")
+            notificationSprite.notification = 2
             nitroSprite.amount = nitroSprite.amount + 5
             trafficLeft.flag = 0
         elseif trafficLeft.flag == 1 then
             print("Near miss")
+            notificationSprite.notification = 1
             nitroSprite.amount = nitroSprite.amount + 2
             trafficLeft.flag = 0
         end
