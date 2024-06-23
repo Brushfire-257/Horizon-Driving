@@ -131,6 +131,11 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     love.graphics.draw(nitroBar.image, nitroBar.x, nitroBar.y, nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
     nitroBar.rotationX, nitroBar.rotationY)
 
+    love.graphics.draw(takedownOverlayTop.image, takedownOverlayTop.x, takedownOverlayTop.y, takedownOverlayTop.rotation, takedownOverlayTop.scaleX, takedownOverlayTop.scaleY,
+    takedownOverlayTop.rotationX, takedownOverlayTop.rotationY)
+    love.graphics.draw(takedownOverlayBottom.image, takedownOverlayBottom.x, takedownOverlayBottom.y, takedownOverlayBottom.rotation, takedownOverlayBottom.scaleX, takedownOverlayBottom.scaleY,
+    takedownOverlayBottom.rotationX, takedownOverlayBottom.rotationY)
+
     -- love.graphics.draw(notificationSprite.image, notificationSprite.x, notificationSprite.y, notificationSprite.rotation, notificationSprite.scaleX, notificationSprite.scaleY,
     -- notificationSprite.rotationX, notificationSprite.rotationY)
     -- Draw notifications
@@ -272,6 +277,45 @@ function loadGUI()
     }
     notifications = {} -- Table to hold notification objects
     notificationEmphasis = {}
+
+    -- Prepare takedown overlay
+    takedownOverlayTopImage = love.graphics.newImage("Sprites/GUI/Notifications/takedownOverlayTop.png")
+    takedownOverlayBottomImage = love.graphics.newImage("Sprites/GUI/Notifications/takedownOverlayBottom.png")
+
+    local scaleX = 2
+    local scaleY = 2
+    local numberyOffset = 50
+    takedownOverlayTop = {
+        x = screenWidth / 2,
+        y = numberyOffset,
+        xOrig = screenWidth / 2,
+        yOrig = numberyOffset,
+        rotation = 0,
+        rotationX = takedownOverlayTopImage:getWidth() / 2,
+        rotationY = takedownOverlayTopImage:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = takedownOverlayTopImage:getWidth() * scaleX,
+        height = takedownOverlayTopImage:getHeight() * scaleY,
+        image = takedownOverlayTopImage,
+        timer = 0,
+    }
+    numberyOffset = 15
+    takedownOverlayBottom = {
+        x = screenWidth / 2,
+        y = screenHeight - numberyOffset,
+        xOrig = screenWidth / 2,
+        yOrig = screenHeight - numberyOffset,
+        rotation = 0,
+        rotationX = takedownOverlayBottomImage:getWidth() / 2,
+        rotationY = takedownOverlayBottomImage:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = takedownOverlayBottomImage:getWidth() * scaleX,
+        height = takedownOverlayBottomImage:getHeight() * scaleY,
+        image = takedownOverlayBottomImage,
+        timer = 0,
+    }
 end
 
 function updateGUI(dt)
@@ -363,7 +407,7 @@ function updateGUI(dt)
         if emphasis.timer < 0 then
             emphasis.timer = 0
         end
-        print(emphasis.timer)
+        -- print(emphasis.timer)
         
         if emphasis.notification ~= 0 then -- we have a notification to display
             local timerChangeBy = 0
@@ -405,6 +449,16 @@ function updateGUI(dt)
         if notificationEmphasis[i].timer == 0 then
             table.remove(notificationEmphasis, i)
         end
+    end
+
+    print((-takedownOverlayTop.yOrig - takedownOverlayTop.y))
+    -- Update Takedown Overlay
+    if takedownCameraTimer > 0 then
+        takedownOverlayTop.y = takedownOverlayTop.y + (takedownOverlayTop.yOrig - takedownOverlayTop.y) * dt * 25
+        takedownOverlayBottom.y = takedownOverlayBottom.y + (takedownOverlayBottom.yOrig - takedownOverlayBottom.y) * dt * 25
+    else
+        takedownOverlayTop.y = takedownOverlayTop.y + (-250 - takedownOverlayTop.y) * dt * 15
+        takedownOverlayBottom.y = takedownOverlayBottom.y + (screenHeight + 250 - takedownOverlayBottom.y) * dt * 15
     end
 end
 
@@ -588,6 +642,7 @@ function playerUpdate(dt)
         camerayShake = camerayShake + carSprite.accel / 5 * carSprite.speed / 1000
     end
     if love.keyboard.isDown('a') and nitroSprite.amount > 0 then -- Nitro
+        takedownCamera = 1 --DEBUG REMOVE THIS
         carSprite.speed = carSprite.speed + nitroSprite.boostamount * dt
         camerayShake = camerayShake - nitroSprite.boostamount / 7.5 * carSprite.speed / 1000
         nitroSprite.appear = 1
@@ -946,7 +1001,7 @@ function updateTraffic(dt)
         trafficLeft.velocity = policeSprite.speed * 1.5
         trafficLeft.flag = 0
     end
-    print(policeSprite.hittimer1)
+    -- print(policeSprite.hittimer1)
     trafficRight.velocity = trafficRight.velocity * 0.98
     trafficLeft.velocity = trafficLeft.velocity * 0.98
 end
