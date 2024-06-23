@@ -32,6 +32,7 @@ function arcadeGame.load() -- Runs once at the start of the game.
     loadRoad()
     loadTraffic()
     loadPolice()
+    loadGUI()
 
     -- Create camera
     camerayOffset = 400
@@ -68,6 +69,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     roadUpdate(dt)
     updateTraffic(dt)
     updatePolice(dt)
+    updateGUI(dt)
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
@@ -90,6 +92,7 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     love.graphics.draw(carSprite.image, carSprite.x, carSprite.y, carSprite.rotation, carSprite.scaleX, carSprite.scaleY,
     carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
     
+    
     -- Draw the edges of car collider
     if debugMode then
         love.graphics.setColor(1, 0, 0) -- Set the color to red
@@ -104,6 +107,94 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
         love.graphics.setColor(1, 1, 1) -- Reset the color to white
     end
     camera:detach()
+
+    -- Draw the GUI
+    love.graphics.draw(speedNumber1.image, speedNumber1.x, speedNumber1.y, speedNumber1.rotation, speedNumber1.scaleX, speedNumber1.scaleY,
+    speedNumber1.rotationX, speedNumber1.rotationY)
+    love.graphics.draw(speedNumber2.image, speedNumber2.x, speedNumber2.y, speedNumber2.rotation, speedNumber2.scaleX, speedNumber2.scaleY,
+    speedNumber2.rotationX, speedNumber2.rotationY)
+    love.graphics.draw(speedNumber3.image, speedNumber3.x, speedNumber3.y, speedNumber3.rotation, speedNumber3.scaleX, speedNumber3.scaleY,
+    speedNumber3.rotationX, speedNumber3.rotationY)
+end
+
+function loadGUI()
+    local scaleX = 1
+    local scaleY = 1
+
+    numberImageList = {
+        love.graphics.newImage("Sprites/GUI/Numbers/0.png"),
+        love.graphics.newImage("Sprites/GUI/Numbers/1.png"),
+        love.graphics.newImage("Sprites/GUI/Numbers/2.png"),
+        love.graphics.newImage("Sprites/GUI/Numbers/3.png"),
+        love.graphics.newImage("Sprites/GUI/Numbers/4.png"),
+        love.graphics.newImage("Sprites/GUI/Numbers/5.png"),
+        love.graphics.newImage("Sprites/GUI/Numbers/6.png"),
+        love.graphics.newImage("Sprites/GUI/Numbers/7.png"),
+        love.graphics.newImage("Sprites/GUI/Numbers/8.png"),
+        love.graphics.newImage("Sprites/GUI/Numbers/9.png")
+    }
+
+    local numberxOffset = 25
+    local numberyOffset = 150
+    -- Prepare Speed Numbers
+    speedNumber1 = {
+        x = screenWidth - numberImageList[1]:getWidth() - numberxOffset,
+        y = screenHeight - numberyOffset,
+        rotation = 0,
+        rotationX = numberImageList[1]:getWidth() / 2,
+        rotationY = numberImageList[1]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = numberImageList[1]:getWidth() * scaleX,
+        height = numberImageList[1]:getHeight() * scaleY,
+        image = numberImageList[1],
+        flag = 0,
+    }
+    speedNumber2 = {
+        x = screenWidth - (2 * numberImageList[1]:getWidth()) - numberxOffset,
+        y = screenHeight - numberyOffset,
+        rotation = 0,
+        rotationX = numberImageList[1]:getWidth() / 2,
+        rotationY = numberImageList[1]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = numberImageList[1]:getWidth() * scaleX,
+        height = numberImageList[1]:getHeight() * scaleY,
+        image = numberImageList[1],
+        flag = 0,
+    }
+    speedNumber3 = {
+        x = screenWidth - (3 * numberImageList[1]:getWidth()) - numberxOffset,
+        y = screenHeight - numberyOffset,
+        rotation = 0,
+        rotationX = numberImageList[1]:getWidth() / 2,
+        rotationY = numberImageList[1]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = numberImageList[1]:getWidth() * scaleX,
+        height = numberImageList[1]:getHeight() * scaleY,
+        image = numberImageList[1],
+        flag = 0,
+    }
+    
+end
+
+function updateGUI(dt)
+    local speedMultiplier = 0.25
+
+    local speedStr = tostring(carSprite.speed * speedMultiplier)
+
+    local len = string.len(speedStr)
+
+    -- Get the digits
+    local digit1 = len >= 3 and tonumber(string.sub(speedStr, len-2, len-2)) or 0
+    local digit2 = len >= 2 and tonumber(string.sub(speedStr, len-1, len-1)) or 0
+    local digit3 = len >= 1 and tonumber(string.sub(speedStr, len, len)) or 0
+
+    -- Update GUI
+    speedNumber1.image = numberImageList[digit3 + 1]  -- Lua array indices start at 1
+    speedNumber2.image = numberImageList[digit2 + 1]  -- Lua array indices start at 1
+    speedNumber3.image = numberImageList[digit1 + 1]  -- Lua array indices start at 1
 end
 
 function loadCar()
