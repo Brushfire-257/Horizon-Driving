@@ -118,6 +118,9 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
 
     love.graphics.draw(nitroBar.image, nitroBar.x, nitroBar.y, nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
     nitroBar.rotationX, nitroBar.rotationY)
+
+    love.graphics.draw(notificationSprite.image, notificationSprite.x, notificationSprite.y, notificationSprite.rotation, notificationSprite.scaleX, notificationSprite.scaleY,
+    notificationSprite.rotationX, notificationSprite.rotationY)
 end
 
 function loadGUI()
@@ -163,6 +166,10 @@ function loadGUI()
         love.graphics.newImage("Sprites/GUI/NitroBar/24.png"),
         love.graphics.newImage("Sprites/GUI/NitroBar/25.png"),
         love.graphics.newImage("Sprites/GUI/NitroBar/26.png"),
+    }
+    notificationImageList = {
+        love.graphics.newImage("Sprites/GUI/Notifications/nearMiss.png"),
+        love.graphics.newImage("Sprites/GUI/Notifications/awesomeNearMiss.png")
     }
 
     -- Prepare Speed Numbers
@@ -223,7 +230,24 @@ function loadGUI()
         height = numberImageList[1]:getHeight() * scaleY,
         image = numberImageList[1],
         flag = 0,
-    }   
+    }
+
+    -- Prepare Near Miss notifications
+    local numberxOffset = 25
+    local numberyOffset = 200
+    notificationSprite = {
+        x = screenWidth - (nitroImageList[1]:getWidth()) - numberxOffset,
+        y = screenHeight - numberyOffset,
+        rotation = 0,
+        rotationX = notificationImageList[1]:getWidth() / 2,
+        rotationY = notificationImageList[1]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = notificationImageList[1]:getWidth() * scaleX,
+        height = notificationImageList[1]:getHeight() * scaleY,
+        image = notificationImageList[1],
+        flag = 0,
+    }
 end
 
 function updateGUI(dt)
