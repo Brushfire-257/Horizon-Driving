@@ -11,6 +11,9 @@ local colliders = {}
 
 local backgroundSpeed = 0
 
+local gameSpeed = 1
+local actualGameSpeed = gameSpeed
+
 -- Libraries
 HC = require 'HardonCollider'
 local Camera = require 'hump.camera'
@@ -33,6 +36,9 @@ function arcadeGame.load() -- Runs once at the start of the game.
     -- Create camera
     camerayOffset = 400
     camerayShake = 0
+    cameraxOffset = 0
+    camerayOffset1 = 0
+    takedownCamera = 0
     camera = Camera(carSprite.x, carSprite.y - camerayOffset)
 
     -- Load Game settings (currently just debug mode)
@@ -42,6 +48,21 @@ end
 
 function arcadeGame.update(dt) -- Runs every frame.
     colliders = {} -- clear the table for new values
+    
+    if policeSprite.crashed == 1 then
+        gameSpeed = 0.15
+    else
+        gameSpeed = 1
+    end
+
+    if (actualGameSpeed - gameSpeed) < 0 then
+        actualGameSpeed = actualGameSpeed - (actualGameSpeed - gameSpeed) * dt * 5
+    else
+        actualGameSpeed = actualGameSpeed - (actualGameSpeed - gameSpeed) * dt * 3
+    end
+    dt = dt * actualGameSpeed
+
+    print(actualGameSpeed)
 
     playerUpdate(dt)
     roadUpdate(dt)
@@ -163,7 +184,7 @@ function playerUpdate(dt)
     else
         nitroSprite.appear = 0
     end
-    print(nitroSprite.amount)
+    -- print(nitroSprite.amount)
 
     if love.keyboard.isDown('a') and nitroSprite.amount > 0 and love.keyboard.isDown('up') then
         minCamerayShake = -150
@@ -205,14 +226,25 @@ function playerUpdate(dt)
 end
 
 function cameraLERP(dt)
+    local cameraxOffset = (policeSprite.x - carSprite.x) / 2
+    local camerayOffset1 = (policeSprite.y - carSprite.y) / 2
+
     if camerayShake > 100 then
         camerayShake = 100
     elseif camerayShake < minCamerayShake then
         camerayShake = minCamerayShake
     end
+
+    local dx = 0
+    local dy = 0
     -- Calculate the distance to the player
-    local dx = carSprite.x - camera.x
-    local dy = carSprite.y - camera.y - camerayOffset - camerayShake
+    if policeSprite.crashed == 1 then
+        dx = carSprite.x - camera.x + cameraxOffset
+        dy = carSprite.y - camera.y - camerayShake + camerayOffset1
+    else
+        dx = carSprite.x - camera.x
+        dy = carSprite.y - camera.y - camerayOffset - camerayShake
+    end
     camerayShake = camerayShake * 0.9
 
     local lerpFactor = 2 -- camera speed
@@ -458,6 +490,9 @@ function updateTraffic(dt)
     if policeCollider:collidesWith(trafficRightCollider) and trafficRight.timer == 0 then --and trafficRight.crashed == 0 then
         policeSprite.speed = policeSprite.speed * 0.75
         trafficRight.crashed = 1
+        if policeSprite.crashed == 0 then
+            policeSprite.health = 0
+        end
         policeSprite.crashed = 1
         trafficRight.y = policeSprite.y - 275
         trafficRight.velocity = policeSprite.speed * 1.5
@@ -465,6 +500,9 @@ function updateTraffic(dt)
     elseif policeCollider:collidesWith(trafficLeftCollider) and trafficLeft.timer == 0 then --and trafficLeft.crashed == 0 then
         policeSprite.speed = policeSprite.speed * 0.75
         trafficLeft.crashed = 1
+        if policeSprite.crashed == 0 then
+            policeSprite.health = 0
+        end
         policeSprite.crashed = 1
         trafficLeft.y = policeSprite.y - 275
         trafficLeft.velocity = policeSprite.speed * 1.5
@@ -599,6 +637,11 @@ function updatePolice(dt)
 
     if policeSprite.health <= 0 then
         policeSprite.crashed = 1
+        if policeSprite.health <= -300 then
+        else
+            policeSprite.health = -300
+            nitroSprite.amount = nitroSprite.amount + 1
+        end
     end
 
     -- Deal with collisions
