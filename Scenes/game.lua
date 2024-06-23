@@ -88,6 +88,7 @@ function loadCar()
     carSprite = loadObject("playerCar", ((screenWidth / 2)), 1000, (-math.pi / 2), scaleX, scaleY, 30, "Sprites/yellowcar.png",
         (image:getWidth() * scaleX), (image:getHeight() * scaleY), (image:getWidth() / 2), (image:getHeight() / 2))
     carSprite.prevX = 1000
+    carSprite.prevY = 800
 
     -- polygon collider for the car
     carCollider = HC.polygon(
@@ -425,6 +426,7 @@ function loadPolice()
         crashed = 0,
         velocity = 0,
         prevX = 1000,
+        prevY = 2200,
     }
 
     -- polygon colliders for the police
@@ -443,19 +445,38 @@ function updatePolice(dt)
         policeSprite.timer = 0
     end
 
-    local playerDifference = policeSprite.x - carSprite.x
-    local prevPlayerDifference = policeSprite.prevX - carSprite.prevX
-    local rateOfChange = playerDifference - prevPlayerDifference
+    local playerDifferencex = policeSprite.x - carSprite.x
+    local prevplayerDifferencex = policeSprite.prevX - carSprite.prevX
+    local rateOfChangex = playerDifferencex - prevplayerDifferencex
     local px = 0.003
     local dx = 0.001
+    local playerDifferencey = policeSprite.y - carSprite.y + 500
+    local prevplayerDifferencey = policeSprite.prevY - carSprite.prevY + 500
+    local rateOfChangey = playerDifferencey - prevplayerDifferencey
+    local py = 0.05
+    local dy = 0.01
 
     if policeSprite.crashed == 0 then
-        if playerDifference < 0 then
+        if playerDifferencex < 0 then
             -- Right
-            policeSprite.rotation = policeSprite.rotation + dt * (px * math.abs(playerDifference) + dx * rateOfChange)
-        elseif playerDifference > 0 then
+            policeSprite.rotation = policeSprite.rotation + dt * (px * math.abs(playerDifferencex) + dx * rateOfChangex)
+        elseif playerDifferencex > 0 then
             -- Left
-            policeSprite.rotation = policeSprite.rotation - dt * (px * math.abs(playerDifference) + dx * rateOfChange)
+            policeSprite.rotation = policeSprite.rotation - dt * (px * math.abs(playerDifferencex) + dx * rateOfChangex)
+        end
+
+        if playerDifferencey < 0 then
+            -- Slow
+            policeSprite.speed = policeSprite.speed - dt * (py * math.abs(playerDifferencey) + dx * rateOfChangey)
+        elseif playerDifferencey > 0 then
+            -- Faster
+            policeSprite.speed = policeSprite.speed + dt * (py * math.abs(playerDifferencey) + dx * rateOfChangey)
+        end
+
+        if policeSprite.speed < 800 then
+            policeSprite.speed = 800
+        elseif policeSprite.speed > 8000 then
+            policeSprite.speed = 8000
         end
 
         policeSprite.rotation = math.max(math.min(policeSprite.rotation, -math.pi/3), -2*math.pi/3)
@@ -467,7 +488,7 @@ function updatePolice(dt)
     elseif policeSprite.crashed == 1 then
         policeSprite.y = policeSprite.y + -roadFrameMove * dt
     end
-    print(policeSprite.y)
+    print(policeSprite.speed)
     
     if policeSprite.y > screenHeight + 500 then
         policeSprite.timer = math.random(1, 3)
@@ -475,6 +496,12 @@ function updatePolice(dt)
         policeSprite.x = math.random(750, 1500)
         policeSprite.crashed = 0
         policeSprite.rotation = -math.rad(90)
+        policeSprite.speed = carSprite.speed
+    elseif policeSprite.y < -screenHeight then
+        policeSprite.y = -500
+        policeSprite.x = math.random(750, 1500)
+        policeSprite.rotation = -math.rad(90)
+        policeSprite.speed = carSprite.speed
     end
 
     
