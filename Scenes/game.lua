@@ -61,12 +61,14 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
 
     love.graphics.draw(policeSprite.image, policeSprite.x, policeSprite.y, policeSprite.rotation, policeSprite.scaleX, policeSprite.scaleY,
     policeSprite.rotationX, policeSprite.rotationY)
-
+    
+    if nitroSprite.appear == 1 then
+        love.graphics.draw(nitroSprite.image, nitroSprite.x, nitroSprite.y, nitroSprite.rotation, nitroSprite.scaleX, nitroSprite.scaleY,
+        nitroSprite.rotationX, nitroSprite.rotationY) -- Nitro
+    end
     love.graphics.draw(carSprite.image, carSprite.x, carSprite.y, carSprite.rotation, carSprite.scaleX, carSprite.scaleY,
     carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
-    love.graphics.draw(nitroSprite.image, nitroSprite.x, nitroSprite.y, nitroSprite.rotation, nitroSprite.scaleX, nitroSprite.scaleY,
-    nitroSprite.rotationX, nitroSprite.rotationY) -- Nitro
-
+    
     -- Draw the edges of car collider
     if debugMode then
         love.graphics.setColor(1, 0, 0) -- Set the color to red
@@ -105,7 +107,7 @@ function loadCar()
         width = nitroImage:getWidth() * scaleX,
         height = nitroImage:getHeight() * scaleY,
         image = nitroImage,
-        amount = 0,
+        amount = 7,
         flag = 0,
         boostamount = 1000
     }
@@ -132,6 +134,7 @@ function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, w
         speed = 0,
         accel = 600,
         rotationSpeed = 2,
+        appear = 0,
         width = width,
         height = height,
         image = love.graphics.newImage(image)
@@ -152,32 +155,44 @@ function playerUpdate(dt)
         carSprite.speed = carSprite.speed - carSprite.accel * 1.5 * dt
         camerayShake = camerayShake + carSprite.accel / 5 * carSprite.speed / 1000
     end
-    if love.keyboard.isDown('a') then -- Nitro
+    if love.keyboard.isDown('a') and nitroSprite.amount > 0 then -- Nitro
         carSprite.speed = carSprite.speed + nitroSprite.boostamount * dt
         camerayShake = camerayShake - nitroSprite.boostamount / 7.5 * carSprite.speed / 1000
+        nitroSprite.appear = 1
+        nitroSprite.amount = nitroSprite.amount - dt
+    else
+        nitroSprite.appear = 0
+    end
+    print(nitroSprite.amount)
+
+    if love.keyboard.isDown('a') and nitroSprite.amount > 0 and love.keyboard.isDown('up') then
         minCamerayShake = -150
     else
         minCamerayShake = -100
     end
 
-    -- nitroSprite.x = carSprite.x
-    -- nitroSprite.y = carSprite.y + 150
-    local offset = carSprite.width * 0.6
-    local carEndX = carSprite.x - offset * math.cos(carSprite.rotation)
-    local carEndY = carSprite.y - offset * math.sin(carSprite.rotation)
-
-    nitroSprite.x = carEndX
-    nitroSprite.y = carEndY
-    nitroSprite.rotation = carSprite.rotation
-
+    if nitroSprite.amount < 0 then
+        nitroSprite.amount = 0
+    end
+    
     local dx = carSprite.speed * math.cos(carSprite.rotation)
     roadFrameMove = carSprite.speed * math.sin(carSprite.rotation)
     carSprite.x = carSprite.x + dx * dt
-
+    
     -- Update collider position and rotation
     carCollider:moveTo(carSprite.x, carSprite.y)
     carCollider:rotate(carSprite.rotation - carCollider:rotation(), carCollider:center())
     table.insert(colliders, carCollider)
+    
+    -- Nitro Movement
+    -- nitroSprite.x = carSprite.x
+    -- nitroSprite.y = carSprite.y + 150
+    local carEndX = carSprite.x - carSprite.height * math.cos(carSprite.rotation)
+    local carEndY = carSprite.y - carSprite.height * math.sin(carSprite.rotation)
+
+    nitroSprite.x = carEndX
+    nitroSprite.y = carEndY
+    nitroSprite.rotation = carSprite.rotation
 
     -- Max Speed
     carSprite.speed = carSprite.speed * 0.999
@@ -364,18 +379,22 @@ function updateTraffic(dt)
     if trafficRight.nmtimer == 0 then
         if trafficRight.flag == 2 then
             print("Awesome near miss")
+            nitroSprite.amount = nitroSprite.amount + 5
             trafficRight.flag = 0
         elseif trafficRight.flag == 1 then
             print("Near miss")
+            nitroSprite.amount = nitroSprite.amount + 2
             trafficRight.flag = 0
         end
     end
     if trafficLeft.nmtimer == 0 then
         if trafficLeft.flag == 2 then
             print("Awesome near miss")
+            nitroSprite.amount = nitroSprite.amount + 5
             trafficLeft.flag = 0
         elseif trafficLeft.flag == 1 then
             print("Near miss")
+            nitroSprite.amount = nitroSprite.amount + 2
             trafficLeft.flag = 0
         end
     end
@@ -435,6 +454,22 @@ function updateTraffic(dt)
         trafficLeft.flag = 0
     end
 
+    -- Deal with police collisions
+    if policeCollider:collidesWith(trafficRightCollider) and trafficRight.timer == 0 then --and trafficRight.crashed == 0 then
+        policeSprite.speed = policeSprite.speed * 0.75
+        trafficRight.crashed = 1
+        policeSprite.crashed = 1
+        trafficRight.y = policeSprite.y - 275
+        trafficRight.velocity = policeSprite.speed * 1.5
+        trafficRight.flag = 0
+    elseif policeCollider:collidesWith(trafficLeftCollider) and trafficLeft.timer == 0 then --and trafficLeft.crashed == 0 then
+        policeSprite.speed = policeSprite.speed * 0.75
+        trafficLeft.crashed = 1
+        policeSprite.crashed = 1
+        trafficLeft.y = policeSprite.y - 275
+        trafficLeft.velocity = policeSprite.speed * 1.5
+        trafficLeft.flag = 0
+    end
 
     trafficRight.velocity = trafficRight.velocity * 0.98
     trafficLeft.velocity = trafficLeft.velocity * 0.98
@@ -574,14 +609,14 @@ function updatePolice(dt)
         policeSprite.health = math.floor(policeSprite.health - 1)
         policeSprite.y = carSprite.y - 150
         policeSprite.velocityy = carSprite.speed * 1.5
-        policeSprite.hittimer = 0.1
+        policeSprite.hittimer = 0.2
         if playerDifferencex > 0 then
-            policeSprite.velocityx = 20 + carSprite.speed * 0.1
-            policeSprite.x = policeSprite.x + 20 + carSprite.speed * 0.001
+            policeSprite.velocityx = 75 + carSprite.speed * 0.2
+            policeSprite.x = policeSprite.x + 20 + carSprite.speed * 0.005
             policeSprite.rotation = (-math.pi/2) + (math.pi/3) * math.abs(rateOfChangex / 10)
         elseif playerDifferencex <= 0 then
-            policeSprite.velocityx = -20 - carSprite.speed * 0.1
-            policeSprite.x = policeSprite.x - 20 - carSprite.speed * 0.001
+            policeSprite.velocityx = -75 - carSprite.speed * 0.2
+            policeSprite.x = policeSprite.x - 20 - carSprite.speed * 0.005
             policeSprite.rotation = (-math.pi/2) - (math.pi/3) * math.abs(rateOfChangex / 10)
         end
     end
@@ -603,8 +638,8 @@ function loadRoad()
         scaleY = roadScale,
     }
 
-    rightRoadColliderOffset = 1570
-    leftRoadColliderOffset = 1570
+    rightRoadColliderOffset = 1600
+    leftRoadColliderOffset = 1600
 
     rightRoadCollider = HC.polygon(
         ((road.x + road.image:getWidth() / 2) + rightRoadColliderOffset), 0,
@@ -662,6 +697,17 @@ function roadUpdate(dt)
         carSprite.speed = carSprite.speed - 250
         camerayShake = camerayShake + 200
     end
+
+    if policeCollider:collidesWith(rightRoadCollider) and policeSprite.crashed == 0 then
+        policeSprite.x = (road.x + road.image:getWidth() * road.scaleX / 2) + rightRoadColliderOffset - (carSprite.image:getWidth() / 3)
+        policeSprite.rotation = -math.rad(90 + 15)
+        policeSprite.speed = policeSprite.speed - 50
+    elseif policeCollider:collidesWith(leftRoadCollider) and policeSprite.crashed == 0 then
+        policeSprite.x = (road.x + road.image:getWidth() * road.scaleX / 2) - leftRoadColliderOffset + (carSprite.image:getWidth() / 3)
+        policeSprite.rotation = -math.rad(90 - 15)
+        policeSprite.speed = policeSprite.speed - 50
+    end
+
     if carSprite.speed < 800 then
         carSprite.speed = 800
     end
@@ -676,6 +722,12 @@ function loadSettings(settingsStr)
             end
             -- Add more settings here...
         end
+    end
+end
+
+function love.keypressed(key) -- Making debugging so much easier
+    if key == '1' then
+        love.event.quit()
     end
 end
 
