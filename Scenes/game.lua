@@ -450,6 +450,8 @@ function loadDebris()
     debrisSprite = {
         x = 0,
         y = 0,
+        velocityx = 0,
+        velocityy = 0,
         rotation = 0,
         rotationX = debrisImage:getWidth() / 2,
         rotationY = debrisImage:getHeight() / 2,
@@ -458,14 +460,17 @@ function loadDebris()
         width = debrisImage:getWidth() * scaleX,
         height = debrisImage:getHeight() * scaleY,
         image = debrisImage,
-        alpha = 1
+        alpha = 1,
+        timer = 0
     }
 end
 
-function addDebris(x, y, rotation)
+function addDebris(x, y, rotation, velx, vely)
     local debrisCopy = deepcopy(debrisSprite)
     debrisCopy.x = x
     debrisCopy.y = y
+    debrisCopy.velocityx = velx
+    debrisCopy.velocityy = vely
     debrisCopy.rotation = rotation
     table.insert(debrisTable, debrisCopy)
 end
@@ -473,44 +478,41 @@ end
 function updateDebris(dt)
 
     -- Update debris
-    if debris.notification ~= 0 then -- we have a notification to display
+    for i, debris in ipairs(debrisTable) do
+        debris.timer = debris.timer - dt
+        
+        if debris.timer < 0 then
+            debris.timer = 0
+        end
+        -- print(debris.timer)
+        
         local timerChangeBy = 0
-        if debris.timer == 0 and debris.displaying == 0 then -- notification just started
-            if i ~= 1 then
-                debris.y = debrisSprite.yOrig - notifications[i-1].height * (i - 1)
-            else
-                debris.y = notificationSprite.yOrig
-            end
-
+        if debris.timer == 0 then -- notification just started
             timerChangeBy = 1
-            local notificationImage = notificationImageList[debris.notification]
-            debris.rotationX = notificationImage:getWidth() / 2
-            debris.rotationY = notificationImage:getHeight()
-            debris.width = notificationImage:getWidth() * debris.scaleX
-            debris.height = notificationImage:getHeight() * debris.scaleY
-            debris.image = notificationImage
-            
-            -- Duplicate notification for emphasis
-            debris.displaying = 1
         end
+        
+        debris.alpha = debris.alpha - 0.6 * dt
+        debris.x = debris.x + debris.velocityx * dt
+        debris.y = debris.y + (-roadFrameMove + debris.velocityy) * dt
 
-        -- Move debris
-        debris.x = debris.x + 200 * dt
-
-        if debris.timer == 0 and debris.displaying == 1 and timerChangeBy == 0 then
-            debris.notification = 0
-            debris.displaying = 0
-        end
+        debris.velocityx = debris.velocityx * 0.995
+        debris.velocityy = debris.velocityy * 0.995
 
         debris.timer = debris.timer + timerChangeBy
     end
 
-    -- Remove debris whose timer has reached 0
-    for i = #notifications, 1, -1 do
-        if notifications[i].timer == 0 then
-            table.remove(notifications, i)
+    -- Remove notifications whose timer has reached 0
+    for i = #debrisTable, 1, -1 do
+        if debrisTable[i].timer == 0 then
+            table.remove(debrisTable, i)
         end
     end
+end
+
+function splitSpeed(speed, rotation)
+    local speedx = speed * math.cos(rotation)
+    local speedy = speed * math.sin(rotation)
+    return speedx, speedy
 end
 
 function loadCar()
@@ -624,8 +626,8 @@ function playerUpdate(dt)
     local carEndX = carSprite.x - carSprite.height * math.cos(carSprite.rotation)
     local carEndY = carSprite.y - carSprite.height * math.sin(carSprite.rotation)
 
-    nitroSprite.x = carEndX
-    nitroSprite.y = carEndY
+    nitroSprite.x = carEndX + math.random(-3, 3)
+    nitroSprite.y = carEndY + math.random(-3, 3)
     nitroSprite.rotation = carSprite.rotation
 
     -- Max Speed
@@ -672,7 +674,7 @@ function cameraUpdate(dt)
     camerayShake = camerayShake * 0.9
 
     local lerpFactor = 2 -- camera speed
-    camera:move(dx * lerpFactor * dt, dy * lerpFactor * dt)
+    camera:move(dx * lerpFactor * dt + math.random(-2, 2), dy * lerpFactor * dt + math.random(-2, 2))
 end
 
 function loadTraffic()
@@ -900,6 +902,10 @@ function updateTraffic(dt)
     -- Deal with collisions
     if carCollider:collidesWith(trafficRightCollider) then --and trafficRight.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
+        local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
+        for i = 1, math.floor(math.random(3,5)) do
+            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+        end
         camerayShake = camerayShake + 1000
         trafficRight.crashed = 1
         trafficRight.y = carSprite.y - 275
@@ -907,6 +913,10 @@ function updateTraffic(dt)
         trafficRight.flag = 0
     elseif carCollider:collidesWith(trafficLeftCollider) then --and trafficLeft.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
+        local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
+        for i = 1, math.floor(math.random(3,5)) do
+            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+        end
         camerayShake = camerayShake + 1000
         trafficLeft.crashed = 1
         trafficLeft.y = carSprite.y - 275
@@ -915,7 +925,7 @@ function updateTraffic(dt)
     end
 
     -- Deal with police collisions
-    if policeCollider:collidesWith(trafficRightCollider) and trafficRight.timer == 0 then --and trafficRight.crashed == 0 then
+    if policeCollider:collidesWith(trafficRightCollider) and trafficRight.timer == 0 and policeSprite.hittimer1 <= 1 then --and trafficRight.crashed == 0 then
         policeSprite.speed = policeSprite.speed * 0.75
         trafficRight.crashed = 1
         if policeSprite.crashed == 0 then
@@ -925,7 +935,7 @@ function updateTraffic(dt)
         trafficRight.y = policeSprite.y - 275
         trafficRight.velocity = policeSprite.speed * 1.5
         trafficRight.flag = 0
-    elseif policeCollider:collidesWith(trafficLeftCollider) and trafficLeft.timer == 0 then --and trafficLeft.crashed == 0 then
+    elseif policeCollider:collidesWith(trafficLeftCollider) and trafficLeft.timer == 0 and policeSprite.hittimer1 <= 1 then --and trafficLeft.crashed == 0 then
         policeSprite.speed = policeSprite.speed * 0.75
         trafficLeft.crashed = 1
         if policeSprite.crashed == 0 then
@@ -936,7 +946,7 @@ function updateTraffic(dt)
         trafficLeft.velocity = policeSprite.speed * 1.5
         trafficLeft.flag = 0
     end
-
+    print(policeSprite.hittimer1)
     trafficRight.velocity = trafficRight.velocity * 0.98
     trafficLeft.velocity = trafficLeft.velocity * 0.98
 end
@@ -954,7 +964,7 @@ function loadPolice()
         rotationY = trafficImage:getHeight() / 2,
         scaleX = scaleX,
         scaleY = scaleY,
-        speed = 2200,
+        speed = 1200,
         acc = 200,
         width = trafficImage:getWidth() * scaleX,
         height = trafficImage:getHeight() * scaleY,
@@ -968,6 +978,7 @@ function loadPolice()
         prevY = 2200,
         health = 8,
         hittimer = 0,
+        hittimer1 = 0
     }
 
     -- polygon colliders for the police
@@ -982,12 +993,16 @@ end
 function updatePolice(dt)
     policeSprite.timer = policeSprite.timer - dt
     policeSprite.hittimer = policeSprite.hittimer - dt
+    policeSprite.hittimer1 = policeSprite.hittimer1 + dt
 
     if policeSprite.timer < 0 then
         policeSprite.timer = 0
     end
     if policeSprite.hittimer < 0 then
         policeSprite.hittimer = 0
+    end
+    if policeSprite.hittimer1 < 0 then
+        policeSprite.hittimer1 = 0
     end
 
     local playerDifferencex = policeSprite.x - carSprite.x
@@ -1020,8 +1035,8 @@ function updatePolice(dt)
 
         if policeSprite.speed < 800 then
             policeSprite.speed = 800
-        elseif policeSprite.speed > 8000 then
-            policeSprite.speed = 8000
+        elseif policeSprite.speed > 3500 then
+            policeSprite.speed = 3500
         end
 
         policeSprite.rotation = math.max(math.min(policeSprite.rotation, -math.pi/3), -2*math.pi/3)
@@ -1082,6 +1097,11 @@ function updatePolice(dt)
         policeSprite.y = carSprite.y - 150
         policeSprite.velocityy = carSprite.speed * 1.5
         policeSprite.hittimer = 0.2
+        policeSprite.hittimer1 = 0
+        local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
+        for i = 1, math.floor(math.random(3,5)) do
+            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+        end
         if playerDifferencex > 0 then
             policeSprite.velocityx = 75 + carSprite.speed * 0.2
             policeSprite.x = policeSprite.x + 20 + carSprite.speed * 0.005
