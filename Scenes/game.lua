@@ -33,6 +33,7 @@ function arcadeGame.load() -- Runs once at the start of the game.
     loadTraffic()
     loadPolice()
     loadGUI()
+    loadDebris()
 
     -- Create camera
     camerayOffset = 400
@@ -40,6 +41,7 @@ function arcadeGame.load() -- Runs once at the start of the game.
     cameraxOffset = 0
     camerayOffset1 = 0
     takedownCamera = 0
+    takedownCameraTimer = 0
     camera = Camera(carSprite.x, carSprite.y - camerayOffset)
 
     -- Load Game settings (currently just debug mode)
@@ -50,7 +52,7 @@ end
 function arcadeGame.update(dt) -- Runs every frame.
     colliders = {} -- clear the table for new values
     
-    if policeSprite.crashed == 1 then
+    if takedownCameraTimer > 0 then
         gameSpeed = 0.15
     else
         gameSpeed = 1
@@ -70,6 +72,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     updateTraffic(dt)
     updatePolice(dt)
     updateGUI(dt)
+    updateDebris(dt)
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
@@ -93,6 +96,15 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
     
     
+    for i, debris in ipairs(debrisTable) do
+        if debris.image then
+            love.graphics.setColor(1, 1, 1, debris.alpha)
+            love.graphics.draw(debris.image, debris.x, debris.y, debris.rotation, debris.scaleX, debris.scaleY,
+            debris.rotationX, debris.rotationY)
+            love.graphics.setColor(1, 1, 1, 1)
+        end
+    end
+
     -- Draw the edges of car collider
     if debugMode then
         love.graphics.setColor(1, 0, 0) -- Set the color to red
@@ -126,6 +138,14 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
         if notification.image then
             love.graphics.draw(notification.image, notification.x, notification.y, notification.rotation, notification.scaleX, notification.scaleY,
             notification.rotationX, notification.rotationY)
+        end
+    end
+    for i, emphasis in ipairs(notificationEmphasis) do
+        if emphasis.image then
+            love.graphics.setColor(1, 1, 1, emphasis.alpha)
+            love.graphics.draw(emphasis.image, emphasis.x, emphasis.y, emphasis.rotation, emphasis.scaleX, emphasis.scaleY,
+            emphasis.rotationX, emphasis.rotationY)
+            love.graphics.setColor(1, 1, 1, 1)
         end
     end
 end
@@ -287,7 +307,7 @@ function updateGUI(dt)
         if notification.timer < 0 then
             notification.timer = 0
         end
-        print(notification.timer)
+        -- print(notification.timer)
         
         if notification.notification ~= 0 then -- we have a notification to display
             local timerChangeBy = 0
@@ -298,18 +318,19 @@ function updateGUI(dt)
                     notification.y = notificationSprite.yOrig
                 end
 
-                
                 timerChangeBy = 1
-                notification.displaying = 1
                 local notificationImage = notificationImageList[notification.notification]
                 notification.rotationX = notificationImage:getWidth() / 2
                 notification.rotationY = notificationImage:getHeight()
                 notification.width = notificationImage:getWidth() * notification.scaleX
                 notification.height = notificationImage:getHeight() * notification.scaleY
                 notification.image = notificationImage
-
+                
                 -- Duplicate notification for emphasis
-                table.insert(notificationEmphasis, notification)
+                local clonedNotification = deepcopy(notification)
+                clonedNotification.alpha = 1
+                table.insert(notificationEmphasis, clonedNotification)
+                notification.displaying = 1
             end
 
             if notification.timer < 0.5 and notification.timer ~= 0 then
@@ -336,6 +357,55 @@ function updateGUI(dt)
     end
 
     -- Emphasis Update
+    for i, emphasis in ipairs(notificationEmphasis) do
+        emphasis.timer = emphasis.timer - dt
+        
+        if emphasis.timer < 0 then
+            emphasis.timer = 0
+        end
+        print(emphasis.timer)
+        
+        if emphasis.notification ~= 0 then -- we have a notification to display
+            local timerChangeBy = 0
+            if emphasis.timer == 0 and emphasis.displaying == 0 then -- notification just started
+                if i ~= 1 then
+                    emphasis.y = notificationSprite.yOrig - notifications[i-1].height * (i - 1)
+                else
+                    emphasis.y = notificationSprite.yOrig
+                end
+
+                timerChangeBy = 1
+                emphasis.displaying = 1
+                local notificationImage = notificationImageList[emphasis.notification]
+                emphasis.rotationX = notificationImage:getWidth() / 2
+                emphasis.rotationY = notificationImage:getHeight()
+                emphasis.width = notificationImage:getWidth() * emphasis.scaleX
+                emphasis.height = notificationImage:getHeight() * emphasis.scaleY
+                emphasis.image = notificationImage
+            end
+            
+            -- Change stuff
+            emphasis.scaleX = emphasis.scaleX + 0.2 * dt
+            emphasis.scaleY = emphasis.scaleY + 0.2 * dt
+            emphasis.alpha = emphasis.alpha - 0.5 * dt
+
+            if emphasis.timer == 0 and emphasis.displaying == 1 and timerChangeBy == 0 then
+                emphasis.notification = 0
+                emphasis.displaying = 0
+            end
+
+            emphasis.timer = emphasis.timer + timerChangeBy
+        else
+            emphasis.x = 5000
+        end
+    end
+
+    -- Remove notifications whose timer has reached 0
+    for i = #notificationEmphasis, 1, -1 do
+        if notificationEmphasis[i].timer == 0 then
+            table.remove(notificationEmphasis, i)
+        end
+    end
 end
 
 function addNotification(notificationType)
@@ -354,6 +424,93 @@ function addNotification(notificationType)
         scaleY = notificationSprite.scaleY
     }
     table.insert(notifications, newNotification)
+end
+
+function deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, stuff
+        copy = orig
+    end
+    return copy
+end
+
+function loadDebris()
+    local scaleX = 0.5
+    local scaleY = 0.5
+    local debrisImage = love.graphics.newImage("Sprites/debris.png")
+    debrisTable = {}
+
+    debrisSprite = {
+        x = 0,
+        y = 0,
+        rotation = 0,
+        rotationX = debrisImage:getWidth() / 2,
+        rotationY = debrisImage:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = debrisImage:getWidth() * scaleX,
+        height = debrisImage:getHeight() * scaleY,
+        image = debrisImage,
+        alpha = 1
+    }
+end
+
+function addDebris(x, y, rotation)
+    local debrisCopy = deepcopy(debrisSprite)
+    debrisCopy.x = x
+    debrisCopy.y = y
+    debrisCopy.rotation = rotation
+    table.insert(debrisTable, debrisCopy)
+end
+
+function updateDebris(dt)
+
+    -- Update debris
+    if debris.notification ~= 0 then -- we have a notification to display
+        local timerChangeBy = 0
+        if debris.timer == 0 and debris.displaying == 0 then -- notification just started
+            if i ~= 1 then
+                debris.y = debrisSprite.yOrig - notifications[i-1].height * (i - 1)
+            else
+                debris.y = notificationSprite.yOrig
+            end
+
+            timerChangeBy = 1
+            local notificationImage = notificationImageList[debris.notification]
+            debris.rotationX = notificationImage:getWidth() / 2
+            debris.rotationY = notificationImage:getHeight()
+            debris.width = notificationImage:getWidth() * debris.scaleX
+            debris.height = notificationImage:getHeight() * debris.scaleY
+            debris.image = notificationImage
+            
+            -- Duplicate notification for emphasis
+            debris.displaying = 1
+        end
+
+        -- Move debris
+        debris.x = debris.x + 200 * dt
+
+        if debris.timer == 0 and debris.displaying == 1 and timerChangeBy == 0 then
+            debris.notification = 0
+            debris.displaying = 0
+        end
+
+        debris.timer = debris.timer + timerChangeBy
+    end
+
+    -- Remove debris whose timer has reached 0
+    for i = #notifications, 1, -1 do
+        if notifications[i].timer == 0 then
+            table.remove(notifications, i)
+        end
+    end
 end
 
 function loadCar()
@@ -478,10 +635,21 @@ function playerUpdate(dt)
     end
 
     -- Update player camera
-    cameraLERP(dt)
+    cameraUpdate(dt)
 end
 
-function cameraLERP(dt)
+function cameraUpdate(dt)
+    takedownCameraTimer = takedownCameraTimer - dt
+
+    if takedownCameraTimer < 0 then
+        takedownCameraTimer = 0
+    end
+
+    if takedownCamera == 1 then
+        takedownCameraTimer = 0.6
+        takedownCamera = 0
+    end
+
     local cameraxOffset = (policeSprite.x - carSprite.x) / 2
     local camerayOffset1 = (policeSprite.y - carSprite.y) / 2
 
@@ -494,7 +662,7 @@ function cameraLERP(dt)
     local dx = 0
     local dy = 0
     -- Calculate the distance to the player
-    if policeSprite.crashed == 1 then
+    if takedownCameraTimer > 0 then
         dx = carSprite.x - camera.x + cameraxOffset
         dy = carSprite.y - camera.y - camerayShake + camerayOffset1
     else
@@ -901,6 +1069,7 @@ function updatePolice(dt)
         else
             policeSprite.health = -300
             nitroSprite.amount = nitroSprite.amount + 1
+            takedownCamera = 1
         end
     end
 
