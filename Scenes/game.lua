@@ -63,7 +63,9 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     policeSprite.rotationX, policeSprite.rotationY)
 
     love.graphics.draw(carSprite.image, carSprite.x, carSprite.y, carSprite.rotation, carSprite.scaleX, carSprite.scaleY,
-        carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
+    carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
+    love.graphics.draw(nitroSprite.image, nitroSprite.x, nitroSprite.y, nitroSprite.rotation, nitroSprite.scaleX, nitroSprite.scaleY,
+    nitroSprite.rotationX, nitroSprite.rotationY) -- Nitro
 
     -- Draw the edges of car collider
     if debugMode then
@@ -89,6 +91,24 @@ function loadCar()
         (image:getWidth() * scaleX), (image:getHeight() * scaleY), (image:getWidth() / 2), (image:getHeight() / 2))
     carSprite.prevX = 1000
     carSprite.prevY = 800
+
+    -- Load Nitro
+    nitroImage = love.graphics.newImage("Sprites/nitro.png")
+    nitroSprite = {
+        x = 1000,
+        y = 800,
+        rotation = -math.pi/2,
+        rotationX = nitroImage:getWidth() / 2,
+        rotationY = nitroImage:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = nitroImage:getWidth() * scaleX,
+        height = nitroImage:getHeight() * scaleY,
+        image = nitroImage,
+        amount = 0,
+        flag = 0,
+        boostamount = 1000
+    }
 
     -- polygon collider for the car
     carCollider = HC.polygon(
@@ -132,6 +152,23 @@ function playerUpdate(dt)
         carSprite.speed = carSprite.speed - carSprite.accel * 1.5 * dt
         camerayShake = camerayShake + carSprite.accel / 5 * carSprite.speed / 1000
     end
+    if love.keyboard.isDown('a') then -- Nitro
+        carSprite.speed = carSprite.speed + nitroSprite.boostamount * dt
+        camerayShake = camerayShake - nitroSprite.boostamount / 7.5 * carSprite.speed / 1000
+        minCamerayShake = -150
+    else
+        minCamerayShake = -100
+    end
+
+    -- nitroSprite.x = carSprite.x
+    -- nitroSprite.y = carSprite.y + 150
+    local offset = carSprite.width * 0.6
+    local carEndX = carSprite.x - offset * math.cos(carSprite.rotation)
+    local carEndY = carSprite.y - offset * math.sin(carSprite.rotation)
+
+    nitroSprite.x = carEndX
+    nitroSprite.y = carEndY
+    nitroSprite.rotation = carSprite.rotation
 
     local dx = carSprite.speed * math.cos(carSprite.rotation)
     roadFrameMove = carSprite.speed * math.sin(carSprite.rotation)
@@ -155,8 +192,8 @@ end
 function cameraLERP(dt)
     if camerayShake > 100 then
         camerayShake = 100
-    elseif camerayShake < -100 then
-        camerayShake = -100
+    elseif camerayShake < minCamerayShake then
+        camerayShake = minCamerayShake
     end
     -- Calculate the distance to the player
     local dx = carSprite.x - camera.x
@@ -529,7 +566,6 @@ function updatePolice(dt)
         policeSprite.crashed = 1
     end
 
-    print(rateOfChangex)
     -- Deal with collisions
     if carCollider:collidesWith(policeCollider) and policeSprite.hittimer == 0 then
         carSprite.speed = carSprite.speed * 0.85
@@ -620,13 +656,11 @@ function roadUpdate(dt)
         carSprite.rotation = -math.rad(90 + 15)
         carSprite.speed = carSprite.speed - 250
         camerayShake = camerayShake + 200
-        print(carSprite.speed)
     elseif carCollider:collidesWith(leftRoadCollider) then
         carSprite.x = (road.x + road.image:getWidth() * road.scaleX / 2) - leftRoadColliderOffset + (carSprite.image:getWidth() / 3)
         carSprite.rotation = -math.rad(90 - 15)
         carSprite.speed = carSprite.speed - 250
         camerayShake = camerayShake + 200
-        print(carSprite.speed)
     end
     if carSprite.speed < 800 then
         carSprite.speed = 800
