@@ -119,8 +119,15 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     love.graphics.draw(nitroBar.image, nitroBar.x, nitroBar.y, nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
     nitroBar.rotationX, nitroBar.rotationY)
 
-    love.graphics.draw(notificationSprite.image, notificationSprite.x, notificationSprite.y, notificationSprite.rotation, notificationSprite.scaleX, notificationSprite.scaleY,
-    notificationSprite.rotationX, notificationSprite.rotationY)
+    -- love.graphics.draw(notificationSprite.image, notificationSprite.x, notificationSprite.y, notificationSprite.rotation, notificationSprite.scaleX, notificationSprite.scaleY,
+    -- notificationSprite.rotationX, notificationSprite.rotationY)
+    -- Draw notifications
+    for i, notification in ipairs(notifications) do
+        if notification.image then
+            love.graphics.draw(notification.image, notification.x, notification.y, notification.rotation, notification.scaleX, notification.scaleY,
+            notification.rotationX, notification.rotationY)
+        end
+    end
 end
 
 function loadGUI()
@@ -240,31 +247,17 @@ function loadGUI()
         y = screenHeight - numberyOffset,
         xOrig = screenWidth - numberxOffset,
         yOrig = screenHeight - numberyOffset,
-        rotation = 0,
-        rotationX = notificationImageList[2]:getWidth() / 2,
-        rotationY = notificationImageList[2]:getHeight(),
         scaleX = scaleX,
-        scaleY = scaleY,
-        width = notificationImageList[2]:getWidth() * scaleX,
-        height = notificationImageList[2]:getHeight() * scaleY,
-        image = notificationImageList[2],
-        notification = 0,
-        timer = 0,
-        displaying = 0
+        scaleY = scaleY
     }
+    notifications = {} -- Table to hold notification objects
+    notificationEmphasis = {}
 end
 
 function updateGUI(dt)
-    notificationSprite.timer = notificationSprite.timer - dt
-
-    if notificationSprite.timer < 0 then
-        notificationSprite.timer = 0
-    end
-    
     local speedMultiplier = 0.1
 
     local speedStr = tostring(math.floor(carSprite.speed * speedMultiplier))
-    print(notificationSprite.timer)
 
     local len = string.len(speedStr)
 
@@ -287,38 +280,80 @@ function updateGUI(dt)
 
     nitroBar.image = nitroImageList[nitroImageIndex]
 
-    -- Update notification sprite
-    if notificationSprite.notification ~= 0 then -- we have a notification to display
-        local timerChangeBy = 0
-        if notificationSprite.timer == 0 and notificationSprite.displaying == 0 then -- notification just started
-            timerChangeBy = 1
-            notificationSprite.x = notificationSprite.xOrig
-            notificationSprite.y = notificationSprite.yOrig
+    -- Update each notification
+    for i, notification in ipairs(notifications) do
+        notification.timer = notification.timer - dt
+        
+        if notification.timer < 0 then
+            notification.timer = 0
         end
-        local notificationImage = notificationImageList[notificationSprite.notification]
-        notificationSprite.rotationX = notificationImage:getWidth() / 2
-        notificationSprite.rotationY = notificationImage:getHeight()
-        notificationSprite.width = notificationImage:getWidth() * notificationSprite.scaleX
-        notificationSprite.height = notificationImage:getHeight() * notificationSprite.scaleY
-        notificationSprite.image = notificationImage
+        print(notification.timer)
+        
+        if notification.notification ~= 0 then -- we have a notification to display
+            local timerChangeBy = 0
+            if notification.timer == 0 and notification.displaying == 0 then -- notification just started
+                if i ~= 1 then
+                    notification.y = notificationSprite.yOrig - notifications[i-1].height * (i - 1)
+                else
+                    notification.y = notificationSprite.yOrig
+                end
 
-        if notificationSprite.timer < 0.5 and notificationSprite.timer ~= 0 then
-            notificationSprite.x = notificationSprite.x + 700 * dt
+                
+                timerChangeBy = 1
+                notification.displaying = 1
+                local notificationImage = notificationImageList[notification.notification]
+                notification.rotationX = notificationImage:getWidth() / 2
+                notification.rotationY = notificationImage:getHeight()
+                notification.width = notificationImage:getWidth() * notification.scaleX
+                notification.height = notificationImage:getHeight() * notification.scaleY
+                notification.image = notificationImage
+
+                -- Duplicate notification for emphasis
+                table.insert(notificationEmphasis, notification)
+            end
+
+            if notification.timer < 0.5 and notification.timer ~= 0 then
+                notification.x = notification.x + 700 * dt
+            else
+                notification.x = notification.x + 200 * dt
+            end
+            if notification.timer == 0 and notification.displaying == 1 and timerChangeBy == 0 then
+                notification.notification = 0
+                notification.displaying = 0
+            end
+
+            notification.timer = notification.timer + timerChangeBy
         else
-            notificationSprite.x = notificationSprite.x + 200 * dt
+            notification.x = 5000
         end
-        if notificationSprite.timer == 0 and notificationSprite.displaying == 1 then
-            notificationSprite.notification = 0
-            timerChangeBy = 0
-            notificationSprite.displaying = 0
-        end
-
-        notificationSprite.timer = notificationSprite.timer + timerChangeBy
-    else
-        notificationSprite.x = 5000
     end
 
+    -- Remove notifications whose timer has reached 0
+    for i = #notifications, 1, -1 do
+        if notifications[i].timer == 0 then
+            table.remove(notifications, i)
+        end
+    end
 
+    -- Emphasis Update
+end
+
+function addNotification(notificationType)
+    local newNotification = {
+        notification = notificationType,
+        timer = 0,
+        displaying = 0,
+        x = notificationSprite.xOrig,
+        y = notificationSprite.yOrig,
+        rotationX = 0,
+        rotationY = 0,
+        width = 0,
+        height = 0,
+        image = nil,
+        scaleX = notificationSprite.scaleX,
+        scaleY = notificationSprite.scaleY
+    }
+    table.insert(notifications, newNotification)
 end
 
 function loadCar()
@@ -413,6 +448,8 @@ function playerUpdate(dt)
 
     if nitroSprite.amount < 0 then
         nitroSprite.amount = 0
+    elseif nitroSprite.amount > nitroSprite.maxAmount then
+        nitroSprite.amount = nitroSprite.maxAmount
     end
     
     local dx = carSprite.speed * math.cos(carSprite.rotation)
@@ -630,12 +667,12 @@ function updateTraffic(dt)
     if trafficRight.nmtimer == 0 then
         if trafficRight.flag == 2 then
             print("Awesome near miss")
-            notificationSprite.notification = 2
-            nitroSprite.amount = nitroSprite.amount + 5
+            addNotification(2)
+            nitroSprite.amount = nitroSprite.amount + 3
             trafficRight.flag = 0
         elseif trafficRight.flag == 1 then
             print("Near miss")
-            notificationSprite.notification = 1
+            addNotification(1)
             nitroSprite.amount = nitroSprite.amount + 2
             trafficRight.flag = 0
         end
@@ -643,12 +680,12 @@ function updateTraffic(dt)
     if trafficLeft.nmtimer == 0 then
         if trafficLeft.flag == 2 then
             print("Awesome near miss")
-            notificationSprite.notification = 2
-            nitroSprite.amount = nitroSprite.amount + 5
+            addNotification(2)
+            nitroSprite.amount = nitroSprite.amount + 3
             trafficLeft.flag = 0
         elseif trafficLeft.flag == 1 then
             print("Near miss")
-            notificationSprite.notification = 1
+            addNotification(1)
             nitroSprite.amount = nitroSprite.amount + 2
             trafficLeft.flag = 0
         end
