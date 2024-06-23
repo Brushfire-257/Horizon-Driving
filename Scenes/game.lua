@@ -63,7 +63,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     end
     dt = dt * actualGameSpeed
 
-    print(actualGameSpeed)
+    -- print(actualGameSpeed)
 
     playerUpdate(dt)
     roadUpdate(dt)
@@ -115,6 +115,9 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     speedNumber2.rotationX, speedNumber2.rotationY)
     love.graphics.draw(speedNumber3.image, speedNumber3.x, speedNumber3.y, speedNumber3.rotation, speedNumber3.scaleX, speedNumber3.scaleY,
     speedNumber3.rotationX, speedNumber3.rotationY)
+
+    love.graphics.draw(nitroBar.image, nitroBar.x, nitroBar.y, nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
+    nitroBar.rotationX, nitroBar.rotationY)
 end
 
 function loadGUI()
@@ -133,10 +136,38 @@ function loadGUI()
         love.graphics.newImage("Sprites/GUI/Numbers/8.png"),
         love.graphics.newImage("Sprites/GUI/Numbers/9.png")
     }
+    nitroImageList = {
+        love.graphics.newImage("Sprites/GUI/NitroBar/1.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/2.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/3.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/4.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/5.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/6.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/7.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/8.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/9.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/10.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/11.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/12.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/13.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/14.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/15.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/16.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/17.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/18.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/19.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/20.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/21.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/22.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/23.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/24.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/25.png"),
+        love.graphics.newImage("Sprites/GUI/NitroBar/26.png"),
+    }
 
+    -- Prepare Speed Numbers
     local numberxOffset = 25
     local numberyOffset = 150
-    -- Prepare Speed Numbers
     speedNumber1 = {
         x = screenWidth - numberImageList[1]:getWidth() - numberxOffset,
         y = screenHeight - numberyOffset,
@@ -177,12 +208,29 @@ function loadGUI()
         flag = 0,
     }
     
+    -- Prepare nitro bar
+    local numberxOffset = 25
+    local numberyOffset = 0
+    nitroBar = {
+        x = screenWidth - (nitroImageList[1]:getWidth()) - numberxOffset,
+        y = screenHeight - numberyOffset,
+        rotation = 0,
+        rotationX = numberImageList[1]:getWidth() / 2,
+        rotationY = numberImageList[1]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = numberImageList[1]:getWidth() * scaleX,
+        height = numberImageList[1]:getHeight() * scaleY,
+        image = numberImageList[1],
+        flag = 0,
+    }   
 end
 
 function updateGUI(dt)
-    local speedMultiplier = 0.25
+    local speedMultiplier = 0.1
 
-    local speedStr = tostring(carSprite.speed * speedMultiplier)
+    local speedStr = tostring(math.floor(carSprite.speed * speedMultiplier))
+    print(speedStr)
 
     local len = string.len(speedStr)
 
@@ -195,6 +243,16 @@ function updateGUI(dt)
     speedNumber1.image = numberImageList[digit3 + 1]  -- Lua array indices start at 1
     speedNumber2.image = numberImageList[digit2 + 1]  -- Lua array indices start at 1
     speedNumber3.image = numberImageList[digit1 + 1]  -- Lua array indices start at 1
+
+    -- Update nitro bar
+    local nitroFraction = nitroSprite.amount / nitroSprite.maxAmount
+
+    local nitroImageIndex = math.floor(nitroFraction * 26) + 1
+
+    nitroImageIndex = math.max(1, math.min(nitroImageIndex, 26))
+
+    nitroBar.image = nitroImageList[nitroImageIndex]
+
 end
 
 function loadCar()
@@ -205,6 +263,7 @@ function loadCar()
         (image:getWidth() * scaleX), (image:getHeight() * scaleY), (image:getWidth() / 2), (image:getHeight() / 2))
     carSprite.prevX = 1000
     carSprite.prevY = 800
+    carSprite.maxSpeed = 3500
 
     -- Load Nitro
     nitroImage = love.graphics.newImage("Sprites/nitro.png")
@@ -219,7 +278,8 @@ function loadCar()
         width = nitroImage:getWidth() * scaleX,
         height = nitroImage:getHeight() * scaleY,
         image = nitroImage,
-        amount = 7,
+        amount = 4,
+        maxAmount = 8,
         flag = 0,
         boostamount = 1000
     }
@@ -244,7 +304,7 @@ function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, w
         scaleX = scaleX,
         scaleY = scaleY,
         speed = 0,
-        accel = 600,
+        accel = 300,
         rotationSpeed = 2,
         appear = 0,
         width = width,
@@ -272,8 +332,10 @@ function playerUpdate(dt)
         camerayShake = camerayShake - nitroSprite.boostamount / 7.5 * carSprite.speed / 1000
         nitroSprite.appear = 1
         nitroSprite.amount = nitroSprite.amount - dt
+        carSprite.maxSpeed = 4500
     else
         nitroSprite.appear = 0
+        carSprite.maxSpeed = 3500
     end
     -- print(nitroSprite.amount)
 
@@ -308,8 +370,8 @@ function playerUpdate(dt)
 
     -- Max Speed
     carSprite.speed = carSprite.speed * 0.999
-    if carSprite.speed > 6500 then
-        carSprite.speed = 6500
+    if carSprite.speed > carSprite.maxSpeed then
+        carSprite.speed = carSprite.speed * 0.97
     end
 
     -- Update player camera
