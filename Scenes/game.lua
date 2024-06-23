@@ -424,9 +424,12 @@ function loadPolice()
         timer = 1,
         flag = 0,
         crashed = 0,
-        velocity = 0,
+        velocityx = 0,
+        velocityy = 0,
         prevX = 1000,
         prevY = 2200,
+        health = 8,
+        hittimer = 0,
     }
 
     -- polygon colliders for the police
@@ -440,9 +443,13 @@ end
 
 function updatePolice(dt)
     policeSprite.timer = policeSprite.timer - dt
+    policeSprite.hittimer = policeSprite.hittimer - dt
 
     if policeSprite.timer < 0 then
         policeSprite.timer = 0
+    end
+    if policeSprite.hittimer < 0 then
+        policeSprite.hittimer = 0
     end
 
     local playerDifferencex = policeSprite.x - carSprite.x
@@ -487,14 +494,17 @@ function updatePolice(dt)
         policeSprite.y = policeSprite.y + (-roadFrameMove + dy) * dt
     elseif policeSprite.crashed == 1 then
         policeSprite.y = policeSprite.y + -roadFrameMove * dt
+        policeSprite.x = policeSprite.x + policeSprite.velocityx * dt
+        policeSprite.rotation = policeSprite.rotation + math.rad(45) * dt
+        policeSprite.y = policeSprite.y - policeSprite.velocityy * dt
     end
-    print(policeSprite.speed)
     
     if policeSprite.y > screenHeight + 500 then
         policeSprite.timer = math.random(1, 3)
         policeSprite.y = -500
         policeSprite.x = math.random(750, 1500)
         policeSprite.crashed = 0
+        policeSprite.health = 8
         policeSprite.rotation = -math.rad(90)
         policeSprite.speed = carSprite.speed
     elseif policeSprite.y < -screenHeight then
@@ -504,7 +514,6 @@ function updatePolice(dt)
         policeSprite.speed = carSprite.speed
     end
 
-    
     policeSprite.speed = policeSprite.speed
 
     -- Update PD control
@@ -515,6 +524,34 @@ function updatePolice(dt)
     policeCollider:moveTo(policeSprite.x, policeSprite.y)
     policeCollider:rotate(policeSprite.rotation - policeCollider:rotation(), policeCollider:center())
     table.insert(colliders, policeCollider)
+
+    if policeSprite.health <= 0 then
+        policeSprite.crashed = 1
+    end
+
+    print(rateOfChangex)
+    -- Deal with collisions
+    if carCollider:collidesWith(policeCollider) and policeSprite.hittimer == 0 then
+        carSprite.speed = carSprite.speed * 0.85
+        policeSprite.speed = 200 + carSprite.speed * 1.1
+        camerayShake = camerayShake + 400
+        policeSprite.health = math.floor(policeSprite.health - 1)
+        policeSprite.y = carSprite.y - 150
+        policeSprite.velocityy = carSprite.speed * 1.5
+        policeSprite.hittimer = 0.1
+        if playerDifferencex > 0 then
+            policeSprite.velocityx = 20 + carSprite.speed * 0.1
+            policeSprite.x = policeSprite.x + 20 + carSprite.speed * 0.001
+            policeSprite.rotation = (-math.pi/2) + (math.pi/3) * math.abs(rateOfChangex / 10)
+        elseif playerDifferencex <= 0 then
+            policeSprite.velocityx = -20 - carSprite.speed * 0.1
+            policeSprite.x = policeSprite.x - 20 - carSprite.speed * 0.001
+            policeSprite.rotation = (-math.pi/2) - (math.pi/3) * math.abs(rateOfChangex / 10)
+        end
+    end
+
+    policeSprite.velocityy = policeSprite.velocityy * 0.98
+    policeSprite.velocityx = policeSprite.velocityx * 0.98
 end
 
 function loadRoad()
