@@ -1190,7 +1190,7 @@ function loadEMP()
     scaleY = 1
 
     EMPSprite = {
-        x = 0,
+        x = 1000,
         y = 0,
         rotation = 0,
         rotationX = EMPImageList[1]:getWidth() / 2,
@@ -1203,7 +1203,7 @@ function loadEMP()
         visible = 0,
         timer = 0,
         spawnTimer = 0,
-        flag = 0,
+        flag = 8,
         speed = 500,
         duration = 7,
         alpha = 1,
@@ -1232,13 +1232,13 @@ function updateEMP(dt)
         EMPSprite.spawnTimer = 0
     end
     
-    if EMPSprite.visible == 0 and EMPSprite.timer == 0 and EMPSprite.spawnTimer == 0 and takedownCameraTimer == 0 then -- EMP needs to spawn / appear
+    if EMPSprite.visible == 0 and EMPSprite.timer == 0 and EMPSprite.spawnTimer == 0 and takedownCameraTimer == 0 and heatLevel >= 3 then -- EMP needs to spawn / appear
         EMPSprite.timer = EMPSprite.duration
         EMPSprite.visible = 1
+        EMPSprite.flag = 0
     end
-    print(EMPSprite.spawnTimer)
+    -- print(EMPSprite.flag)
 
-    
     -- Update position
     EMPSprite.y = carSprite.y
     if (EMPSprite.x - carSprite.x) < 0 and EMPSprite.visible == 1 then -- Move right
@@ -1255,60 +1255,29 @@ function updateEMP(dt)
         end
     end
 
-    -- Update image
-    if (EMPSprite.timer / EMPSprite.duration) < (1/5) then
-        EMPSprite.image = EMPImageList[5]
-        EMPSprite.rotationX = EMPImageList[5]:getWidth() / 2
-        EMPSprite.rotationY = EMPImageList[5]:getHeight() / 2
-        EMPSprite.width = EMPImageList[5]:getWidth() * EMPSprite.scaleX
-        if EMPSprite.flag ~= 5 then
-            table.insert(EMPCopies, deepcopy(EMPSprite))
-            EMPSprite.flag = 5
-        end
-    elseif (EMPSprite.timer / EMPSprite.duration) < (2/5) then
-        EMPSprite.image = EMPImageList[4]
-        EMPSprite.rotationX = EMPImageList[4]:getWidth() / 2
-        EMPSprite.rotationY = EMPImageList[4]:getHeight() / 2
-        EMPSprite.width = EMPImageList[4]:getWidth() * EMPSprite.scaleX
-        if EMPSprite.flag ~= 4 then
-            table.insert(EMPCopies, deepcopy(EMPSprite))
-            EMPSprite.flag = 4
-        end
-    elseif (EMPSprite.timer / EMPSprite.duration) < (3/5) then
-        EMPSprite.image = EMPImageList[3]
-        EMPSprite.rotationX = EMPImageList[3]:getWidth() / 2
-        EMPSprite.rotationY = EMPImageList[3]:getHeight() / 2
-        EMPSprite.width = EMPImageList[3]:getWidth() * EMPSprite.scaleX
-        if EMPSprite.flag ~= 3 then
-            table.insert(EMPCopies, deepcopy(EMPSprite))
-            EMPSprite.flag = 3
-        end
-    elseif (EMPSprite.timer / EMPSprite.duration) < (4/5) then
-        EMPSprite.image = EMPImageList[2]
-        EMPSprite.rotationX = EMPImageList[2]:getWidth() / 2
-        EMPSprite.rotationY = EMPImageList[2]:getHeight() / 2
-        EMPSprite.width = EMPImageList[2]:getWidth() * EMPSprite.scaleX
-        if EMPSprite.flag ~= 2 then
-            table.insert(EMPCopies, deepcopy(EMPSprite))
-            EMPSprite.flag = 2
-        end
+    -- Update image and create clones
+    local percentage = EMPSprite.timer / EMPSprite.duration
+    local newFlag = nil
+
+    if percentage < (1/5) then
+        newFlag = 5
+    elseif percentage < (2/5) then
+        newFlag = 4
+    elseif percentage < (3/5) then
+        newFlag = 3
+    elseif percentage < (4/5) then
+        newFlag = 2
     else
-        EMPSprite.image = EMPImageList[1]
-        EMPSprite.rotationX = EMPImageList[1]:getWidth() / 2
-        EMPSprite.rotationY = EMPImageList[1]:getHeight() / 2
-        EMPSprite.width = EMPImageList[1]:getWidth() * EMPSprite.scaleX
-        if EMPSprite.flag ~= 1 then
-            table.insert(EMPCopies, deepcopy(EMPSprite))
-            EMPSprite.flag = 1
-        end
+        newFlag = 1
     end
 
-    if EMPSprite.visible == 0 then
-        EMPSprite.image = EMPImageList[1]
-        EMPSprite.rotationX = EMPImageList[1]:getWidth() / 2
-        EMPSprite.rotationY = EMPImageList[1]:getHeight() / 2
-        EMPSprite.width = EMPImageList[1]:getWidth() * EMPSprite.scaleX
-        EMPSprite.flag = 0
+    if newFlag and EMPSprite.flag ~= newFlag and EMPSprite.visible == 1 then
+        EMPSprite.image = EMPImageList[newFlag]
+        EMPSprite.rotationX = EMPSprite.image:getWidth() / 2
+        EMPSprite.rotationY = EMPSprite.image:getHeight() / 2
+        EMPSprite.width = EMPSprite.image:getWidth() * EMPSprite.scaleX
+        table.insert(EMPCopies, deepcopy(EMPSprite))
+        EMPSprite.flag = newFlag
     end
 
     -- Update collider
@@ -1331,14 +1300,10 @@ function updateEMP(dt)
     end
 
     if EMPSprite.timer == 0 and EMPSprite.visible == 1 then
-        if EMPSprite.flag == 5 then
-            table.insert(EMPCopies, deepcopy(EMPSprite))
-        end
-        EMPSprite.flag = 0
         EMPSprite.visible = 0
         EMPSprite.spawnTimer = math.random(1, 1.5)
     end
-
+    
     -- Update EMP copies
     for i = #EMPCopies, 1, -1 do
         local EMPcopy = EMPCopies[i]
@@ -1351,8 +1316,25 @@ function updateEMP(dt)
         else
             EMPcopy.width = EMPcopy.image:getWidth() * EMPcopy.scaleX
             EMPcopy.height = EMPcopy.image:getHeight() * EMPcopy.scaleY
+            EMPcopy.x = EMPSprite.x
+            EMPcopy.y = EMPSprite.y
         end
     end
+
+    if EMPSprite.visible == 0 and EMPSprite.flag ~= 8 then
+        if EMPSprite.flag ~= 6 then
+            table.insert(EMPCopies, deepcopy(EMPSprite))
+            EMPSprite.flag = 6
+        end
+        EMPSprite.image = EMPImageList[1]
+        EMPSprite.rotationX = EMPImageList[1]:getWidth() / 2
+        EMPSprite.rotationY = EMPImageList[1]:getHeight() / 2
+        EMPSprite.width = EMPImageList[1]:getWidth() * EMPSprite.scaleX
+    end
+
+    -- if EMPSprite.flag == 8 then -- Game just started
+    --     EMPSprite.flag = 0
+    -- end
 end
 
 function loadSpikestrip()
@@ -1366,7 +1348,7 @@ function loadSpikestrip()
     
     scaleX = 1
     scaleY = 1
-
+    
     spikestripSprite = {
         x = 0,
         y = 0,
@@ -1406,7 +1388,7 @@ function updateSpikestrip(dt)
         spikestripSprite.spawnTimer = 0
     end
 
-    if spikestripSprite.visible == 0 and spikestripSprite.timer == 0 and spikestripSprite.spawnTimer == 0 and policeSprite.crashed == 0 then -- Spikestrip needs to be spawned
+    if spikestripSprite.visible == 0 and spikestripSprite.timer == 0 and spikestripSprite.spawnTimer == 0 and policeSprite.crashed == 0 and heatLevel >= 1 then -- Spikestrip needs to be spawned
         spikestripSprite.timer = 2
         spikestripSprite.visible = 1
     end
