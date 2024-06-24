@@ -203,8 +203,10 @@ end
 
 function loadSongs()
     local songs = {
-        {path = "Sounds/song1.wav", volume = 1},
-        {path = "Sounds/song2.wav", volume = 1},
+        {path = "Sounds/song1.mp3", volume = 1},
+        -- {path = "Sounds/song2.mp3", volume = 1},
+        {path = "Sounds/song3.mp3", volume = 1},
+        {path = "Sounds/song4.mp3", volume = 1},
     }
 
     for i, song in ipairs(songs) do
@@ -512,7 +514,7 @@ function updateGUI(dt)
     -- Update Heat Level Indicator
     heatIndicator.image = heatIndicatorImageList[math.min((heatLevel + 1), 5)]
 
-    heatIndicatorNumber.image = numberImageList[math.min((heatLevel + 1), 5)]
+    heatIndicatorNumber.image = numberImageList[math.min((heatLevel + 1), 6)]
     heatIndicatorNumber.rotationX = heatIndicatorNumber.image:getWidth() / 2
     heatIndicatorNumber.rotationY = heatIndicatorNumber.image:getHeight() / 2
 
