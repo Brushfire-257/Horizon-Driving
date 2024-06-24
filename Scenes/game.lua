@@ -35,6 +35,7 @@ function arcadeGame.load() -- Runs once at the start of the game.
     loadGUI()
     loadDebris()
     loadSpikestrip()
+    loadEMP()
 
     -- Create camera
     camerayOffset = 400
@@ -75,6 +76,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     updateGUI(dt)
     updateDebris(dt)
     updateSpikestrip(dt)
+    updateEMP(dt)
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
@@ -89,10 +91,15 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
 
     love.graphics.draw(policeSprite.image, policeSprite.x, policeSprite.y, policeSprite.rotation, policeSprite.scaleX, policeSprite.scaleY,
     policeSprite.rotationX, policeSprite.rotationY)
-
+    
     if spikestripSprite.visible == 1 then
         love.graphics.draw(spikestripSprite.image, math.floor(spikestripSprite.x), math.floor(spikestripSprite.y), spikestripSprite.rotation, spikestripSprite.scaleX, spikestripSprite.scaleY,
         spikestripSprite.rotationX, spikestripSprite.rotationY)
+    end
+    
+    if EMPSprite.visible == 1 then
+        love.graphics.draw(EMPSprite.image, EMPSprite.x, EMPSprite.y, EMPSprite.rotation, EMPSprite.scaleX, EMPSprite.scaleY,
+        EMPSprite.rotationX, EMPSprite.rotationY)
     end
 
     if nitroSprite.appear == 1 then
@@ -1158,6 +1165,84 @@ function updateTraffic(dt)
     trafficLeft.velocity = trafficLeft.velocity * 0.98
 end
 
+function loadEMP()
+    EMPImageList = {
+        love.graphics.newImage("Sprites/EMP/1.png"),
+        love.graphics.newImage("Sprites/EMP/2.png"),
+        love.graphics.newImage("Sprites/EMP/3.png"),
+        love.graphics.newImage("Sprites/EMP/4.png"),
+        love.graphics.newImage("Sprites/EMP/5.png")
+    }
+
+    scaleX = 1
+    scaleY = 1
+
+    EMPSprite = {
+        x = 0,
+        y = 0,
+        rotation = 0,
+        rotationX = EMPImageList[1]:getWidth() / 2,
+        rotationY = EMPImageList[1]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = EMPImageList[1]:getWidth() * scaleX,
+        height = EMPImageList[1]:getHeight() * scaleY,
+        image = EMPImageList[1],
+        visible = 0,
+        timer = 0,
+        spawnTimer = 0,
+        flag = 0,
+        speed = 10,
+    }
+
+    EMPCollider = HC.polygon(
+        EMPSprite.x, EMPSprite.y,
+        EMPSprite.x + EMPSprite.width, EMPSprite.y,
+        EMPSprite.x + EMPSprite.width, EMPSprite.y + EMPSprite.height,
+        EMPSprite.x, EMPSprite.y + EMPSprite.height
+    )
+    table.insert(colliders, EMPCollider)
+end
+
+function updateEMP(dt)
+    EMPSprite.timer = EMPSprite.timer - dt
+    EMPSprite.spawnTimer = EMPSprite.spawnTimer - dt
+
+    if EMPSprite.timer < 0 then
+        EMPSprite.timer = 0
+    end
+    
+    if EMPSprite.spawnTimer < 0 then
+        EMPSprite.spawnTimer = 0
+    end
+    
+    if EMPSprite.visible == 0 and EMPSprite.timer == 0 and EMPSprite.spawnTimer == 0 and takedownCameraTimer == 0 then -- EMP needs to spawn / appear
+        EMPSprite.timer = 2
+        EMPSprite.visible = 1
+    end
+    -- print(EMPSprite.timer)
+
+    if EMPSprite.timer == 0 then
+        EMPSprite.visible = 0
+    end
+
+    -- Update position
+    EMPSprite.y = carSprite.y
+    if (EMPSprite.x - carSprite.x) < 0 then -- Move right
+        if math.abs(EMPSprite.x - carSprite.x) < 5 then
+            EMPSprite.x = EMPSprite.x + 1 * dt
+        else
+            EMPSprite.x = EMPSprite.x + EMPSprite.speed * dt
+        end
+    else -- Move left
+        if math.abs(EMPSprite.x - carSprite.x) < 5 then
+            EMPSprite.x = EMPSprite.x - 1 * dt
+        else
+            EMPSprite.x = EMPSprite.x - EMPSprite.speed * dt
+        end
+    end
+end
+
 function loadSpikestrip()
     spikestripImageList = {
         love.graphics.newImage("Sprites/Spikestrip/1.png"),
@@ -1238,7 +1323,7 @@ function updateSpikestrip(dt)
     -- if spikestripSprite.timer <= 0 then
     --     spikestripSprite.visible = 0
     -- end
-    print(spikestripSprite.timer)
+    -- print(spikestripSprite.timer)
 
     -- Update collider
     spikestripCollider = HC.polygon(
@@ -1301,6 +1386,9 @@ end
 
 function loadPolice()
     local policeImage = love.graphics.newImage("Sprites/yellowcar.png")
+
+    heatLevel = 0
+
     scaleX = 0.5
     scaleY = 0.5
     policeHeat = 0
@@ -1430,6 +1518,9 @@ function updatePolice(dt)
         policeSprite.crashed = 1
         if policeSprite.health <= -300 then
         else
+            heatLevel = heatLevel + 1
+            print(heatLevel)
+
             policeSprite.health = -300
             nitroSprite.amount = nitroSprite.amount + 1
             takedownCamera = 1
@@ -1451,6 +1542,8 @@ function updatePolice(dt)
         policeSprite.velocityy = carSprite.speed * 1.5
         policeSprite.hittimer = 0.2
         policeSprite.hittimer1 = 0
+
+
         -- if (carSprite.x - policeSprite.x) < 0 then -- Right
         --     policeSprite.velocityx = policeSprite.velocityx + 100 * (carSprite.speed / 1000)
         -- else -- Left
