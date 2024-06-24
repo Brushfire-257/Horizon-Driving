@@ -34,6 +34,7 @@ function arcadeGame.load() -- Runs once at the start of the game.
     loadPolice()
     loadGUI()
     loadDebris()
+    loadSpikestrip()
 
     -- Create camera
     camerayOffset = 400
@@ -73,6 +74,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     updatePolice(dt)
     updateGUI(dt)
     updateDebris(dt)
+    updateSpikestrip(dt)
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
@@ -87,7 +89,12 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
 
     love.graphics.draw(policeSprite.image, policeSprite.x, policeSprite.y, policeSprite.rotation, policeSprite.scaleX, policeSprite.scaleY,
     policeSprite.rotationX, policeSprite.rotationY)
-    
+
+    if spikestripSprite.visible == 1 then
+        love.graphics.draw(spikestripSprite.image, math.floor(spikestripSprite.x), math.floor(spikestripSprite.y), spikestripSprite.rotation, spikestripSprite.scaleX, spikestripSprite.scaleY,
+        spikestripSprite.rotationX, spikestripSprite.rotationY)
+    end
+
     if nitroSprite.appear == 1 then
         love.graphics.draw(nitroSprite.image, nitroSprite.x, nitroSprite.y, nitroSprite.rotation, nitroSprite.scaleX, nitroSprite.scaleY,
         nitroSprite.rotationX, nitroSprite.rotationY) -- Nitro
@@ -131,6 +138,9 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
 
         love.graphics.draw(nitroBar.image, math.floor(nitroBar.x), math.floor(nitroBar.y), nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
         nitroBar.rotationX, nitroBar.rotationY)
+
+        love.graphics.draw(healthBar.image, math.floor(healthBar.x), math.floor(healthBar.y), healthBar.rotation, healthBar.scaleX, healthBar.scaleY,
+        healthBar.rotationX, healthBar.rotationY)
     end
 
     -- if takedownCameraTimer > 0 then
@@ -206,6 +216,20 @@ function loadGUI()
     notificationImageList = {
         love.graphics.newImage("Sprites/GUI/Notifications/nearMiss.png"),
         love.graphics.newImage("Sprites/GUI/Notifications/awesomeNearMiss.png")
+    }
+
+    healthImageList = {
+        love.graphics.newImage("Sprites/GUI/HealthBar/1.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/2.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/3.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/4.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/5.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/6.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/7.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/8.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/9.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/10.png"),
+        love.graphics.newImage("Sprites/GUI/HealthBar/11.png"),
     }
 
     -- Prepare Speed Numbers
@@ -326,6 +350,27 @@ function loadGUI()
     }
     takedownOverlayTop.image:setFilter("nearest", "nearest")
     takedownOverlayBottom.image:setFilter("nearest", "nearest")
+
+    -- Reset Scale
+    scaleX = 1
+    scaleY = 1
+
+    -- Prepare health GUI
+    local numberxOffset = 100
+    local numberyOffset = 40
+    healthBar = {
+        x = healthImageList[11]:getWidth() - numberxOffset,
+        y = screenHeight - numberyOffset,
+        rotation = 0,
+        rotationX = healthImageList[11]:getWidth() / 2,
+        rotationY = healthImageList[11]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = healthImageList[11]:getWidth() * scaleX,
+        height = healthImageList[11]:getHeight() * scaleY,
+        image = healthImageList[11],
+        flag = 0,
+    }
 end
 
 function updateGUI(dt)
@@ -353,6 +398,15 @@ function updateGUI(dt)
     nitroImageIndex = math.max(1, math.min(nitroImageIndex, 26))
 
     nitroBar.image = nitroImageList[nitroImageIndex]
+
+    -- Update health bar
+    local healthFraction = carSprite.health / carSprite.maxHealth
+
+    local healthImageIndex = math.floor(healthFraction * 11) + 1
+
+    healthImageIndex = math.max(1, math.min(healthImageIndex, 11))
+
+    healthBar.image = healthImageList[healthImageIndex]
 
     -- Update each notification
     for i, notification in ipairs(notifications) do
@@ -596,6 +650,7 @@ function loadCar()
     carSprite.prevY = 800
     carSprite.maxSpeed = 3500
     carSprite.health = 30
+    carSprite.maxHealth = 30
 
     -- Load Nitro
     nitroImage = love.graphics.newImage("Sprites/nitro.png")
@@ -1017,7 +1072,9 @@ function updateTraffic(dt)
     -- Deal with collisions
     if carCollider:collidesWith(trafficRightCollider) and trafficRight.hittimer == 0 then --and trafficRight.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
-        carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
+        if takedownCameraTimer == 0 then
+            carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
+        end 
         if (carSprite.x - trafficRight.x) < 0 then -- Right
             trafficRight.velocityx = trafficRight.velocityx + 100 * (carSprite.speed / 1000) * math.abs(carSprite.x - trafficRight.x) / 100
         else -- Left
@@ -1034,6 +1091,9 @@ function updateTraffic(dt)
         trafficRight.crashed = 1
         if carFrontCollider:collidesWith(trafficRightCollider) then
             trafficRight.y = carSprite.y - 275
+            if takedownCameraTimer == 0 then
+                carSprite.health = carSprite.health - 1
+            end
         else
             -- trafficRight.y = trafficRight.y
         end
@@ -1041,7 +1101,9 @@ function updateTraffic(dt)
         trafficRight.flag = 0
     elseif carCollider:collidesWith(trafficLeftCollider) and trafficLeft.hittimer == 0 then --and trafficLeft.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
-        carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 2000) + 0.5)
+        if takedownCameraTimer == 0 then
+            carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 2000) + 0.5)
+        end
         if (carSprite.x - trafficLeft.x) > 0 then -- Right
             trafficLeft.velocityx = trafficLeft.velocityx + 100 * (carSprite.speed / 2000) * math.abs(carSprite.x - trafficLeft.x) / 100
         else -- Left
@@ -1058,13 +1120,16 @@ function updateTraffic(dt)
         trafficLeft.crashed = 1
         if carFrontCollider:collidesWith(trafficLeftCollider) then
             trafficLeft.y = carSprite.y - 275
+            if takedownCameraTimer == 0 then
+                carSprite.health = carSprite.health - 1
+            end
         else
             -- trafficLeft.y = trafficLeft.y
         end
         trafficLeft.velocity = carSprite.speed * 1.5
         trafficLeft.flag = 0
     end
-    print(carSprite.health)
+    -- print(carSprite.health)
 
     -- Deal with police collisions
     if policeCollider:collidesWith(trafficRightCollider) and trafficRight.timer == 0 and policeSprite.hittimer1 <= 1 then --and trafficRight.crashed == 0 then
@@ -1091,6 +1156,66 @@ function updateTraffic(dt)
     -- print(policeSprite.hittimer1)
     trafficRight.velocity = trafficRight.velocity * 0.98
     trafficLeft.velocity = trafficLeft.velocity * 0.98
+end
+
+function loadSpikestrip()
+    spikestripImageList = {
+        love.graphics.newImage("Sprites/Spikestrip/1.png"),
+        love.graphics.newImage("Sprites/Spikestrip/2.png"),
+        love.graphics.newImage("Sprites/Spikestrip/3.png"),
+        love.graphics.newImage("Sprites/Spikestrip/4.png"),
+        love.graphics.newImage("Sprites/Spikestrip/5.png"),
+    }
+
+    scaleX = 1
+    scaleY = 1
+
+    spikestripSprite = {
+        x = 0,
+        y = 0,
+        rotation = 0,
+        rotationX = spikestripImageList[1]:getWidth() / 2,
+        rotationY = spikestripImageList[1]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = spikestripImageList[1]:getWidth() * scaleX,
+        height = spikestripImageList[1]:getHeight() * scaleY,
+        image = spikestripImageList[1],
+        visible = 0,
+        timer = 0,
+        flag = 0,
+    }
+end
+
+function updateSpikestrip(dt)
+    spikestripSprite.timer = spikestripSprite.timer - dt
+
+    if spikestripSprite.timer < 0 then
+        spikestripSprite.timer = 0
+    end
+
+    if spikestripSprite.visible == 0 and spikestripSprite.timer == 0 then -- Spikestrip needs to be spawned
+        spikestripSprite.timer = 1
+        spikestripSprite.visible = 1
+    end
+
+    if spikestripSprite.visible == 1 and spikestripSprite.timer < 0.75 then
+        local carEndX = policeSprite.x - (policeSprite.height + 25) * math.cos(policeSprite.rotation)
+        local carEndY = policeSprite.y - (policeSprite.height + 25) * math.sin(policeSprite.rotation)
+
+        spikestripSprite.x = carEndX
+        spikestripSprite.y = carEndY
+    end
+
+    if spikestripSprite.visible == 1 and spikestripSprite.timer > 0.75 then
+        spikestripSprite.y = spikestripSprite.y - roadFrameMove * dt
+    end
+
+    if spikestripSprite.y > screenHeight + 500 then
+        spikestripSprite.visible = 0
+        spikestripSprite.timer = 0
+    end
+    print(spikestripSprite.timer)
 end
 
 function loadPolice()
