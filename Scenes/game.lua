@@ -26,8 +26,12 @@ function arcadeGame.load() -- Runs once at the start of the game.
 
     -- Reseed RNG
     love.math.setRandomSeed(os.time())
+    
+    -- Create the sound manager
+    soundManager = SoundManager:new()
 
-    -- Load the player car
+    -- Load stuff
+    loadSongs()
     loadCar()
     loadRoad()
     loadTraffic()
@@ -77,6 +81,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     updateDebris(dt)
     updateSpikestrip(dt)
     updateEMP(dt)
+    soundManager:update(dt)
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
@@ -148,22 +153,25 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
 
     -- Draw the GUI
     if displayGUI == 1 then
-        love.graphics.draw(speedNumber1.image, math.floor(speedNumber1.x), math.floor(speedNumber1.y), speedNumber1.rotation, speedNumber1.scaleX, speedNumber1.scaleY,
+        local GUIShakex = math.random(-2, 2) * (carSprite.speed/2000)
+        local GUIShakey = math.random(-2, 2) * (carSprite.speed/2000)
+
+        love.graphics.draw(speedNumber1.image, math.floor(speedNumber1.x + GUIShakex), math.floor(speedNumber1.y + GUIShakey), speedNumber1.rotation, speedNumber1.scaleX, speedNumber1.scaleY,
         speedNumber1.rotationX, speedNumber1.rotationY)
-        love.graphics.draw(speedNumber2.image, math.floor(speedNumber2.x), math.floor(speedNumber2.y), speedNumber2.rotation, speedNumber2.scaleX, speedNumber2.scaleY,
+        love.graphics.draw(speedNumber2.image, math.floor(speedNumber2.x + GUIShakex), math.floor(speedNumber2.y + GUIShakey), speedNumber2.rotation, speedNumber2.scaleX, speedNumber2.scaleY,
         speedNumber2.rotationX, speedNumber2.rotationY)
-        love.graphics.draw(speedNumber3.image, math.floor(speedNumber3.x), math.floor(speedNumber3.y), speedNumber3.rotation, speedNumber3.scaleX, speedNumber3.scaleY,
+        love.graphics.draw(speedNumber3.image, math.floor(speedNumber3.x + GUIShakex), math.floor(speedNumber3.y + GUIShakey), speedNumber3.rotation, speedNumber3.scaleX, speedNumber3.scaleY,
         speedNumber3.rotationX, speedNumber3.rotationY)
 
-        love.graphics.draw(nitroBar.image, math.floor(nitroBar.x), math.floor(nitroBar.y), nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
+        love.graphics.draw(nitroBar.image, math.floor(nitroBar.x + GUIShakex), math.floor(nitroBar.y + GUIShakey), nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
         nitroBar.rotationX, nitroBar.rotationY)
 
-        love.graphics.draw(healthBar.image, math.floor(healthBar.x), math.floor(healthBar.y), healthBar.rotation, healthBar.scaleX, healthBar.scaleY,
+        love.graphics.draw(healthBar.image, math.floor(healthBar.x + GUIShakex), math.floor(healthBar.y + GUIShakey), healthBar.rotation, healthBar.scaleX, healthBar.scaleY,
         healthBar.rotationX, healthBar.rotationY)
 
-        love.graphics.draw(heatIndicator.image, math.floor(heatIndicator.x), math.floor(heatIndicator.y), heatIndicator.rotation, heatIndicator.scaleX, heatIndicator.scaleY,
+        love.graphics.draw(heatIndicator.image, math.floor(heatIndicator.x + GUIShakex), math.floor(heatIndicator.y + GUIShakey), heatIndicator.rotation, heatIndicator.scaleX, heatIndicator.scaleY,
         heatIndicator.rotationX, heatIndicator.rotationY)
-        love.graphics.draw(heatIndicatorNumber.image, math.floor(heatIndicatorNumber.x), math.floor(heatIndicatorNumber.y), heatIndicatorNumber.rotation, heatIndicatorNumber.scaleX, heatIndicatorNumber.scaleY,
+        love.graphics.draw(heatIndicatorNumber.image, math.floor(heatIndicatorNumber.x + GUIShakex), math.floor(heatIndicatorNumber.y + GUIShakey), heatIndicatorNumber.rotation, heatIndicatorNumber.scaleX, heatIndicatorNumber.scaleY,
         heatIndicatorNumber.rotationX, heatIndicatorNumber.rotationY)
     end
 
@@ -191,6 +199,19 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
             love.graphics.setColor(1, 1, 1, 1)
         end
     end
+end
+
+function loadSongs()
+    local songs = {
+        {path = "Sounds/song1.wav", volume = 1},
+        {path = "Sounds/song2.wav", volume = 1},
+    }
+
+    for i, song in ipairs(songs) do
+        soundManager:addSongToQueue(song.path, song.volume)
+    end
+
+    soundManager:playNextSong()
 end
 
 function loadGUI()
@@ -1834,6 +1855,73 @@ end
 function love.keypressed(key) -- Making debugging so much easier
     if key == '1' then
         love.event.quit()
+    end
+end
+
+-- No good sound libraries. Guess I need to make my own sound manager .-.
+
+SoundManager = {}
+SoundManager.__index = SoundManager
+
+function SoundManager:new()
+    local self = setmetatable({}, SoundManager)
+    self.sounds = {}
+    self.soundID = 0
+    self.songQueue = {}
+    self.currentSong = nil
+    return self
+end
+
+function SoundManager:addSongToQueue(path, volume, name)
+    local song = love.audio.newSource(path, "stream")
+    song:setVolume(volume)
+    song:setLooping(false)
+
+    if not name then
+        self.soundID = self.soundID + 1
+        name = "song" .. self.soundID
+    end
+
+    self.sounds[name] = song
+    table.insert(self.songQueue, name)
+end
+
+function SoundManager:playNextSong()
+    if self.currentSong then
+        self.sounds[self.currentSong]:stop()
+        table.insert(self.songQueue, self.currentSong)
+    end
+
+    -- Get the next song from the queue
+    self.currentSong = table.remove(self.songQueue, 1)
+
+    if self.currentSong then
+        self.sounds[self.currentSong]:play()
+    end
+end
+
+function SoundManager:update(dt)
+    if self.currentSong and not self.sounds[self.currentSong]:isPlaying() then
+        self:playNextSong()
+    end
+end
+
+function SoundManager:addSound(name, path, volume, loop)
+    local sound = love.audio.newSource(path, "static")
+    sound:setVolume(volume)
+    sound:setLooping(loop)
+    self.sounds[name] = sound
+end
+
+function SoundManager:playSound(name)
+    if self.sounds[name] then
+        self.sounds[name]:play()
+    end
+end
+
+function SoundManager:stopSound(name)
+    if self.sounds[name] then
+        self.sounds[name]:stop()
     end
 end
 
