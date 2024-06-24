@@ -624,6 +624,15 @@ function loadCar()
         carSprite.x, carSprite.y + carSprite.height
     )
     table.insert(colliders, carCollider)
+    local xOffset = carSprite.height * 0.9
+    local yOffset = 25
+    carFrontCollider = HC.polygon(
+        carSprite.x, carSprite.y + xOffset,
+        carSprite.x + yOffset, carSprite.y + xOffset,
+        carSprite.x + yOffset, carSprite.y + carSprite.height - xOffset,
+        carSprite.x, carSprite.y + carSprite.height - xOffset
+    )
+    table.insert(colliders, carCollider)
 end
 
 function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, width, height, rotationX, rotationY)
@@ -690,7 +699,14 @@ function playerUpdate(dt)
     -- Update collider position and rotation
     carCollider:moveTo(carSprite.x, carSprite.y)
     carCollider:rotate(carSprite.rotation - carCollider:rotation(), carCollider:center())
+
+    local carFrontX = carSprite.x + carSprite.height * math.cos(carSprite.rotation)
+    local carFrontY = carSprite.y + carSprite.height * math.sin(carSprite.rotation)
+
+    carFrontCollider:moveTo(carFrontX, carFrontY)
+    carFrontCollider:rotate(carSprite.rotation - carFrontCollider:rotation(), carFrontCollider:center())
     table.insert(colliders, carCollider)
+    table.insert(colliders, carFrontCollider)
     
     -- Nitro Movement
     -- nitroSprite.x = carSprite.x
@@ -716,6 +732,7 @@ function playerUpdate(dt)
         carSprite.health = 30 -- No way to die yet
     end
 end
+-- CHECKPOINT THING MY CODE IS SO LONG..
 
 function cameraUpdate(dt)
     takedownCameraTimer = takedownCameraTimer - dt
@@ -776,7 +793,9 @@ function loadTraffic()
         flag = 0,
         crashed = 0,
         velocity = 0,
-        nmtimer = 0
+        velocityx = 0,
+        nmtimer = 0,
+        hittimer = 0
     }
     trafficLeft = {
         x = 0,
@@ -794,7 +813,9 @@ function loadTraffic()
         flag = 0,
         crashed = 0,
         velocity = 0,
-        nmtimer = 0
+        velocityx = 0,
+        nmtimer = 0,
+        hittimer = 0
     }
 
     -- polygon colliders for the traffic
@@ -845,8 +866,10 @@ end
 function updateTraffic(dt)
     trafficRight.timer = trafficRight.timer - dt
     trafficLeft.timer = trafficLeft.timer - dt
+    trafficLeft.hittimer = trafficLeft.hittimer - dt
     trafficRight.nmtimer = trafficRight.nmtimer - dt
     trafficLeft.nmtimer = trafficLeft.nmtimer - dt
+    trafficRight.hittimer = trafficRight.hittimer - dt
 
     if trafficRight.nmtimer < 0 then
         trafficRight.nmtimer = 0
@@ -862,6 +885,13 @@ function updateTraffic(dt)
         trafficLeft.timer = 0
     end
 
+    if trafficRight.hittimer < 0 then
+        trafficRight.hittimer = 0
+    end
+    if trafficLeft.hittimer < 0 then
+        trafficLeft.hittimer = 0
+    end
+
     if trafficRight.timer < 1 and trafficRight.timer > 0 then
         trafficRight.image = trafficWarning
         trafficRight.y = 150
@@ -871,7 +901,7 @@ function updateTraffic(dt)
         trafficLeft.y = 150
     end
 
-    if trafficRight.timer == 0 and trafficRight.crashed == 0 then
+    if trafficRight.timer == 0 and trafficRight.crashed == 0 then -- Alive
         trafficRight.image = trafficImage
         trafficRight.y = trafficRight.y + (-roadFrameMove - trafficRight.speed) * dt
     elseif trafficRight.crashed == 1 then
@@ -884,7 +914,7 @@ function updateTraffic(dt)
         trafficLeft.y = trafficLeft.y + -roadFrameMove * dt
     end
 
-    if trafficRight.y > screenHeight + 500 then
+    if trafficRight.y > screenHeight + 500 then -- Below Screen
         trafficRight.timer = math.random(1.5, 4)
         trafficRight.y = -500
         trafficRight.x = math.random(1500, 2000)
@@ -900,13 +930,21 @@ function updateTraffic(dt)
         trafficLeft.rotation = -math.rad(90)
     end
 
-    if trafficRight.crashed == 1 then
-        trafficRight.x = trafficRight.x + 100 * dt
+    if trafficRight.y < -screenHeight then
+        trafficRight.y = -screenHeight
+    end
+
+    if trafficLeft.y < -screenHeight then
+        trafficLeft.y = -screenHeight
+    end
+
+    if trafficRight.crashed == 1 then -- Crashed obv
+        trafficRight.x = trafficRight.x + trafficRight.velocityx * dt
         trafficRight.rotation = trafficRight.rotation + math.rad(45) * dt
         trafficRight.y = trafficRight.y - trafficRight.velocity * dt
     end
     if trafficLeft.crashed == 1 then
-        trafficLeft.x = trafficLeft.x - 100 * dt
+        trafficLeft.x = trafficLeft.x - trafficLeft.velocityx * dt
         trafficLeft.rotation = trafficLeft.rotation + math.rad(45) * dt
         trafficLeft.y = trafficLeft.y - trafficLeft.velocity * dt
     end
@@ -977,28 +1015,52 @@ function updateTraffic(dt)
     end
 
     -- Deal with collisions
-    if carCollider:collidesWith(trafficRightCollider) then --and trafficRight.crashed == 0 then
+    if carCollider:collidesWith(trafficRightCollider) and trafficRight.hittimer == 0 then --and trafficRight.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
         carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
-        local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
+        if (carSprite.x - trafficRight.x) < 0 then -- Right
+            trafficRight.velocityx = trafficRight.velocityx + 100 * (carSprite.speed / 1000) * math.abs(carSprite.x - trafficRight.x) / 100
+        else -- Left
+            trafficRight.velocityx = trafficRight.velocityx - 100 * (carSprite.speed / 1000) * math.abs(carSprite.x - trafficRight.x) / 100
+        end
+
+        trafficRight.hittimer = 0.1
+
         for i = 1, math.floor(math.random(3,5)) do
+            local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
             addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
         end
         camerayShake = camerayShake + 1000
         trafficRight.crashed = 1
-        trafficRight.y = carSprite.y - 275
+        if carFrontCollider:collidesWith(trafficRightCollider) then
+            trafficRight.y = carSprite.y - 275
+        else
+            -- trafficRight.y = trafficRight.y
+        end
         trafficRight.velocity = carSprite.speed * 1.5
         trafficRight.flag = 0
-    elseif carCollider:collidesWith(trafficLeftCollider) then --and trafficLeft.crashed == 0 then
+    elseif carCollider:collidesWith(trafficLeftCollider) and trafficLeft.hittimer == 0 then --and trafficLeft.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
-        carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
-        local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
+        carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 2000) + 0.5)
+        if (carSprite.x - trafficLeft.x) > 0 then -- Right
+            trafficLeft.velocityx = trafficLeft.velocityx + 100 * (carSprite.speed / 2000) * math.abs(carSprite.x - trafficLeft.x) / 100
+        else -- Left
+            trafficLeft.velocityx = trafficLeft.velocityx - 100 * (carSprite.speed / 2000) * math.abs(carSprite.x - trafficLeft.x) / 100
+        end
+
+        trafficLeft.hittimer = 0.1
+
         for i = 1, math.floor(math.random(3,5)) do
+            local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
             addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
         end
         camerayShake = camerayShake + 1000
         trafficLeft.crashed = 1
-        trafficLeft.y = carSprite.y - 275
+        if carFrontCollider:collidesWith(trafficLeftCollider) then
+            trafficLeft.y = carSprite.y - 275
+        else
+            -- trafficLeft.y = trafficLeft.y
+        end
         trafficLeft.velocity = carSprite.speed * 1.5
         trafficLeft.flag = 0
     end
@@ -1174,10 +1236,21 @@ function updatePolice(dt)
         policeSprite.speed = 200 + carSprite.speed * 1.1
         camerayShake = camerayShake + 400
         policeSprite.health = math.floor(policeSprite.health - 1)
-        policeSprite.y = carSprite.y - 150
+        if carFrontCollider:collidesWith(policeCollider) then
+            policeSprite.y = carSprite.y - 150
+        else
+            -- policeSprite.y = policeSprite.y
+        end
+
         policeSprite.velocityy = carSprite.speed * 1.5
         policeSprite.hittimer = 0.2
         policeSprite.hittimer1 = 0
+        -- if (carSprite.x - policeSprite.x) < 0 then -- Right
+        --     policeSprite.velocityx = policeSprite.velocityx + 100 * (carSprite.speed / 1000)
+        -- else -- Left
+        --     policeSprite.velocityx = policeSprite.velocityx - 100 * (carSprite.speed / 1000)
+        -- end
+
         local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
         for i = 1, math.floor(math.random(3,5)) do
             addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
