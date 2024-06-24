@@ -97,11 +97,7 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
         spikestripSprite.rotationX, spikestripSprite.rotationY)
     end
     
-    if EMPSprite.visible == 1 then
-        love.graphics.draw(EMPSprite.image, EMPSprite.x, EMPSprite.y, EMPSprite.rotation, EMPSprite.scaleX, EMPSprite.scaleY,
-        EMPSprite.rotationX, EMPSprite.rotationY)
-    end
-
+    
     if nitroSprite.appear == 1 then
         love.graphics.draw(nitroSprite.image, nitroSprite.x, nitroSprite.y, nitroSprite.rotation, nitroSprite.scaleX, nitroSprite.scaleY,
         nitroSprite.rotationX, nitroSprite.rotationY) -- Nitro
@@ -116,6 +112,22 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
             love.graphics.draw(debris.image, debris.x, debris.y, debris.rotation, debris.scaleX, debris.scaleY,
             debris.rotationX, debris.rotationY)
             love.graphics.setColor(1, 1, 1, 1)
+        end
+    end
+
+    if EMPSprite.visible == 1 and takedownCameraTimer == 0 then
+        love.graphics.draw(EMPSprite.image, EMPSprite.x, EMPSprite.y, EMPSprite.rotation, EMPSprite.scaleX, EMPSprite.scaleY,
+        EMPSprite.rotationX, EMPSprite.rotationY)
+
+    end
+    if takedownCameraTimer == 0 then
+        for i, EMPSprite in ipairs(EMPCopies) do
+            if EMPSprite.image then
+                love.graphics.setColor(1, 1, 1, EMPSprite.alpha)
+                love.graphics.draw(EMPSprite.image, EMPSprite.x, EMPSprite.y, EMPSprite.rotation, EMPSprite.scaleX, EMPSprite.scaleY,
+                EMPSprite.rotationX, EMPSprite.rotationY)
+                love.graphics.setColor(1, 1, 1, 1)
+            end
         end
     end
 
@@ -1192,16 +1204,20 @@ function loadEMP()
         timer = 0,
         spawnTimer = 0,
         flag = 0,
-        speed = 10,
+        speed = 500,
+        duration = 7,
+        alpha = 1,
     }
 
     EMPCollider = HC.polygon(
         EMPSprite.x, EMPSprite.y,
-        EMPSprite.x + EMPSprite.width, EMPSprite.y,
-        EMPSprite.x + EMPSprite.width, EMPSprite.y + EMPSprite.height,
-        EMPSprite.x, EMPSprite.y + EMPSprite.height
+        EMPSprite.x + EMPSprite.width / 3, EMPSprite.y,
+        EMPSprite.x + EMPSprite.width / 3, EMPSprite.y + EMPSprite.height / 3,
+        EMPSprite.x, EMPSprite.y + EMPSprite.height / 3
     )
     table.insert(colliders, EMPCollider)
+
+    EMPCopies = {} -- Table for the copies
 end
 
 function updateEMP(dt)
@@ -1217,28 +1233,124 @@ function updateEMP(dt)
     end
     
     if EMPSprite.visible == 0 and EMPSprite.timer == 0 and EMPSprite.spawnTimer == 0 and takedownCameraTimer == 0 then -- EMP needs to spawn / appear
-        EMPSprite.timer = 2
+        EMPSprite.timer = EMPSprite.duration
         EMPSprite.visible = 1
     end
-    -- print(EMPSprite.timer)
+    print(EMPSprite.spawnTimer)
 
-    if EMPSprite.timer == 0 then
-        EMPSprite.visible = 0
-    end
-
+    
     -- Update position
     EMPSprite.y = carSprite.y
-    if (EMPSprite.x - carSprite.x) < 0 then -- Move right
-        if math.abs(EMPSprite.x - carSprite.x) < 5 then
-            EMPSprite.x = EMPSprite.x + 1 * dt
+    if (EMPSprite.x - carSprite.x) < 0 and EMPSprite.visible == 1 then -- Move right
+        if math.abs(EMPSprite.x - carSprite.x) < 20 then
+            EMPSprite.x = EMPSprite.x + 10 * dt
         else
             EMPSprite.x = EMPSprite.x + EMPSprite.speed * dt
         end
-    else -- Move left
-        if math.abs(EMPSprite.x - carSprite.x) < 5 then
-            EMPSprite.x = EMPSprite.x - 1 * dt
+    elseif EMPSprite.visible == 1 then -- Move left
+        if math.abs(EMPSprite.x - carSprite.x) < 20 then
+            EMPSprite.x = EMPSprite.x - 10 * dt
         else
             EMPSprite.x = EMPSprite.x - EMPSprite.speed * dt
+        end
+    end
+
+    -- Update image
+    if (EMPSprite.timer / EMPSprite.duration) < (1/5) then
+        EMPSprite.image = EMPImageList[5]
+        EMPSprite.rotationX = EMPImageList[5]:getWidth() / 2
+        EMPSprite.rotationY = EMPImageList[5]:getHeight() / 2
+        EMPSprite.width = EMPImageList[5]:getWidth() * EMPSprite.scaleX
+        if EMPSprite.flag ~= 5 then
+            table.insert(EMPCopies, deepcopy(EMPSprite))
+            EMPSprite.flag = 5
+        end
+    elseif (EMPSprite.timer / EMPSprite.duration) < (2/5) then
+        EMPSprite.image = EMPImageList[4]
+        EMPSprite.rotationX = EMPImageList[4]:getWidth() / 2
+        EMPSprite.rotationY = EMPImageList[4]:getHeight() / 2
+        EMPSprite.width = EMPImageList[4]:getWidth() * EMPSprite.scaleX
+        if EMPSprite.flag ~= 4 then
+            table.insert(EMPCopies, deepcopy(EMPSprite))
+            EMPSprite.flag = 4
+        end
+    elseif (EMPSprite.timer / EMPSprite.duration) < (3/5) then
+        EMPSprite.image = EMPImageList[3]
+        EMPSprite.rotationX = EMPImageList[3]:getWidth() / 2
+        EMPSprite.rotationY = EMPImageList[3]:getHeight() / 2
+        EMPSprite.width = EMPImageList[3]:getWidth() * EMPSprite.scaleX
+        if EMPSprite.flag ~= 3 then
+            table.insert(EMPCopies, deepcopy(EMPSprite))
+            EMPSprite.flag = 3
+        end
+    elseif (EMPSprite.timer / EMPSprite.duration) < (4/5) then
+        EMPSprite.image = EMPImageList[2]
+        EMPSprite.rotationX = EMPImageList[2]:getWidth() / 2
+        EMPSprite.rotationY = EMPImageList[2]:getHeight() / 2
+        EMPSprite.width = EMPImageList[2]:getWidth() * EMPSprite.scaleX
+        if EMPSprite.flag ~= 2 then
+            table.insert(EMPCopies, deepcopy(EMPSprite))
+            EMPSprite.flag = 2
+        end
+    else
+        EMPSprite.image = EMPImageList[1]
+        EMPSprite.rotationX = EMPImageList[1]:getWidth() / 2
+        EMPSprite.rotationY = EMPImageList[1]:getHeight() / 2
+        EMPSprite.width = EMPImageList[1]:getWidth() * EMPSprite.scaleX
+        if EMPSprite.flag ~= 1 then
+            table.insert(EMPCopies, deepcopy(EMPSprite))
+            EMPSprite.flag = 1
+        end
+    end
+
+    if EMPSprite.visible == 0 then
+        EMPSprite.image = EMPImageList[1]
+        EMPSprite.rotationX = EMPImageList[1]:getWidth() / 2
+        EMPSprite.rotationY = EMPImageList[1]:getHeight() / 2
+        EMPSprite.width = EMPImageList[1]:getWidth() * EMPSprite.scaleX
+        EMPSprite.flag = 0
+    end
+
+    -- Update collider
+    EMPCollider:moveTo(EMPSprite.x, EMPSprite.y)
+    EMPCollider:rotate(EMPSprite.rotation - EMPCollider:rotation(), EMPCollider:center())
+    table.insert(colliders, EMPCollider)
+    
+    -- Deal with collisions
+    if carCollider:collidesWith(EMPCollider) and EMPSprite.timer == 0 and EMPSprite.visible == 1 then --and trafficRight.crashed == 0 then
+        carSprite.speed = carSprite.speed * 0.75
+        if takedownCameraTimer == 0 then
+            carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
+        end
+        
+        for i = 1, math.floor(math.random(3,5)) do
+            local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
+            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+        end
+        camerayShake = camerayShake + 1000
+    end
+
+    if EMPSprite.timer == 0 and EMPSprite.visible == 1 then
+        if EMPSprite.flag == 5 then
+            table.insert(EMPCopies, deepcopy(EMPSprite))
+        end
+        EMPSprite.flag = 0
+        EMPSprite.visible = 0
+        EMPSprite.spawnTimer = math.random(1, 1.5)
+    end
+
+    -- Update EMP copies
+    for i = #EMPCopies, 1, -1 do
+        local EMPcopy = EMPCopies[i]
+        EMPcopy.scaleX = EMPcopy.scaleX + dt
+        EMPcopy.scaleY = EMPcopy.scaleY + dt
+        EMPcopy.alpha = EMPcopy.alpha - dt
+
+        if EMPcopy.alpha <= 0 then
+            table.remove(EMPCopies, i)
+        else
+            EMPcopy.width = EMPcopy.image:getWidth() * EMPcopy.scaleX
+            EMPcopy.height = EMPcopy.image:getHeight() * EMPcopy.scaleY
         end
     end
 end
@@ -1251,7 +1363,7 @@ function loadSpikestrip()
         love.graphics.newImage("Sprites/Spikestrip/4.png"),
         love.graphics.newImage("Sprites/Spikestrip/5.png"),
     }
-
+    
     scaleX = 1
     scaleY = 1
 
