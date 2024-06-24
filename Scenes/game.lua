@@ -1183,39 +1183,120 @@ function loadSpikestrip()
         image = spikestripImageList[1],
         visible = 0,
         timer = 0,
+        spawnTimer = 0,
         flag = 0,
+        speed = 0,
     }
+
+    spikestripCollider = HC.polygon(
+        policeSprite.x, policeSprite.y,
+        policeSprite.x + spikestripImageList[5]:getWidth(), policeSprite.y,
+        policeSprite.x + spikestripImageList[5]:getWidth(), policeSprite.y + spikestripImageList[5]:getHeight(),
+        policeSprite.x, policeSprite.y + spikestripImageList[5]:getHeight()
+    )
+    table.insert(colliders, spikestripCollider)
 end
 
 function updateSpikestrip(dt)
     spikestripSprite.timer = spikestripSprite.timer - dt
+    spikestripSprite.spawnTimer = spikestripSprite.spawnTimer - dt
 
     if spikestripSprite.timer < 0 then
         spikestripSprite.timer = 0
     end
 
-    if spikestripSprite.visible == 0 and spikestripSprite.timer == 0 then -- Spikestrip needs to be spawned
-        spikestripSprite.timer = 1
+    if spikestripSprite.spawnTimer < 0 then
+        spikestripSprite.spawnTimer = 0
+    end
+
+    if spikestripSprite.visible == 0 and spikestripSprite.timer == 0 and spikestripSprite.spawnTimer == 0 and policeSprite.crashed == 0 then -- Spikestrip needs to be spawned
+        spikestripSprite.timer = 2
         spikestripSprite.visible = 1
     end
 
-    if spikestripSprite.visible == 1 and spikestripSprite.timer < 0.75 then
+    if spikestripSprite.visible == 1 and spikestripSprite.timer > 0.75 then
         local carEndX = policeSprite.x - (policeSprite.height + 25) * math.cos(policeSprite.rotation)
         local carEndY = policeSprite.y - (policeSprite.height + 25) * math.sin(policeSprite.rotation)
 
         spikestripSprite.x = carEndX
         spikestripSprite.y = carEndY
+        spikestripSprite.speed = carSprite.speed
     end
 
-    if spikestripSprite.visible == 1 and spikestripSprite.timer > 0.75 then
-        spikestripSprite.y = spikestripSprite.y - roadFrameMove * dt
+    if spikestripSprite.visible == 1 and spikestripSprite.timer < 0.75 then
+        -- spikestripSprite.y = spikestripSprite.y - roadFrameMove * dt
+        spikestripSprite.y = spikestripSprite.y - roadFrameMove * dt * math.min(math.abs(1 - (spikestripSprite.speed/2000)), 1)
     end
+
+    spikestripSprite.speed = spikestripSprite.speed * 0.96
 
     if spikestripSprite.y > screenHeight + 500 then
         spikestripSprite.visible = 0
         spikestripSprite.timer = 0
     end
+
+    -- if spikestripSprite.timer <= 0 then
+    --     spikestripSprite.visible = 0
+    -- end
     print(spikestripSprite.timer)
+
+    -- Update collider
+    spikestripCollider = HC.polygon(
+        policeSprite.x, policeSprite.y,
+        policeSprite.x + spikestripSprite.image:getWidth(), policeSprite.y,
+        policeSprite.x + spikestripSprite.image:getWidth(), policeSprite.y + spikestripSprite.image:getHeight(),
+        policeSprite.x, policeSprite.y + spikestripSprite.image:getHeight()
+    )
+    spikestripCollider:moveTo(spikestripSprite.x, spikestripSprite.y)
+    spikestripCollider:rotate(spikestripSprite.rotation - spikestripCollider:rotation(), spikestripCollider:center())
+    table.insert(colliders, spikestripCollider)
+
+    -- Deal with collisions
+    if carCollider:collidesWith(spikestripCollider) and spikestripSprite.timer < 0.75 and spikestripSprite.visible == 1 then
+        carSprite.speed = carSprite.speed * 0.75
+        if takedownCameraTimer == 0 then
+            carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 2000) + 0.5)
+        end
+        spikestripSprite.timer = 0
+        spikestripSprite.spawnTimer = math.random(2, 3)
+        spikestripSprite.visible = 0
+
+        for i = 1, math.floor(math.random(3,5)) do
+            local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
+            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+        end
+        camerayShake = camerayShake + 1000
+    end
+
+    -- Spikestrip animation
+    if spikestripSprite.timer < 0.75 and spikestripSprite.timer > 0.65 then
+        spikestripSprite.image = spikestripImageList[2]
+        spikestripSprite.rotationX = spikestripImageList[2]:getWidth() / 2
+        spikestripSprite.rotationY = spikestripImageList[2]:getHeight() / 2
+        spikestripSprite.width = spikestripImageList[2]:getWidth() * spikestripSprite.scaleX
+    elseif spikestripSprite.timer < 0.65 and spikestripSprite.timer > 0.55 then
+        spikestripSprite.image = spikestripImageList[3]
+        spikestripSprite.rotationX = spikestripImageList[3]:getWidth() / 2
+        spikestripSprite.rotationY = spikestripImageList[3]:getHeight() / 2
+        spikestripSprite.width = spikestripImageList[2]:getWidth() * spikestripSprite.scaleX
+    elseif spikestripSprite.timer < 0.55 and spikestripSprite.timer > 0.45 then
+        spikestripSprite.image = spikestripImageList[4]
+        spikestripSprite.rotationX = spikestripImageList[4]:getWidth() / 2
+        spikestripSprite.rotationY = spikestripImageList[4]:getHeight() / 2
+        spikestripSprite.width = spikestripImageList[2]:getWidth() * spikestripSprite.scaleX
+    elseif spikestripSprite.timer < 0.45 then
+        spikestripSprite.image = spikestripImageList[5]
+        spikestripSprite.rotationX = spikestripImageList[5]:getWidth() / 2
+        spikestripSprite.rotationY = spikestripImageList[5]:getHeight() / 2
+        spikestripSprite.width = spikestripImageList[2]:getWidth() * spikestripSprite.scaleX
+    end
+
+    if spikestripSprite.visible == 0 then
+        spikestripSprite.image = spikestripImageList[1]
+        spikestripSprite.rotationX = spikestripImageList[1]:getWidth() / 2
+        spikestripSprite.rotationY = spikestripImageList[1]:getHeight() / 2
+        spikestripSprite.width = spikestripImageList[1]:getWidth() * spikestripSprite.scaleX
+    end
 end
 
 function loadPolice()
