@@ -14,6 +14,14 @@ local backgroundSpeed = 0
 local gameSpeed = 1
 local actualGameSpeed = gameSpeed
 
+-- Player Stats
+local policeTakedowns = 0
+local distanceTraveled = 0
+local EMPDodges = 0
+local nearMisses = 0
+local awesomeNearMisses = 0
+local timeSurvived = 0
+
 -- Libraries
 HC = require 'HardonCollider'
 local Camera = require 'hump.camera'
@@ -82,6 +90,8 @@ function arcadeGame.update(dt) -- Runs every frame.
     updateSpikestrip(dt)
     updateEMP(dt)
     soundManager:update(dt)
+
+    timeSurvived = timeSurvived + dt
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
@@ -860,6 +870,9 @@ function playerUpdate(dt)
     local dx = carSprite.speed * math.cos(carSprite.rotation)
     roadFrameMove = carSprite.speed * math.sin(carSprite.rotation)
     carSprite.x = carSprite.x + dx * dt
+
+    distanceTraveled = distanceTraveled - roadFrameMove * dt
+    print(distanceTraveled)
     
     -- Update collider position and rotation
     carCollider:moveTo(carSprite.x, carSprite.y)
@@ -1036,26 +1049,12 @@ function updateTraffic(dt)
     trafficLeft.nmtimer = trafficLeft.nmtimer - dt
     trafficRight.hittimer = trafficRight.hittimer - dt
 
-    if trafficRight.nmtimer < 0 then
-        trafficRight.nmtimer = 0
-    end
-    if trafficLeft.nmtimer < 0 then
-        trafficLeft.nmtimer = 0
-    end
-
-    if trafficRight.timer < 0 then
-        trafficRight.timer = 0
-    end
-    if trafficLeft.timer < 0 then
-        trafficLeft.timer = 0
-    end
-
-    if trafficRight.hittimer < 0 then
-        trafficRight.hittimer = 0
-    end
-    if trafficLeft.hittimer < 0 then
-        trafficLeft.hittimer = 0
-    end
+    if trafficRight.nmtimer < 0 then trafficRight.nmtimer = 0 end -- While debugging I found I could do this!
+    if trafficLeft.nmtimer < 0 then trafficLeft.nmtimer = 0 end -- I am not going around and changing the other ones ..
+    if trafficRight.timer < 0 then trafficRight.timer = 0 end
+    if trafficLeft.timer < 0 then trafficLeft.timer = 0 end
+    if trafficRight.hittimer < 0 then trafficRight.hittimer = 0 end
+    if trafficLeft.hittimer < 0 then trafficLeft.hittimer = 0 end
 
     if trafficRight.timer < 1 and trafficRight.timer > 0 then
         trafficRight.image = trafficWarning
@@ -1066,7 +1065,12 @@ function updateTraffic(dt)
         trafficLeft.y = 150
     end
 
-    if trafficRight.timer == 0 and trafficRight.crashed == 0 then -- Alive
+    trafficRight.rotationX = trafficRight.image:getWidth() / 2
+    trafficRight.rotationY = trafficRight.image:getHeight() / 2
+    trafficLeft.rotationX = trafficLeft.image:getWidth() / 2
+    trafficLeft.rotationY = trafficLeft.image:getHeight() / 2
+
+    if trafficRight.timer == 0 and trafficRight.crashed == 0 then
         trafficRight.image = trafficImage
         trafficRight.y = trafficRight.y + (-roadFrameMove - trafficRight.speed) * dt
     elseif trafficRight.crashed == 1 then
@@ -1095,6 +1099,7 @@ function updateTraffic(dt)
         trafficLeft.rotation = -math.rad(90)
     end
 
+    -- Ensure traffic stays within the screen bounds
     if trafficRight.y < -screenHeight then
         trafficRight.y = -screenHeight
     end
@@ -1120,11 +1125,13 @@ function updateTraffic(dt)
             addNotification(2)
             nitroSprite.amount = nitroSprite.amount + 3
             trafficRight.flag = 0
+            awesomeNearMisses = awesomeNearMisses + 1
         elseif trafficRight.flag == 1 then
             print("Near miss")
             addNotification(1)
             nitroSprite.amount = nitroSprite.amount + 2
             trafficRight.flag = 0
+            nearMisses = nearMisses + 1
         end
     end
     if trafficLeft.nmtimer == 0 then
@@ -1133,11 +1140,13 @@ function updateTraffic(dt)
             addNotification(2)
             nitroSprite.amount = nitroSprite.amount + 3
             trafficLeft.flag = 0
+            awesomeNearMisses = awesomeNearMisses + 1
         elseif trafficLeft.flag == 1 then
             print("Near miss")
             addNotification(1)
             nitroSprite.amount = nitroSprite.amount + 2
             trafficLeft.flag = 0
+            nearMisses = nearMisses + 1
         end
     end
 
@@ -1174,13 +1183,13 @@ function updateTraffic(dt)
     if carCollider:collidesWith(trafficLeftAwesomeMissCollider) and trafficLeft.crashed == 0 then
         trafficLeft.flag = 2
         trafficLeft.nmtimer = 0.05
-    elseif carCollider:collidesWith(trafficLeftNearMissCollider) and trafficLeft.crashed == 0 and trafficLeft.flag ~= 2  then
+    elseif carCollider:collidesWith(trafficLeftNearMissCollider) and trafficLeft.crashed == 0 and trafficLeft.flag ~= 2 then
         trafficLeft.flag = 1
         trafficLeft.nmtimer = 0.05
     end
 
     -- Deal with collisions
-    if carCollider:collidesWith(trafficRightCollider) and trafficRight.hittimer == 0 then --and trafficRight.crashed == 0 then
+    if carCollider:collidesWith(trafficRightCollider) and trafficRight.hittimer == 0 then
         carSprite.speed = carSprite.speed * 0.75
         if takedownCameraTimer == 0 then
             carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
@@ -1204,12 +1213,10 @@ function updateTraffic(dt)
             if takedownCameraTimer == 0 then
                 carSprite.health = carSprite.health - 1
             end
-        else
-            -- trafficRight.y = trafficRight.y
         end
         trafficRight.velocity = carSprite.speed * 1.5
         trafficRight.flag = 0
-    elseif carCollider:collidesWith(trafficLeftCollider) and trafficLeft.hittimer == 0 then --and trafficLeft.crashed == 0 then
+    elseif carCollider:collidesWith(trafficLeftCollider) and trafficLeft.hittimer == 0 then
         carSprite.speed = carSprite.speed * 0.75
         if takedownCameraTimer == 0 then
             carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 2000) + 0.5)
@@ -1233,16 +1240,13 @@ function updateTraffic(dt)
             if takedownCameraTimer == 0 then
                 carSprite.health = carSprite.health - 1
             end
-        else
-            -- trafficLeft.y = trafficLeft.y
         end
         trafficLeft.velocity = carSprite.speed * 1.5
         trafficLeft.flag = 0
     end
-    -- print(carSprite.health)
 
     -- Deal with police collisions
-    if policeCollider:collidesWith(trafficRightCollider) and trafficRight.timer == 0 and policeSprite.hittimer1 <= 1 then --and trafficRight.crashed == 0 then
+    if policeCollider:collidesWith(trafficRightCollider) and trafficRight.timer == 0 and policeSprite.hittimer1 <= 1 then
         policeSprite.speed = policeSprite.speed * 0.75
         trafficRight.crashed = 1
         if policeSprite.crashed == 0 then
@@ -1252,7 +1256,7 @@ function updateTraffic(dt)
         trafficRight.y = policeSprite.y - 275
         trafficRight.velocity = policeSprite.speed * 1.5
         trafficRight.flag = 0
-    elseif policeCollider:collidesWith(trafficLeftCollider) and trafficLeft.timer == 0 and policeSprite.hittimer1 <= 1 then --and trafficLeft.crashed == 0 then
+    elseif policeCollider:collidesWith(trafficLeftCollider) and trafficLeft.timer == 0 and policeSprite.hittimer1 <= 1 then
         policeSprite.speed = policeSprite.speed * 0.75
         trafficLeft.crashed = 1
         if policeSprite.crashed == 0 then
@@ -1263,7 +1267,7 @@ function updateTraffic(dt)
         trafficLeft.velocity = policeSprite.speed * 1.5
         trafficLeft.flag = 0
     end
-    -- print(policeSprite.hittimer1)
+
     trafficRight.velocity = trafficRight.velocity * 0.98
     trafficLeft.velocity = trafficLeft.velocity * 0.98
 end
@@ -1381,6 +1385,8 @@ function updateEMP(dt)
         carSprite.speed = carSprite.speed * 0.75
         if takedownCameraTimer == 0 then
             carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
+            EMPSprite.visible = 0
+            EMPSprite.spawnTimer = math.random(1, 1.5)
         end
         
         for i = 1, math.floor(math.random(3,5)) do
@@ -1393,6 +1399,7 @@ function updateEMP(dt)
     if EMPSprite.timer == 0 and EMPSprite.visible == 1 then
         EMPSprite.visible = 0
         EMPSprite.spawnTimer = math.random(1, 1.5)
+        EMPDodges = EMPDodges + 1
     end
     
     -- Update EMP copies
@@ -1625,6 +1632,8 @@ function updatePolice(dt)
     if policeSprite.hittimer1 < 0 then
         policeSprite.hittimer1 = 0
     end
+
+    policeTakedowns = heatLevel
 
     local playerDifferencex = policeSprite.x - carSprite.x
     local prevplayerDifferencex = policeSprite.prevX - carSprite.prevX
