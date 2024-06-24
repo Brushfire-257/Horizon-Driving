@@ -160,6 +160,11 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
 
         love.graphics.draw(healthBar.image, math.floor(healthBar.x), math.floor(healthBar.y), healthBar.rotation, healthBar.scaleX, healthBar.scaleY,
         healthBar.rotationX, healthBar.rotationY)
+
+        love.graphics.draw(heatIndicator.image, math.floor(heatIndicator.x), math.floor(heatIndicator.y), heatIndicator.rotation, heatIndicator.scaleX, heatIndicator.scaleY,
+        heatIndicator.rotationX, heatIndicator.rotationY)
+        love.graphics.draw(heatIndicatorNumber.image, math.floor(heatIndicatorNumber.x), math.floor(heatIndicatorNumber.y), heatIndicatorNumber.rotation, heatIndicatorNumber.scaleX, heatIndicatorNumber.scaleY,
+        heatIndicatorNumber.rotationX, heatIndicatorNumber.rotationY)
     end
 
     -- if takedownCameraTimer > 0 then
@@ -249,6 +254,15 @@ function loadGUI()
         love.graphics.newImage("Sprites/GUI/HealthBar/9.png"),
         love.graphics.newImage("Sprites/GUI/HealthBar/10.png"),
         love.graphics.newImage("Sprites/GUI/HealthBar/11.png"),
+    }
+
+    heatIndicatorImageList = {
+        love.graphics.newImage("Sprites/GUI/HeatIndicator/0.png"),
+        love.graphics.newImage("Sprites/GUI/HeatIndicator/1.png"),
+        love.graphics.newImage("Sprites/GUI/HeatIndicator/2.png"),
+        love.graphics.newImage("Sprites/GUI/HeatIndicator/3.png"),
+        love.graphics.newImage("Sprites/GUI/HeatIndicator/4.png"),
+        love.graphics.newImage("Sprites/GUI/HeatIndicator/5.png"),
     }
 
     -- Prepare Speed Numbers
@@ -390,6 +404,46 @@ function loadGUI()
         image = healthImageList[11],
         flag = 0,
     }
+
+    -- Set Scale
+    scaleX = 1.5
+    scaleY = 1.5
+
+    -- Prepare heat indicator
+    local numberxOffset = 100
+    local numberyOffset = 150
+    heatIndicator = {
+        x = healthBar.x,
+        y = healthBar.y - numberyOffset,
+        rotation = 0,
+        rotationX = heatIndicatorImageList[1]:getWidth() / 2,
+        rotationY = heatIndicatorImageList[1]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = heatIndicatorImageList[1]:getWidth() * scaleX,
+        height = heatIndicatorImageList[1]:getHeight() * scaleY,
+        image = heatIndicatorImageList[1],
+        flag = 0,
+    }
+
+    -- Set Scale
+    scaleX = 0.75
+    scaleY = 0.75
+
+    local numberyOffset = 50
+    heatIndicatorNumber = {
+        x = heatIndicator.x,
+        y = heatIndicator.y + numberyOffset,
+        rotation = 0,
+        rotationX = numberImageList[1]:getWidth() / 2,
+        rotationY = numberImageList[1]:getHeight() / 2,
+        scaleX = scaleX,
+        scaleY = scaleY,
+        width = numberImageList[1]:getWidth() * scaleX,
+        height = numberImageList[1]:getHeight() * scaleY,
+        image = numberImageList[1],
+        flag = 0,
+    }
 end
 
 function updateGUI(dt)
@@ -409,6 +463,13 @@ function updateGUI(dt)
     speedNumber2.image = numberImageList[digit2 + 1]  -- Lua array indices start at 1
     speedNumber3.image = numberImageList[digit1 + 1]  -- Lua array indices start at 1
 
+    speedNumber1.rotationX = speedNumber1.image:getWidth() / 2
+    speedNumber1.rotationY = speedNumber1.image:getHeight() / 2
+    speedNumber2.rotationX = speedNumber2.image:getWidth() / 2
+    speedNumber2.rotationY = speedNumber2.image:getHeight() / 2
+    speedNumber3.rotationX = speedNumber3.image:getWidth() / 2
+    speedNumber3.rotationY = speedNumber3.image:getHeight() / 2
+
     -- Update nitro bar
     local nitroFraction = nitroSprite.amount / nitroSprite.maxAmount
 
@@ -426,6 +487,13 @@ function updateGUI(dt)
     healthImageIndex = math.max(1, math.min(healthImageIndex, 11))
 
     healthBar.image = healthImageList[healthImageIndex]
+
+    -- Update Heat Level Indicator
+    heatIndicator.image = heatIndicatorImageList[math.min((heatLevel + 1), 5)]
+
+    heatIndicatorNumber.image = numberImageList[math.min((heatLevel + 1), 5)]
+    heatIndicatorNumber.rotationX = heatIndicatorNumber.image:getWidth() / 2
+    heatIndicatorNumber.rotationY = heatIndicatorNumber.image:getHeight() / 2
 
     -- Update each notification
     for i, notification in ipairs(notifications) do
