@@ -77,8 +77,8 @@ end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
     camera:attach()
-    love.graphics.draw(road.image, road.x, road.v1y, 0, road.scaleX, road.scaleY) -- Draws the road sprites
-    love.graphics.draw(road.image, road.x, road.v2y, 0, road.scaleX, road.scaleY)
+    love.graphics.draw(road.image, math.floor(road.x), math.floor(road.v1y), 0, road.scaleX, road.scaleY) -- Draws the road sprites
+    love.graphics.draw(road.image, math.floor(road.x), math.floor(road.v2y), 0, road.scaleX, road.scaleY)
 
     love.graphics.draw(trafficRight.image, trafficRight.x, trafficRight.y, trafficRight.rotation, trafficRight.scaleX, trafficRight.scaleY,
     trafficRight.rotationX, trafficRight.rotationY)
@@ -121,20 +121,24 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     camera:detach()
 
     -- Draw the GUI
-    love.graphics.draw(speedNumber1.image, speedNumber1.x, speedNumber1.y, speedNumber1.rotation, speedNumber1.scaleX, speedNumber1.scaleY,
-    speedNumber1.rotationX, speedNumber1.rotationY)
-    love.graphics.draw(speedNumber2.image, speedNumber2.x, speedNumber2.y, speedNumber2.rotation, speedNumber2.scaleX, speedNumber2.scaleY,
-    speedNumber2.rotationX, speedNumber2.rotationY)
-    love.graphics.draw(speedNumber3.image, speedNumber3.x, speedNumber3.y, speedNumber3.rotation, speedNumber3.scaleX, speedNumber3.scaleY,
-    speedNumber3.rotationX, speedNumber3.rotationY)
+    if displayGUI == 1 then
+        love.graphics.draw(speedNumber1.image, math.floor(speedNumber1.x), math.floor(speedNumber1.y), speedNumber1.rotation, speedNumber1.scaleX, speedNumber1.scaleY,
+        speedNumber1.rotationX, speedNumber1.rotationY)
+        love.graphics.draw(speedNumber2.image, math.floor(speedNumber2.x), math.floor(speedNumber2.y), speedNumber2.rotation, speedNumber2.scaleX, speedNumber2.scaleY,
+        speedNumber2.rotationX, speedNumber2.rotationY)
+        love.graphics.draw(speedNumber3.image, math.floor(speedNumber3.x), math.floor(speedNumber3.y), speedNumber3.rotation, speedNumber3.scaleX, speedNumber3.scaleY,
+        speedNumber3.rotationX, speedNumber3.rotationY)
 
-    love.graphics.draw(nitroBar.image, nitroBar.x, nitroBar.y, nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
-    nitroBar.rotationX, nitroBar.rotationY)
+        love.graphics.draw(nitroBar.image, math.floor(nitroBar.x), math.floor(nitroBar.y), nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
+        nitroBar.rotationX, nitroBar.rotationY)
+    end
 
-    love.graphics.draw(takedownOverlayTop.image, takedownOverlayTop.x, takedownOverlayTop.y, takedownOverlayTop.rotation, takedownOverlayTop.scaleX, takedownOverlayTop.scaleY,
+    -- if takedownCameraTimer > 0 then
+    love.graphics.draw(takedownOverlayTop.image, math.floor(takedownOverlayTop.x), math.floor(takedownOverlayTop.y), takedownOverlayTop.rotation, takedownOverlayTop.scaleX, takedownOverlayTop.scaleY,
     takedownOverlayTop.rotationX, takedownOverlayTop.rotationY)
-    love.graphics.draw(takedownOverlayBottom.image, takedownOverlayBottom.x, takedownOverlayBottom.y, takedownOverlayBottom.rotation, takedownOverlayBottom.scaleX, takedownOverlayBottom.scaleY,
+    love.graphics.draw(takedownOverlayBottom.image, math.floor(takedownOverlayBottom.x), math.floor(takedownOverlayBottom.y), takedownOverlayBottom.rotation, takedownOverlayBottom.scaleX, takedownOverlayBottom.scaleY,
     takedownOverlayBottom.rotationX, takedownOverlayBottom.rotationY)
+    -- end
 
     -- love.graphics.draw(notificationSprite.image, notificationSprite.x, notificationSprite.y, notificationSprite.rotation, notificationSprite.scaleX, notificationSprite.scaleY,
     -- notificationSprite.rotationX, notificationSprite.rotationY)
@@ -220,6 +224,7 @@ function loadGUI()
         image = numberImageList[1],
         flag = 0,
     }
+    speedNumber1.image:setFilter("nearest", "nearest")
     speedNumber2 = {
         x = screenWidth - (2 * numberImageList[1]:getWidth()) - numberxOffset,
         y = screenHeight - numberyOffset,
@@ -233,6 +238,7 @@ function loadGUI()
         image = numberImageList[1],
         flag = 0,
     }
+    speedNumber2.image:setFilter("nearest", "nearest")
     speedNumber3 = {
         x = screenWidth - (3 * numberImageList[1]:getWidth()) - numberxOffset,
         y = screenHeight - numberyOffset,
@@ -246,6 +252,7 @@ function loadGUI()
         image = numberImageList[1],
         flag = 0,
     }
+    speedNumber3.image:setFilter("nearest", "nearest")
     
     -- Prepare nitro bar
     local numberxOffset = 25
@@ -282,6 +289,7 @@ function loadGUI()
     takedownOverlayTopImage = love.graphics.newImage("Sprites/GUI/Notifications/takedownOverlayTop.png")
     takedownOverlayBottomImage = love.graphics.newImage("Sprites/GUI/Notifications/takedownOverlayBottom.png")
 
+    displayGUI = 1
     local scaleX = 2
     local scaleY = 2
     local numberyOffset = 50
@@ -316,6 +324,8 @@ function loadGUI()
         image = takedownOverlayBottomImage,
         timer = 0,
     }
+    takedownOverlayTop.image:setFilter("nearest", "nearest")
+    takedownOverlayBottom.image:setFilter("nearest", "nearest")
 end
 
 function updateGUI(dt)
@@ -369,6 +379,7 @@ function updateGUI(dt)
                 notification.width = notificationImage:getWidth() * notification.scaleX
                 notification.height = notificationImage:getHeight() * notification.scaleY
                 notification.image = notificationImage
+                notification.image:setFilter("nearest", "nearest")
                 
                 -- Duplicate notification for emphasis
                 local clonedNotification = deepcopy(notification)
@@ -426,6 +437,7 @@ function updateGUI(dt)
                 emphasis.width = notificationImage:getWidth() * emphasis.scaleX
                 emphasis.height = notificationImage:getHeight() * emphasis.scaleY
                 emphasis.image = notificationImage
+                emphasis.image:setFilter("nearest", "nearest")
             end
             
             -- Change stuff
@@ -451,7 +463,7 @@ function updateGUI(dt)
         end
     end
 
-    print((-takedownOverlayTop.yOrig - takedownOverlayTop.y))
+    -- print((-takedownOverlayTop.yOrig - takedownOverlayTop.y))
     -- Update Takedown Overlay
     if takedownCameraTimer > 0 then
         takedownOverlayTop.y = takedownOverlayTop.y + (takedownOverlayTop.yOrig - takedownOverlayTop.y) * dt * 25
@@ -459,6 +471,11 @@ function updateGUI(dt)
     else
         takedownOverlayTop.y = takedownOverlayTop.y + (-250 - takedownOverlayTop.y) * dt * 15
         takedownOverlayBottom.y = takedownOverlayBottom.y + (screenHeight + 250 - takedownOverlayBottom.y) * dt * 15
+    end
+    if takedownOverlayTop.y < - 200 then
+        displayGUI = 1
+    else
+        displayGUI = 0
     end
 end
 
@@ -578,6 +595,7 @@ function loadCar()
     carSprite.prevX = 1000
     carSprite.prevY = 800
     carSprite.maxSpeed = 3500
+    carSprite.health = 30
 
     -- Load Nitro
     nitroImage = love.graphics.newImage("Sprites/nitro.png")
@@ -642,7 +660,6 @@ function playerUpdate(dt)
         camerayShake = camerayShake + carSprite.accel / 5 * carSprite.speed / 1000
     end
     if love.keyboard.isDown('a') and nitroSprite.amount > 0 then -- Nitro
-        takedownCamera = 1 --DEBUG REMOVE THIS
         carSprite.speed = carSprite.speed + nitroSprite.boostamount * dt
         camerayShake = camerayShake - nitroSprite.boostamount / 7.5 * carSprite.speed / 1000
         nitroSprite.appear = 1
@@ -693,6 +710,11 @@ function playerUpdate(dt)
 
     -- Update player camera
     cameraUpdate(dt)
+
+    if carSprite.health <= 0 then
+        print("Player Died")
+        carSprite.health = 30 -- No way to die yet
+    end
 end
 
 function cameraUpdate(dt)
@@ -957,6 +979,7 @@ function updateTraffic(dt)
     -- Deal with collisions
     if carCollider:collidesWith(trafficRightCollider) then --and trafficRight.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
+        carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
         local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
         for i = 1, math.floor(math.random(3,5)) do
             addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
@@ -968,6 +991,7 @@ function updateTraffic(dt)
         trafficRight.flag = 0
     elseif carCollider:collidesWith(trafficLeftCollider) then --and trafficLeft.crashed == 0 then
         carSprite.speed = carSprite.speed * 0.75
+        carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
         local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
         for i = 1, math.floor(math.random(3,5)) do
             addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
@@ -978,6 +1002,7 @@ function updateTraffic(dt)
         trafficLeft.velocity = carSprite.speed * 1.5
         trafficLeft.flag = 0
     end
+    print(carSprite.health)
 
     -- Deal with police collisions
     if policeCollider:collidesWith(trafficRightCollider) and trafficRight.timer == 0 and policeSprite.hittimer1 <= 1 then --and trafficRight.crashed == 0 then
