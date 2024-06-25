@@ -17,12 +17,12 @@ local actualGameSpeed = gameSpeed
 local exitGame = 0
 
 -- Player Stats
-local policeTakedowns = 0
-local distanceTraveled = 0
-local EMPDodges = 0
-local nearMisses = 0
-local awesomeNearMisses = 0
-local timeSurvived = 0
+policeTakedowns = 0
+distanceTraveled = 0
+EMPDodges = 0
+nearMisses = 0
+awesomeNearMisses = 0
+timeSurvived = 0
 
 -- Libraries
 HC = require 'HardonCollider'
@@ -39,6 +39,24 @@ function arcadeGame.load() -- Runs once at the start of the game.
     
     -- Create the sound manager
     soundManager = SoundManager:new()
+
+    -- misc. setup
+    screenWidth = love.graphics.getWidth()
+    screenHeight = love.graphics.getHeight()
+    timer = 0
+    colliders = {}
+    backgroundSpeed = 0
+    gameSpeed = 1
+    actualGameSpeed = gameSpeed
+    exitGame = 0
+
+    -- Player Stats
+    policeTakedowns = 0
+    distanceTraveled = 0
+    EMPDodges = 0
+    nearMisses = 0
+    awesomeNearMisses = 0
+    timeSurvived = 0
 
     -- Load stuff
     loadSongs()
@@ -96,7 +114,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     
     -- Exit game?
     if exitGame == 1 then
-        return "mainMenu"
+        return "gameEndscreen"
     end
 
     -- Moved down here so it only updates if the game is actually running
@@ -489,7 +507,7 @@ function loadGUI()
 end
 
 function updateGUI(dt)
-    local speedMultiplier = 0.1
+    speedMultiplier = 0.1
 
     local speedStr = tostring(math.floor(carSprite.speed * speedMultiplier))
 
@@ -778,8 +796,8 @@ function loadCar()
     carSprite.prevX = 1000
     carSprite.prevY = 800
     carSprite.maxSpeed = 3500
-    carSprite.health = 30
-    carSprite.maxHealth = 30
+    carSprite.health = 3 -- (Much lower for death debugging!! CHANGE BACK)
+    carSprite.maxHealth = 3
 
     -- Load Nitro
     nitroImage = love.graphics.newImage("Sprites/nitro.png")

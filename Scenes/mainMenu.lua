@@ -24,7 +24,6 @@ function mainMenu.load()
 end
 
 function mainMenu.update(dt)
-
     -- Prepare GUI
     suit.layout:reset(0, 0)
 
