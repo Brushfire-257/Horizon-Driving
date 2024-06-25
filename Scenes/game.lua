@@ -843,7 +843,7 @@ function playerUpdate(dt)
         carSprite.speed = carSprite.speed - carSprite.accel * 1.5 * dt
         camerayShake = camerayShake + carSprite.accel / 5 * carSprite.speed / 1000
     end
-    if love.keyboard.isDown('a') and nitroSprite.amount > 0 then -- Nitro
+    if love.keyboard.isDown('a') then --and nitroSprite.amount > 0 then -- Nitro
         carSprite.speed = carSprite.speed + nitroSprite.boostamount * dt
         camerayShake = camerayShake - nitroSprite.boostamount / 7.5 * carSprite.speed / 1000
         nitroSprite.appear = 1
@@ -872,7 +872,7 @@ function playerUpdate(dt)
     carSprite.x = carSprite.x + dx * dt
 
     distanceTraveled = distanceTraveled - roadFrameMove * dt
-    print(distanceTraveled)
+    -- print(distanceTraveled)
     
     -- Update collider position and rotation
     carCollider:moveTo(carSprite.x, carSprite.y)
@@ -1914,6 +1914,10 @@ end
 function SoundManager:update(dt)
     if self.currentSong and not self.sounds[self.currentSong]:isPlaying() then
         self:playNextSong()
+    end
+    for name, sound in pairs(self.sounds) do
+        sound:setPitch(1 + (1 - actualGameSpeed) * -0.2)
+        sound:setVolume(1 + (1 - actualGameSpeed) * -0.4)
     end
 end
 
