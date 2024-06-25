@@ -17,7 +17,7 @@ function love.load()
     love.math.setRandomSeed(os.time())
 
     -- Load the menu state
-    state.current = require("Scenes/game")
+    state.current = require("Scenes/mainMenu")
     state.current.load()
 end
 
@@ -33,7 +33,7 @@ function love.update(dt) -- Runs every frame.
     elseif nextState == "mainMenu" then
       -- Switch to the main menu scene
       print("Switching to the main menu scene")
-      state.current = require("Scenes/mainmenu") -- (Add a menu in the future)
+      state.current = require("Scenes/mainMenu")
       state.current.load()
     end
 end

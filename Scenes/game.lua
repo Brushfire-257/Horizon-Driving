@@ -14,6 +14,8 @@ local backgroundSpeed = 0
 local gameSpeed = 1
 local actualGameSpeed = gameSpeed
 
+local exitGame = 0
+
 -- Player Stats
 local policeTakedowns = 0
 local distanceTraveled = 0
@@ -89,9 +91,16 @@ function arcadeGame.update(dt) -- Runs every frame.
     updateDebris(dt)
     updateSpikestrip(dt)
     updateEMP(dt)
-    soundManager:update(dt)
-
+    
     timeSurvived = timeSurvived + dt
+    
+    -- Exit game?
+    if exitGame == 1 then
+        return "mainMenu"
+    end
+
+    -- Moved down here so it only updates if the game is actually running
+    soundManager:update(dt)
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
@@ -213,10 +222,10 @@ end
 
 function loadSongs()
     local songs = {
+        {path = "Sounds/song4.mp3", volume = 1},
         {path = "Sounds/song1.mp3", volume = 1},
         -- {path = "Sounds/song2.mp3", volume = 1},
         {path = "Sounds/song3.mp3", volume = 1},
-        {path = "Sounds/song4.mp3", volume = 1},
     }
 
     for i, song in ipairs(songs) do
@@ -907,7 +916,9 @@ function playerUpdate(dt)
 
     if carSprite.health <= 0 then
         print("Player Died")
-        carSprite.health = 30 -- No way to die yet
+        exitGame = 1 -- Just returns to main menu for now.
+        love.audio.stop() -- Stop all current sounds
+        -- carSprite.health = 30
     end
 end
 -- CHECKPOINT THING MY CODE IS SO LONG..
@@ -1882,6 +1893,14 @@ function SoundManager:new()
     self.currentSong = nil
     return self
 end
+
+-- function SoundManager:clearSounds() (This didnt work..)
+--     self.sounds = {}
+--     self.songQueue = {}
+--     if self.currentSong then
+--         self.currentSong:stop()
+--     end
+-- end
 
 function SoundManager:addSongToQueue(path, volume, name)
     local song = love.audio.newSource(path, "stream")
