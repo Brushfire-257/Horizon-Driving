@@ -4,9 +4,8 @@ mainMenu = {}
 -- SUIT setup (This is gonna make the GUI so much easier to make..)
 local suit = require("suit")
 
--- Blob serialization init (For saving)
-BlobWriter = require('BlobWriter')
-BlobReader = require('BlobReader')
+-- tableIO setup (For saving)
+local tableIO = require 'tableIO'
 
 -- misc. setup
 local screenWidth = love.graphics.getWidth()
@@ -67,7 +66,7 @@ function mainMenu.update(dt)
 
         suit.Label("Highscores:", {align = "left"},
         (25), (25), 800, 150)
-        suit.Label("Distance Traveled: " .. distanceTraveledHIGHSCORE * 0.1 / 60, {align = "left"},
+        suit.Label("Distance Traveled: " .. gameData.distanceTraveledHIGHSCORE * 0.1 / 60, {align = "left"},
         (25), (125), 800, 150)
         suit.Label("Near Misses: " .. nearMissesHIGHSCORE, {align = "left"},
         (25), (225), 800, 150)
@@ -106,28 +105,28 @@ local gameData = {
 
 -- Saving system!!
 function saveGame()
-    local fileToSave = BlobWriter()
-    fileToSave:write(tbl:gameData)
-    local file = io.open("saveFile.ext", "wb")
-    file:write(file:tostring())
-    file:close()
+    local file, err = io.open("saveFile.txt", "w")
     if file then
+        file:write(tableIO.tableToString(gameData))
+        file:close()
         print("Game saved!")
     else
-        print("Could not save game.")
+        print("Could not save game. Error: " .. err)
     end
 end
 
 function loadGame()
-    if file_exists("saveFile.ext") then
-        local file = io.open("saveFile.ext", "rb")
-        local fileContents = BlobReader(file:read("*all"))
-        gameData = fileContents:table()
-        if gameData then
-        print("Game loaded!")
+    local file, err = io.open("saveFile.txt", "r")
+
+    if file then
+        local str = file:read('*all')
+        file:close()
+        gameData = tableIO.stringToTable(str)
+        if gameData ~= nil then
+            print("Game loaded!")
         end
     else
-        print("No save file found.")
+        print("No save file found. Error: " .. err)
     end
 end
 
@@ -135,8 +134,10 @@ function file_exists(name)
     local file = io.open(name,"r")
     if file ~= nil then 
         io.close(file) 
+        print("Save File Exists!")
         return true
     else 
+        print("Save File DOES NOT Exist!")
         return false 
     end
 end
