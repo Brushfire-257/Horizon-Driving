@@ -4,6 +4,10 @@ mainMenu = {}
 -- SUIT setup (This is gonna make the GUI so much easier to make..)
 local suit = require("suit")
 
+-- Blob serialization init (For saving)
+BlobWriter = require('BlobWriter')
+BlobReader = require('BlobReader')
+
 -- misc. setup
 local screenWidth = love.graphics.getWidth()
 local screenHeight = love.graphics.getHeight()
@@ -13,6 +17,13 @@ local darkCurrent = 0
 local screen = "mainMenu"
 
 function mainMenu.load()
+    if firstStart == true then
+        loadGame()
+        firstStart = false
+    else
+        saveGame()
+    end
+
     -- Set SUIT colors
     suit.theme.color.normal.fg = {255,255,255}
     suit.theme.color.hovered = {bg = {200,230,255}, fg = {0,0,0}}
@@ -81,6 +92,52 @@ end
 function love.keypressed(key)
     if key == "1" then -- Exit the game (Debug)
       love.event.quit()
+    end
+end
+
+local gameData = {
+    distanceTraveledHIGHSCORE = 0,
+    nearMissesHIGHSCORE = 0,
+    awesomeNearMissesHIGHSCORE = 0,
+    policeTakedownsHIGHSCORE = 0,
+    EMPDodgesHIGHSCORE = 0,
+    timeSurvivedHIGHSCORE = 0
+}
+
+-- Saving system!!
+function saveGame()
+    local fileToSave = BlobWriter()
+    fileToSave:write(tbl:gameData)
+    local file = io.open("saveFile.ext", "wb")
+    file:write(file:tostring())
+    file:close()
+    if file then
+        print("Game saved!")
+    else
+        print("Could not save game.")
+    end
+end
+
+function loadGame()
+    if file_exists("saveFile.ext") then
+        local file = io.open("saveFile.ext", "rb")
+        local fileContents = BlobReader(file:read("*all"))
+        gameData = fileContents:table()
+        if gameData then
+        print("Game loaded!")
+        end
+    else
+        print("No save file found.")
+    end
+end
+
+function file_exists(name)
+    local file = io.open(name,"r")
+    if file ~= nil then 
+        io.close(file) 
+        return true
+    else 
+        return false 
     end
 end
 
