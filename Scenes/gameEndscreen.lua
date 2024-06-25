@@ -29,6 +29,14 @@ function gameEndscreen.load()
     -- font1 = love.graphics.newFont("fonts/I am literally on the road.ttf", 50)
     -- font2 = love.graphics.newFont("fonts/chill out bruv.ttf", 25)
     -- love.graphics.setFont(font)
+
+    -- Update Highscores
+    if distanceTraveled > distanceTraveledHIGHSCORE then distanceTraveledHIGHSCORE = distanceTraveled end
+    if nearMisses > nearMissesHIGHSCORE then nearMissesHIGHSCORE = nearMisses end
+    if awesomeNearMisses > awesomeNearMissesHIGHSCORE then awesomeNearMissesHIGHSCORE = awesomeNearMisses end
+    if policeTakedowns > policeTakedownsHIGHSCORE then policeTakedownsHIGHSCORE = policeTakedowns end
+    if EMPDodges > EMPDodgesHIGHSCORE then EMPDodgesHIGHSCORE = EMPDodges end
+    if timeSurvived > timeSurvivedHIGHSCORE then timeSurvivedHIGHSCORE = timeSurvived end
 end
 
 function gameEndscreen.update(dt)
