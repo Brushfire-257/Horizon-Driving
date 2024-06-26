@@ -15,8 +15,28 @@ local darkCurrent = 0
 
 local screen = "mainMenu"
 
+gameData = {
+    distanceTraveledHIGHSCORE = 0,
+    nearMissesHIGHSCORE = 0,
+    awesomeNearMissesHIGHSCORE = 0,
+    policeTakedownsHIGHSCORE = 0,
+    EMPDodgesHIGHSCORE = 0,
+    timeSurvivedHIGHSCORE = 0
+}
+
 function mainMenu.load()
+    -- Update game data list
+    gameData = {
+        distanceTraveledHIGHSCORE,
+        nearMissesHIGHSCORE,
+        awesomeNearMissesHIGHSCORE,
+        policeTakedownsHIGHSCORE,
+        EMPDodgesHIGHSCORE,
+        timeSurvivedHIGHSCORE
+    }
+
     if firstStart == true then
+        -- saveGame()
         loadGame()
         firstStart = false
     else
@@ -35,9 +55,22 @@ function mainMenu.load()
     -- love.graphics.setFont(font)
 
     screen = "mainMenu"
+
+    print(love.filesystem.read("saveFile.txt"))
+    print(tableIO.stringToTable(love.filesystem.read("saveFile.txt")))
 end
 
 function mainMenu.update(dt)
+    -- Update game data list
+    gameData = {
+        distanceTraveledHIGHSCORE,
+        nearMissesHIGHSCORE,
+        awesomeNearMissesHIGHSCORE,
+        policeTakedownsHIGHSCORE,
+        EMPDodgesHIGHSCORE,
+        timeSurvivedHIGHSCORE
+    }
+
     -- Prepare GUI
     if screen == "mainMenu" then
         suit.layout:reset(0, 0)
@@ -94,39 +127,27 @@ function love.keypressed(key)
     end
 end
 
-local gameData = {
-    distanceTraveledHIGHSCORE = 0,
-    nearMissesHIGHSCORE = 0,
-    awesomeNearMissesHIGHSCORE = 0,
-    policeTakedownsHIGHSCORE = 0,
-    EMPDodgesHIGHSCORE = 0,
-    timeSurvivedHIGHSCORE = 0
-}
-
 -- Saving system!!
 function saveGame()
-    local file, err = io.open("saveFile.txt", "w")
-    if file then
-        file:write(tableIO.tableToString(gameData))
-        file:close()
+    local success, message = love.filesystem.write("saveFile.txt", tableIO.tableToString(gameData))
+    if success then
         print("Game saved!")
+        print(love.filesystem.read("saveFile.txt"))
     else
-        print("Could not save game. Error: " .. err)
+        print("Could not save game. Error: " .. message)
     end
 end
 
 function loadGame()
-    local file, err = io.open("saveFile.txt", "r")
-
-    if file then
-        local str = file:read('*all')
-        file:close()
-        gameData = tableIO.stringToTable(str)
-        if gameData ~= nil then
-            print("Game loaded!")
-        end
+    if love.filesystem.getInfo("saveFile.txt") and love.filesystem.read("saveFile.txt") ~= nil then
+        print(love.filesystem.read("saveFile.txt"))
+        local str = love.filesystem.read("saveFile.txt")
+        local str = string.gsub(str, "%z", "")  -- Remove null byte characters
+        gameDatadata = stringToTable(str)
+        -- gameDatadata = stringToTable(love.filesystem.read("saveFile.txt"))
+        print("Game loaded!")
     else
-        print("No save file found. Error: " .. err)
+        print("No save file found.")
     end
 end
 
@@ -139,6 +160,20 @@ function file_exists(name)
     else 
         print("Save File DOES NOT Exist!")
         return false 
+    end
+end
+
+function stringToTable(str)
+    local func = load("return " .. str)
+    if func then
+        local ok, result = pcall(func)
+        if ok then
+            return result
+        else
+            error("Failed to parse string: " .. result)
+        end
+    else
+        error("Failed to load string!")
     end
 end
 

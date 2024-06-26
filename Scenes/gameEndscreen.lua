@@ -31,12 +31,12 @@ function gameEndscreen.load()
     -- love.graphics.setFont(font)
 
     -- Update Highscores
-    if distanceTraveled > distanceTraveledHIGHSCORE then distanceTraveledHIGHSCORE = distanceTraveled end
-    if nearMisses > nearMissesHIGHSCORE then nearMissesHIGHSCORE = nearMisses end
-    if awesomeNearMisses > awesomeNearMissesHIGHSCORE then awesomeNearMissesHIGHSCORE = awesomeNearMisses end
-    if policeTakedowns > policeTakedownsHIGHSCORE then policeTakedownsHIGHSCORE = policeTakedowns end
-    if EMPDodges > EMPDodgesHIGHSCORE then EMPDodgesHIGHSCORE = EMPDodges end
-    if timeSurvived > timeSurvivedHIGHSCORE then timeSurvivedHIGHSCORE = timeSurvived end
+    if distanceTraveled > gameData.distanceTraveledHIGHSCORE then gameData.distanceTraveledHIGHSCORE = distanceTraveled end
+    if nearMisses > gameData.nearMissesHIGHSCORE then gameData.nearMissesHIGHSCORE = nearMisses end
+    if awesomeNearMisses > gameData.awesomeNearMissesHIGHSCORE then gameData.awesomeNearMissesHIGHSCORE = awesomeNearMisses end
+    if policeTakedowns > gameData.policeTakedownsHIGHSCORE then gameData.policeTakedownsHIGHSCORE = policeTakedowns end
+    if EMPDodges > gameData.EMPDodgesHIGHSCORE then gameData.EMPDodgesHIGHSCORE = EMPDodges end
+    if timeSurvived > gameData.timeSurvivedHIGHSCORE then gameData.timeSurvivedHIGHSCORE = timeSurvived end
 end
 
 function gameEndscreen.update(dt)

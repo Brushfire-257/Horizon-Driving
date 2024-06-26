@@ -42,7 +42,7 @@ Returns:
 function tableIO.stringToTable(string)
 	local lines = {}
 	for i in string.gmatch(string, '[^\n\t,]+') do
-		--print(i)
+		-- print(i)
   		table.insert(lines,i)
 	end
 	return getTable(lines)
