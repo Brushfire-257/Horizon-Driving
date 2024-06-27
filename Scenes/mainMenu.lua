@@ -35,8 +35,10 @@ function mainMenu.load()
     --     timeSurvivedHIGHSCORE
     -- }
 
+    love.window.setTitle("Horizon Driving - Main Menu")
+
     if firstStart == true then
-        saveGame()
+        -- saveGame()
         loadGame()
         firstStart = false
     else
@@ -102,15 +104,15 @@ function mainMenu.update(dt)
         (25), (25), 800, 150)
         suit.Label("Distance Traveled: " .. gameData.distanceTraveledHIGHSCORE * 0.1 / 60, {align = "left"},
         (25), (125), 800, 150)
-        suit.Label("Near Misses: " .. nearMissesHIGHSCORE, {align = "left"},
+        suit.Label("Near Misses: " .. gameData.nearMissesHIGHSCORE, {align = "left"},
         (25), (225), 800, 150)
-        suit.Label("Awesome Near Misses: " .. awesomeNearMissesHIGHSCORE, {align = "left"},
+        suit.Label("Awesome Near Misses: " .. gameData.awesomeNearMissesHIGHSCORE, {align = "left"},
         (25), (325), 800, 150)
-        suit.Label("Police Takedowns: " .. policeTakedownsHIGHSCORE, {align = "left"},
+        suit.Label("Police Takedowns: " .. gameData.policeTakedownsHIGHSCORE, {align = "left"},
         (25), (425), 800, 150)
-        suit.Label("EMP Dodges: " .. EMPDodgesHIGHSCORE, {align = "left"},
+        suit.Label("EMP Dodges: " .. gameData.EMPDodgesHIGHSCORE, {align = "left"},
         (25), (525), 800, 150)
-        suit.Label("Time Survived: " .. timeSurvivedHIGHSCORE, {align = "left"},
+        suit.Label("Time Survived: " .. gameData.timeSurvivedHIGHSCORE, {align = "left"},
         (25), (625), 800, 150)
     end
 

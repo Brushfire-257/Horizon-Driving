@@ -11,7 +11,7 @@ firstStart = true -- After intro set this to false
 -- Define the load function
 function love.load()
     -- Load High Scores
-    loadHighscores()
+    -- loadHighscores()
 
     -- Load window values
     love.window.setMode(1920, 1080) -- Set to 1920 x 1080 on launch
@@ -19,21 +19,27 @@ function love.load()
     love.window.setFullscreen(true)
     love.math.setRandomSeed(os.time())
 
+    -- Load scaling
+    canvas = love.graphics.newCanvas()
+
     -- Load the menu state
     state.current = require("Scenes/mainMenu")
     state.current.load()
 end
 
-function loadHighscores()
-    distanceTraveledHIGHSCORE = 0 -- No way to load the stuff from a file yet
-    nearMissesHIGHSCORE = 0
-    awesomeNearMissesHIGHSCORE = 0
-    policeTakedownsHIGHSCORE = 0
-    EMPDodgesHIGHSCORE = 0
-    timeSurvivedHIGHSCORE = 0
-end
+-- function loadHighscores()
+--     distanceTraveledHIGHSCORE = 0
+--     nearMissesHIGHSCORE = 0
+--     awesomeNearMissesHIGHSCORE = 0
+--     policeTakedownsHIGHSCORE = 0
+--     EMPDodgesHIGHSCORE = 0
+--     timeSurvivedHIGHSCORE = 0
+-- end
 
 function love.update(dt) -- Runs every frame.
+    -- Update the game scaling
+    imageScaleX, imageScaleY = getScaling(canvas)
+
     -- Update the current state
     local nextState = state.current.update(dt)
 
@@ -56,6 +62,30 @@ function love.update(dt) -- Runs every frame.
 end
 
 function love.draw() -- Draws every frame / Runs directly after love.update()
+    -- Set the scaling
+    love.graphics.draw(canvas, 0, 0, 0, imageScaleX, imageScaleY)
     -- Draw the current state
     state.current.draw()
+end
+
+-- Scaling Functions
+function getScaling(drawable, canvas)
+    local canvas = canvas or nil
+    local drawW = drawable:getWidth()
+    local drawH = drawable:getHeight()
+    local canvasW = 0
+    local canvasH = 0
+
+    if canvas then
+        canvasW = canvas:getWidth()
+        canvasH = canvas:getHeight()
+    else
+        canvasW = love.graphics.getWidth()
+        canvasH = love.graphics.getHeight()
+    end
+
+    local scaleX = canvasW / drawW
+    local scaleY = canvasH / drawH
+
+    return scaleX, scaleY
 end

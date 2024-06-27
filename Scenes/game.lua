@@ -30,9 +30,8 @@ local Camera = require 'hump.camera'
 
 function arcadeGame.load() -- Runs once at the start of the game.
     -- Load window values
-    love.window.setMode(1280, 720) -- Set to 1920 x 1080 on launch
+    -- love.window.setMode(1280, 720) -- Set to 1920 x 1080 on launch
     love.window.setTitle("Horizon Driving - Arcade Mode")
-    love.window.setFullscreen(true)
 
     -- Reseed RNG
     love.math.setRandomSeed(os.time())
