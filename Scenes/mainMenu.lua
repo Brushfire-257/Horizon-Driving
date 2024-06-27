@@ -26,17 +26,17 @@ gameData = {
 
 function mainMenu.load()
     -- Update game data list
-    gameData = {
-        distanceTraveledHIGHSCORE,
-        nearMissesHIGHSCORE,
-        awesomeNearMissesHIGHSCORE,
-        policeTakedownsHIGHSCORE,
-        EMPDodgesHIGHSCORE,
-        timeSurvivedHIGHSCORE
-    }
+    -- gameData = {
+    --     distanceTraveledHIGHSCORE,
+    --     nearMissesHIGHSCORE,
+    --     awesomeNearMissesHIGHSCORE,
+    --     policeTakedownsHIGHSCORE,
+    --     EMPDodgesHIGHSCORE,
+    --     timeSurvivedHIGHSCORE
+    -- }
 
     if firstStart == true then
-        -- saveGame()
+        saveGame()
         loadGame()
         firstStart = false
     else
@@ -62,14 +62,15 @@ end
 
 function mainMenu.update(dt)
     -- Update game data list
-    gameData = {
-        distanceTraveledHIGHSCORE,
-        nearMissesHIGHSCORE,
-        awesomeNearMissesHIGHSCORE,
-        policeTakedownsHIGHSCORE,
-        EMPDodgesHIGHSCORE,
-        timeSurvivedHIGHSCORE
-    }
+    -- gameData = {
+    --     distanceTraveledHIGHSCORE,
+    --     nearMissesHIGHSCORE,
+    --     awesomeNearMissesHIGHSCORE,
+    --     policeTakedownsHIGHSCORE,
+    --     EMPDodgesHIGHSCORE,
+    --     timeSurvivedHIGHSCORE
+    -- }
+    -- print("DistanceTH: " .. gameData["distanceTraveledHIGHSCORE"])
 
     -- Prepare GUI
     if screen == "mainMenu" then
@@ -143,8 +144,9 @@ function loadGame()
         print(love.filesystem.read("saveFile.txt"))
         local str = love.filesystem.read("saveFile.txt")
         gameData = stringToTable(str)
+        -- gameData["distanceTraveledHIGHSCORE"] = 100
         printTable(gameData, "  ")
-        if gameData[1] ~= nil then
+        if gameData["distanceTraveledHIGHSCORE"] ~= nil then
             print("Game loaded!")
         else
             print("Error while loading gamesave!")
@@ -166,7 +168,7 @@ function file_exists(name)
     end
 end
 
-function tableToString(tbl, indent) -- The libraries arent working so I had to make my own :>
+function tableToString(tbl, indent)
     if not indent then indent = '' end
     local format = string.format
 
@@ -179,13 +181,15 @@ function tableToString(tbl, indent) -- The libraries arent working so I had to m
     end
 
     local lines = {}
+    table.insert(lines, "{")
     for k, v in pairs(tbl) do
         if type(v) == 'table' then
-            table.insert(lines, format('%s[%s] = {\n%s\n%s},', indent, formatValue(k), tableToString(v, indent .. '\t'), indent))
+            table.insert(lines, format('%s%s = {\n%s\n%s},', indent, k, tableToString(v, indent .. '\t'), indent))
         else
-            table.insert(lines, format('%s[%s] = %s,', indent, formatValue(k), formatValue(v)))
+            table.insert(lines, format('%s%s = %s,', indent, k, formatValue(v)))
         end
     end
+    table.insert(lines, "}")
     return table.concat(lines, '\n')
 end
 
