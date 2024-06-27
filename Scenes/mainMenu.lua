@@ -57,7 +57,7 @@ function mainMenu.load()
     screen = "mainMenu"
 
     print(love.filesystem.read("saveFile.txt"))
-    print(tableIO.stringToTable(love.filesystem.read("saveFile.txt")))
+    -- print(tableIO.stringToTable(love.filesystem.read("saveFile.txt")))
 end
 
 function mainMenu.update(dt)
@@ -129,7 +129,7 @@ end
 
 -- Saving system!!
 function saveGame()
-    local success, message = love.filesystem.write("saveFile.txt", tableIO.tableToString(gameData))
+    local success, message = love.filesystem.write("saveFile.txt", tableToString(gameData))
     if success then
         print("Game saved!")
         print(love.filesystem.read("saveFile.txt"))
@@ -142,10 +142,13 @@ function loadGame()
     if love.filesystem.getInfo("saveFile.txt") and love.filesystem.read("saveFile.txt") ~= nil then
         print(love.filesystem.read("saveFile.txt"))
         local str = love.filesystem.read("saveFile.txt")
-        local str = string.gsub(str, "%z", "")  -- Remove null byte characters
-        gameDatadata = stringToTable(str)
-        -- gameDatadata = stringToTable(love.filesystem.read("saveFile.txt"))
-        print("Game loaded!")
+        gameData = stringToTable(str)
+        printTable(gameData, "  ")
+        if gameData[1] ~= nil then
+            print("Game loaded!")
+        else
+            print("Error while loading gamesave!")
+        end
     else
         print("No save file found.")
     end
@@ -163,8 +166,31 @@ function file_exists(name)
     end
 end
 
+function tableToString(tbl, indent) -- The libraries arent working so I had to make my own :>
+    if not indent then indent = '' end
+    local format = string.format
+
+    local function formatValue(v)
+        if type(v) == 'string' then
+            return format('%q', v)
+        else
+            return tostring(v)
+        end
+    end
+
+    local lines = {}
+    for k, v in pairs(tbl) do
+        if type(v) == 'table' then
+            table.insert(lines, format('%s[%s] = {\n%s\n%s},', indent, formatValue(k), tableToString(v, indent .. '\t'), indent))
+        else
+            table.insert(lines, format('%s[%s] = %s,', indent, formatValue(k), formatValue(v)))
+        end
+    end
+    return table.concat(lines, '\n')
+end
+
 function stringToTable(str)
-    local func = load("return " .. str)
+    local func, err = load("return " .. str)
     if func then
         local ok, result = pcall(func)
         if ok then
@@ -173,7 +199,21 @@ function stringToTable(str)
             error("Failed to parse string: " .. result)
         end
     else
-        error("Failed to load string!")
+        error("Failed to load string: " .. err)
+    end
+end
+
+function printTable(tbl, indent)
+    if not indent then indent = '' end
+    
+    print("Printed table:")
+    for k, v in pairs(tbl) do
+        if type(v) == 'table' then
+            print(indent .. k .. " = ")
+            printTable(v, indent .. "  ")
+        else
+            print(indent .. k .. " = " .. tostring(v))
+        end
     end
 end
 
