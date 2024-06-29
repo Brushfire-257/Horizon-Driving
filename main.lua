@@ -5,6 +5,9 @@
 -- Hold the current state of the game
 local state = {}
 
+-- Load scaling libraries
+local CScreen = require "cscreen"
+
 -- misc. setup (Planning on adding intro later)
 firstStart = true -- After intro set this to false
 
@@ -14,13 +17,13 @@ function love.load()
     -- loadHighscores()
 
     -- Load window values
-    love.window.setMode(1920, 1080) -- Set to 1920 x 1080 on launch
+    love.window.setMode(love.graphics.getWidth(), love.graphics.getHeight()) -- Set to 1920 x 1080 on launch
     love.window.setTitle("Horizon Driving")
     love.window.setFullscreen(true)
     love.math.setRandomSeed(os.time())
 
     -- Load scaling
-    canvas = love.graphics.newCanvas()
+    -- CScreen.init(1920, 1080, true)
 
     -- Load the menu state
     state.current = require("Scenes/mainMenu")
@@ -37,9 +40,6 @@ end
 -- end
 
 function love.update(dt) -- Runs every frame.
-    -- Update the game scaling
-    imageScaleX, imageScaleY = getScaling(canvas)
-
     -- Update the current state
     local nextState = state.current.update(dt)
 
@@ -63,29 +63,13 @@ end
 
 function love.draw() -- Draws every frame / Runs directly after love.update()
     -- Set the scaling
-    love.graphics.draw(canvas, 0, 0, 0, imageScaleX, imageScaleY)
+    -- CScreen.apply()
     -- Draw the current state
     state.current.draw()
+	-- CScreen.cease()
 end
 
--- Scaling Functions
-function getScaling(drawable, canvas)
-    local canvas = canvas or nil
-    local drawW = drawable:getWidth()
-    local drawH = drawable:getHeight()
-    local canvasW = 0
-    local canvasH = 0
-
-    if canvas then
-        canvasW = canvas:getWidth()
-        canvasH = canvas:getHeight()
-    else
-        canvasW = love.graphics.getWidth()
-        canvasH = love.graphics.getHeight()
-    end
-
-    local scaleX = canvasW / drawW
-    local scaleY = canvasH / drawH
-
-    return scaleX, scaleY
+-- Scaling Function
+function love.resize(width, height)
+	CScreen.update(width, height)
 end

@@ -27,6 +27,7 @@ timeSurvived = 0
 -- Libraries
 HC = require 'HardonCollider'
 local Camera = require 'hump.camera'
+local CScreen = require "cscreen"
 
 function arcadeGame.load() -- Runs once at the start of the game.
     -- Load window values
@@ -35,6 +36,9 @@ function arcadeGame.load() -- Runs once at the start of the game.
 
     -- Reseed RNG
     love.math.setRandomSeed(os.time())
+
+    -- Scaling init
+    CScreen.init(love.graphics.getWidth(), 720, true)
     
     -- Create the sound manager
     soundManager = SoundManager:new()
@@ -121,6 +125,8 @@ function arcadeGame.update(dt) -- Runs every frame.
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
+    CScreen.apply()
+
     camera:attach()
     love.graphics.draw(road.image, math.floor(road.x), math.floor(road.v1y), 0, road.scaleX, road.scaleY) -- Draws the road sprites
     love.graphics.draw(road.image, math.floor(road.x), math.floor(road.v2y), 0, road.scaleX, road.scaleY)
@@ -235,6 +241,8 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
             love.graphics.setColor(1, 1, 1, 1)
         end
     end
+
+	CScreen.cease()
 end
 
 function loadSongs()
@@ -1974,6 +1982,10 @@ function SoundManager:stopSound(name)
     if self.sounds[name] then
         self.sounds[name]:stop()
     end
+end
+
+function love.resize(width, height)
+	CScreen.update(width, height)
 end
 
 return arcadeGame
