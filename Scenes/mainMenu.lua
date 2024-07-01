@@ -116,7 +116,7 @@ function mainMenu.update(dt)
         (25), (625), 800, 150)
     end
 
-    return nil
+    return "startGame"
 end
 
 function mainMenu.draw()

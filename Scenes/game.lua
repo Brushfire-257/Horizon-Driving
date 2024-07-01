@@ -33,19 +33,25 @@ function arcadeGame.load() -- Runs once at the start of the game.
     -- Load window values
     -- love.window.setMode(1280, 720) -- Set to 1920 x 1080 on launch
     love.window.setTitle("Horizon Driving - Arcade Mode")
+    
+    -- Load Game settings (currently just debug mode)
+    local settingsStr = love.filesystem.read("settings.txt")
+    loadSettings(settingsStr)
 
     -- Reseed RNG
     love.math.setRandomSeed(os.time())
 
     -- Scaling init
-    CScreen.init(love.graphics.getWidth(), 720, true)
+    CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, debugMode)
     
     -- Create the sound manager
     soundManager = SoundManager:new()
 
     -- misc. setup
-    screenWidth = love.graphics.getWidth()
-    screenHeight = love.graphics.getHeight()
+    -- screenWidth = math.min(love.graphics.getWidth(), 1920)
+    -- screenHeight = math.min(love.graphics.getHeight(), 1080)
+    screenWidth = math.max(love.graphics.getWidth(), 1920)
+    screenHeight = 1080
     timer = 0
     colliders = {}
     backgroundSpeed = 0
@@ -73,17 +79,17 @@ function arcadeGame.load() -- Runs once at the start of the game.
     loadEMP()
 
     -- Create camera
-    camerayOffset = 400
+    -- camerayOffset = screenHeight - (530 + (1280 - love.graphics.getHeight() - 600))
+    camerayOffset = screenHeight - (530 - love.graphics.getHeight())
+    cameraxScaleOffset = (1920 / 2) - (love.graphics.getWidth() / 2)
+    GUIyOffset = 0
+    GUIxOffset = 0
     camerayShake = 0
     cameraxOffset = 0
     camerayOffset1 = 0
     takedownCamera = 0
     takedownCameraTimer = 0
-    camera = Camera(carSprite.x, carSprite.y - camerayOffset)
-
-    -- Load Game settings (currently just debug mode)
-    local settingsStr = love.filesystem.read("settings.txt")
-    loadSettings(settingsStr)
+    camera = Camera(carSprite.x - cameraxScaleOffset, carSprite.y - camerayOffset)
 end
 
 function arcadeGame.update(dt) -- Runs every frame.
@@ -112,7 +118,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     updateDebris(dt)
     updateSpikestrip(dt)
     updateEMP(dt)
-    
+
     timeSurvived = timeSurvived + dt
     
     -- Exit game?
@@ -192,28 +198,29 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
         love.graphics.setColor(1, 1, 1) -- Reset the color to white
     end
     camera:detach()
+    love.graphics.translate(0, GUIyOffset)
 
     -- Draw the GUI
     if displayGUI == 1 then
         local GUIShakex = math.random(-2, 2) * (carSprite.speed/2000)
         local GUIShakey = math.random(-2, 2) * (carSprite.speed/2000)
 
-        love.graphics.draw(speedNumber1.image, math.floor(speedNumber1.x + GUIShakex), math.floor(speedNumber1.y + GUIShakey), speedNumber1.rotation, speedNumber1.scaleX, speedNumber1.scaleY,
+        love.graphics.draw(speedNumber1.image, math.floor(speedNumber1.x + GUIShakex + GUIxOffset), math.floor(speedNumber1.y + GUIShakey), speedNumber1.rotation, speedNumber1.scaleX, speedNumber1.scaleY,
         speedNumber1.rotationX, speedNumber1.rotationY)
-        love.graphics.draw(speedNumber2.image, math.floor(speedNumber2.x + GUIShakex), math.floor(speedNumber2.y + GUIShakey), speedNumber2.rotation, speedNumber2.scaleX, speedNumber2.scaleY,
+        love.graphics.draw(speedNumber2.image, math.floor(speedNumber2.x + GUIShakex + GUIxOffset), math.floor(speedNumber2.y + GUIShakey), speedNumber2.rotation, speedNumber2.scaleX, speedNumber2.scaleY,
         speedNumber2.rotationX, speedNumber2.rotationY)
-        love.graphics.draw(speedNumber3.image, math.floor(speedNumber3.x + GUIShakex), math.floor(speedNumber3.y + GUIShakey), speedNumber3.rotation, speedNumber3.scaleX, speedNumber3.scaleY,
+        love.graphics.draw(speedNumber3.image, math.floor(speedNumber3.x + GUIShakex + GUIxOffset), math.floor(speedNumber3.y + GUIShakey), speedNumber3.rotation, speedNumber3.scaleX, speedNumber3.scaleY,
         speedNumber3.rotationX, speedNumber3.rotationY)
 
-        love.graphics.draw(nitroBar.image, math.floor(nitroBar.x + GUIShakex), math.floor(nitroBar.y + GUIShakey), nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
+        love.graphics.draw(nitroBar.image, math.floor(nitroBar.x + GUIShakex + GUIxOffset), math.floor(nitroBar.y + GUIShakey), nitroBar.rotation, nitroBar.scaleX, nitroBar.scaleY,
         nitroBar.rotationX, nitroBar.rotationY)
 
-        love.graphics.draw(healthBar.image, math.floor(healthBar.x + GUIShakex), math.floor(healthBar.y + GUIShakey), healthBar.rotation, healthBar.scaleX, healthBar.scaleY,
+        love.graphics.draw(healthBar.image, math.floor(healthBar.x + GUIShakex - GUIxOffset), math.floor(healthBar.y + GUIShakey), healthBar.rotation, healthBar.scaleX, healthBar.scaleY,
         healthBar.rotationX, healthBar.rotationY)
 
-        love.graphics.draw(heatIndicator.image, math.floor(heatIndicator.x + GUIShakex), math.floor(heatIndicator.y + GUIShakey), heatIndicator.rotation, heatIndicator.scaleX, heatIndicator.scaleY,
+        love.graphics.draw(heatIndicator.image, math.floor(heatIndicator.x + GUIShakex - GUIxOffset), math.floor(heatIndicator.y + GUIShakey), heatIndicator.rotation, heatIndicator.scaleX, heatIndicator.scaleY,
         heatIndicator.rotationX, heatIndicator.rotationY)
-        love.graphics.draw(heatIndicatorNumber.image, math.floor(heatIndicatorNumber.x + GUIShakex), math.floor(heatIndicatorNumber.y + GUIShakey), heatIndicatorNumber.rotation, heatIndicatorNumber.scaleX, heatIndicatorNumber.scaleY,
+        love.graphics.draw(heatIndicatorNumber.image, math.floor(heatIndicatorNumber.x + GUIShakex - GUIxOffset), math.floor(heatIndicatorNumber.y + GUIShakey), heatIndicatorNumber.rotation, heatIndicatorNumber.scaleX, heatIndicatorNumber.scaleY,
         heatIndicatorNumber.rotationX, heatIndicatorNumber.rotationY)
     end
 
@@ -229,19 +236,20 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     -- Draw notifications
     for i, notification in ipairs(notifications) do
         if notification.image then
-            love.graphics.draw(notification.image, notification.x, notification.y, notification.rotation, notification.scaleX, notification.scaleY,
+            love.graphics.draw(notification.image, notification.x + GUIxOffset, notification.y, notification.rotation, notification.scaleX, notification.scaleY,
             notification.rotationX, notification.rotationY)
         end
     end
     for i, emphasis in ipairs(notificationEmphasis) do
         if emphasis.image then
             love.graphics.setColor(1, 1, 1, emphasis.alpha)
-            love.graphics.draw(emphasis.image, emphasis.x, emphasis.y, emphasis.rotation, emphasis.scaleX, emphasis.scaleY,
+            love.graphics.draw(emphasis.image, emphasis.x + GUIxOffset, emphasis.y, emphasis.rotation, emphasis.scaleX, emphasis.scaleY,
             emphasis.rotationX, emphasis.rotationY)
             love.graphics.setColor(1, 1, 1, 1)
         end
     end
 
+    love.graphics.translate(0, -GUIyOffset)
 	CScreen.cease()
 end
 
@@ -416,7 +424,7 @@ function loadGUI()
     displayGUI = 1
     local scaleX = 2
     local scaleY = 2
-    local numberyOffset = 50
+    local numberyOffset = 150
     takedownOverlayTop = {
         x = screenWidth / 2,
         y = numberyOffset,
@@ -435,9 +443,9 @@ function loadGUI()
     numberyOffset = 15
     takedownOverlayBottom = {
         x = screenWidth / 2,
-        y = screenHeight - numberyOffset,
+        y = 1080 - numberyOffset,
         xOrig = screenWidth / 2,
-        yOrig = screenHeight - numberyOffset,
+        yOrig = 1080 - numberyOffset,
         rotation = 0,
         rotationX = takedownOverlayBottomImage:getWidth() / 2,
         rotationY = takedownOverlayBottomImage:getHeight() / 2,
@@ -677,10 +685,10 @@ function updateGUI(dt)
         takedownOverlayTop.y = takedownOverlayTop.y + (takedownOverlayTop.yOrig - takedownOverlayTop.y) * dt * 25
         takedownOverlayBottom.y = takedownOverlayBottom.y + (takedownOverlayBottom.yOrig - takedownOverlayBottom.y) * dt * 25
     else
-        takedownOverlayTop.y = takedownOverlayTop.y + (-250 - takedownOverlayTop.y) * dt * 15
-        takedownOverlayBottom.y = takedownOverlayBottom.y + (screenHeight + 250 - takedownOverlayBottom.y) * dt * 15
+        takedownOverlayTop.y = takedownOverlayTop.y + (-550 - takedownOverlayTop.y) * dt * 15
+        takedownOverlayBottom.y = takedownOverlayBottom.y + (screenHeight + 550 - takedownOverlayBottom.y) * dt * 15
     end
-    if takedownOverlayTop.y < - 200 then
+    if takedownOverlayTop.y < - 500 then
         displayGUI = 1
     else
         displayGUI = 0
@@ -973,10 +981,10 @@ function cameraUpdate(dt)
     local dy = 0
     -- Calculate the distance to the player
     if takedownCameraTimer > 0 then
-        dx = carSprite.x - camera.x + cameraxOffset
+        dx = carSprite.x - camera.x + cameraxOffset - cameraxScaleOffset
         dy = carSprite.y - camera.y - camerayShake + camerayOffset1
     else
-        dx = carSprite.x - camera.x
+        dx = carSprite.x - camera.x - cameraxScaleOffset
         dy = carSprite.y - camera.y - camerayOffset - camerayShake
     end
     camerayShake = camerayShake * 0.9
@@ -1119,7 +1127,7 @@ function updateTraffic(dt)
         trafficLeft.y = trafficLeft.y + -roadFrameMove * dt
     end
 
-    if trafficRight.y > screenHeight + 500 then -- Below Screen
+    if trafficRight.y > 1080 + 500 then -- Below Screen
         trafficRight.timer = math.random(1.5, 4)
         trafficRight.y = -500
         trafficRight.x = math.random(1500, 2000)
@@ -1127,7 +1135,7 @@ function updateTraffic(dt)
         trafficRight.rotation = -math.rad(90)
     end
 
-    if trafficLeft.y > screenHeight + 500 then
+    if trafficLeft.y > 1080 + 500 then
         trafficLeft.timer = math.random(1.5, 4)
         trafficLeft.y = -500
         trafficLeft.x = math.random(-100, 500)
@@ -1136,12 +1144,12 @@ function updateTraffic(dt)
     end
 
     -- Ensure traffic stays within the screen bounds
-    if trafficRight.y < -screenHeight then
-        trafficRight.y = -screenHeight
+    if trafficRight.y < -1080 then
+        trafficRight.y = -1080
     end
 
-    if trafficLeft.y < -screenHeight then
-        trafficLeft.y = -screenHeight
+    if trafficLeft.y < -1080 then
+        trafficLeft.y = -1080
     end
 
     if trafficRight.crashed == 1 then -- Crashed obv
@@ -1543,7 +1551,7 @@ function updateSpikestrip(dt)
 
     spikestripSprite.speed = spikestripSprite.speed * 0.96
 
-    if spikestripSprite.y > screenHeight + 500 then
+    if spikestripSprite.y > 1080 + 500 then
         spikestripSprite.visible = 0
         spikestripSprite.timer = 0
     end
@@ -1718,7 +1726,7 @@ function updatePolice(dt)
         policeSprite.y = policeSprite.y - policeSprite.velocityy * dt
     end
     
-    if policeSprite.y > screenHeight + 500 then
+    if policeSprite.y > 1080 + 750 then
         policeSprite.timer = math.random(1, 3)
         policeSprite.y = -500
         policeSprite.x = math.random(750, 1500)
@@ -1726,7 +1734,7 @@ function updatePolice(dt)
         policeSprite.health = 8
         policeSprite.rotation = -math.rad(90)
         policeSprite.speed = carSprite.speed
-    elseif policeSprite.y < -screenHeight then
+    elseif policeSprite.y < -1080 then
         policeSprite.y = -500
         policeSprite.x = math.random(750, 1500)
         policeSprite.rotation = -math.rad(90)
@@ -1902,7 +1910,21 @@ end
 function love.keypressed(key) -- Making debugging so much easier
     if key == '1' then
         love.event.quit()
+    elseif key == '3' then -- For scaling debugging
+        love.window.setMode(192*4, 72*4)
+        CScreen.update(192*4, 72*4)
+    elseif key == '4' then
+        love.window.setMode(1280, 720)
+        CScreen.update(1280, 720)
+    elseif key == '5' then
+        love.window.setMode(1280, 720*2)
+        CScreen.update(1280, 720*2)
+    elseif key == '6' then
+        love.window.setMode(128, 72)
+        CScreen.update(128, 72)
     end
+    camerayOffset = screenHeight - (530 - love.graphics.getHeight())
+    cameraxScaleOffset = (1920 / 2) - (love.graphics.getWidth() / 2)
 end
 
 -- No good sound libraries. Guess I need to make my own sound manager .-.

@@ -17,9 +17,9 @@ function love.load()
     -- loadHighscores()
 
     -- Load window values
-    love.window.setMode(love.graphics.getWidth(), love.graphics.getHeight()) -- Set to 1920 x 1080 on launch
+    -- love.window.setFullscreen(true)
+    love.window.setMode(192*4, 72*4) -- Set to 1920 x 1080 on launch
     love.window.setTitle("Horizon Driving")
-    love.window.setFullscreen(true)
     love.math.setRandomSeed(os.time())
 
     -- Load scaling
