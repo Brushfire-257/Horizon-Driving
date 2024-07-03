@@ -79,8 +79,7 @@ function arcadeGame.load() -- Runs once at the start of the game.
     loadEMP()
 
     -- Create camera
-    -- camerayOffset = screenHeight - (530 + (1280 - love.graphics.getHeight() - 600))
-    camerayOffset = screenHeight - (530 - love.graphics.getHeight())
+    camerayOffset = (1080 / 2) - (love.graphics.getHeight() / 2) + 360
     cameraxScaleOffset = (1920 / 2) - (love.graphics.getWidth() / 2)
     GUIyOffset = 0
     GUIxOffset = 0
@@ -137,10 +136,20 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     love.graphics.draw(road.image, math.floor(road.x), math.floor(road.v1y), 0, road.scaleX, road.scaleY) -- Draws the road sprites
     love.graphics.draw(road.image, math.floor(road.x), math.floor(road.v2y), 0, road.scaleX, road.scaleY)
 
-    love.graphics.draw(trafficRight.image, trafficRight.x, trafficRight.y, trafficRight.rotation, trafficRight.scaleX, trafficRight.scaleY,
-    trafficRight.rotationX, trafficRight.rotationY)
-    love.graphics.draw(trafficLeft.image, trafficLeft.x, trafficLeft.y, trafficLeft.rotation, trafficLeft.scaleX, trafficLeft.scaleY,
-    trafficLeft.rotationX, trafficLeft.rotationY)
+    if trafficRight.timer < 1 and trafficRight.timer > 0 then
+        love.graphics.draw(trafficRight.image, trafficRight.x, trafficRight.y + trafficRight.warningOffset, trafficRight.rotation, trafficRight.scaleX, trafficRight.scaleY,
+        trafficRight.rotationX, trafficRight.rotationY)
+    else
+        love.graphics.draw(trafficRight.image, trafficRight.x, trafficRight.y, trafficRight.rotation, trafficRight.scaleX, trafficRight.scaleY,
+        trafficRight.rotationX, trafficRight.rotationY)
+    end
+    if trafficLeft.timer < 1 and trafficLeft.timer > 0 then
+        love.graphics.draw(trafficLeft.image, trafficLeft.x, trafficLeft.y + trafficLeft.warningOffset, trafficLeft.rotation, trafficLeft.scaleX, trafficLeft.scaleY,
+        trafficLeft.rotationX, trafficLeft.rotationY)
+    else
+        love.graphics.draw(trafficLeft.image, trafficLeft.x, trafficLeft.y, trafficLeft.rotation, trafficLeft.scaleX, trafficLeft.scaleY,
+        trafficLeft.rotationX, trafficLeft.rotationY)
+    end
 
     love.graphics.draw(policeSprite.image, policeSprite.x, policeSprite.y, policeSprite.rotation, policeSprite.scaleX, policeSprite.scaleY,
     policeSprite.rotationX, policeSprite.rotationY)
@@ -1017,7 +1026,8 @@ function loadTraffic()
         velocity = 0,
         velocityx = 0,
         nmtimer = 0,
-        hittimer = 0
+        hittimer = 0,
+        warningOffset = 700
     }
     trafficLeft = {
         x = 0,
@@ -1037,7 +1047,8 @@ function loadTraffic()
         velocity = 0,
         velocityx = 0,
         nmtimer = 0,
-        hittimer = 0
+        hittimer = 0,
+        warningOffset = 700
     }
 
     -- polygon colliders for the traffic
@@ -1102,11 +1113,9 @@ function updateTraffic(dt)
 
     if trafficRight.timer < 1 and trafficRight.timer > 0 then
         trafficRight.image = trafficWarning
-        trafficRight.y = 150
     end
     if trafficLeft.timer < 1 and trafficLeft.timer > 0 then
         trafficLeft.image = trafficWarning
-        trafficLeft.y = 150
     end
 
     trafficRight.rotationX = trafficRight.image:getWidth() / 2
@@ -1908,22 +1917,24 @@ function loadSettings(settingsStr)
 end
 
 function love.keypressed(key) -- Making debugging so much easier
-    if key == '1' then
-        love.event.quit()
-    elseif key == '3' then -- For scaling debugging
-        love.window.setMode(192*4, 72*4)
-        CScreen.update(192*4, 72*4)
-    elseif key == '4' then
-        love.window.setMode(1280, 720)
-        CScreen.update(1280, 720)
-    elseif key == '5' then
-        love.window.setMode(1280, 720*2)
-        CScreen.update(1280, 720*2)
-    elseif key == '6' then
-        love.window.setMode(128, 72)
-        CScreen.update(128, 72)
+    if debugMode then
+        if key == '1' then
+            love.event.quit()
+        elseif key == '3' then -- For scaling debugging
+            love.window.setMode(192*4, 72*4)
+            CScreen.update(192*4, 72*4)
+        elseif key == '4' then
+            love.window.setMode(1280, 720)
+            CScreen.update(1280, 720)
+        elseif key == '5' then
+            love.window.setMode(1280, 720*2)
+            CScreen.update(1280, 720*2)
+        elseif key == '6' then
+            love.window.setMode(128, 72)
+            CScreen.update(128, 72)
+        end
     end
-    camerayOffset = screenHeight - (530 - love.graphics.getHeight())
+    camerayOffset = (1080 / 2) - (love.graphics.getHeight() / 2) + 360
     cameraxScaleOffset = (1920 / 2) - (love.graphics.getWidth() / 2)
 end
 

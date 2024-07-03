@@ -8,8 +8,10 @@ local suit = require("suit")
 local tableIO = require 'tableIO'
 
 -- misc. setup
-local screenWidth = love.graphics.getWidth()
-local screenHeight = love.graphics.getHeight()
+local screenWidthA = love.graphics.getWidth()
+local screenHeightA = love.graphics.getHeight()
+local screenWidth = 1920
+local screenHeight = 1080
 
 local darkCurrent = 0
 
@@ -36,6 +38,8 @@ function mainMenu.load()
     -- }
 
     love.window.setTitle("Horizon Driving - Main Menu")
+    screenWidthA = love.graphics.getWidth()
+    screenHeightA = love.graphics.getHeight()
 
     if firstStart == true then
         -- saveGame()
@@ -51,14 +55,15 @@ function mainMenu.load()
     suit.theme.color.active = {bg = {150,150,150}, fg = {0,0,0}}
 
     -- Load font
-    -- font = love.graphics.newFont("fonts/uhh I didnt choose one yet.ttf", 100) -- The font
-    -- font1 = love.graphics.newFont("fonts/I am literally on the road.ttf", 50)
-    -- font2 = love.graphics.newFont("fonts/chill out bruv.ttf", 25)
-    -- love.graphics.setFont(font)
+    font = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 100 * math.min(scaleStuff("w"), scaleStuff("h"))) -- The font
+    font1 = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 75 * math.min(scaleStuff("w"), scaleStuff("h")))
+    font2 = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 50 * math.min(scaleStuff("w"), scaleStuff("h")))
+    font3 = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 25 * math.min(scaleStuff("w"), scaleStuff("h")))
+    love.graphics.setFont(font)
 
     screen = "mainMenu"
 
-    print(love.filesystem.read("saveFile.txt"))
+    -- print(love.filesystem.read("saveFile.txt"))
     -- print(tableIO.stringToTable(love.filesystem.read("saveFile.txt")))
 end
 
@@ -78,45 +83,51 @@ function mainMenu.update(dt)
     if screen == "mainMenu" then
         suit.layout:reset(0, 0)
 
-        if suit.Button("Start Game", 100, 100, 800, 150).hit then
+        love.graphics.setFont(font)
+
+        if suit.Button("Start Game", 100 * scaleStuff("w"), 100 * scaleStuff("h"),
+        800 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
             return "startGame"
         end
 
-        if suit.Button("Highscores", 100, 300, 800, 150).hit then
+        if suit.Button("Highscores", 100 * scaleStuff("w"), 300 * scaleStuff("h"),
+        800 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
             screen = "highscores"
         end
 
-        if suit.Button("Quit", 100, 500, 800, 150).hit then
+        if suit.Button("Quit", 100 * scaleStuff("w"), 500 * scaleStuff("h"),
+        800 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
             love.event.quit()
         end
 
-        -- love.graphics.setFont(font2) -- This should make it smaller when I actually add a font
+        love.graphics.setFont(font2)
 
-        suit.Label("Made by: Logan Peterson (With LOVE)", {align = "center"}, (screenWidth - 800)/2, (screenHeight - 100), 800, 150)
+        suit.Label("Made by: Logan Peterson (With LOVE)", {align = "center"}, ((screenWidth - 800)/2) * scaleStuff("w"), (screenHeight - 150) * scaleStuff("h"), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
 
-        -- love.graphics.setFont(font)
     elseif screen == "highscores" then
-        if suit.Button("Back", screenWidth - 425, 25, 400, 100).hit then
+        if suit.Button("Back", (screenWidth - 425) * scaleStuff("w"), 25 * scaleStuff("h"), 400 * scaleStuff("w"), 100 * scaleStuff("h")).hit then
             screen = "mainMenu"
         end
 
+        love.graphics.setFont(font2)
+
         suit.Label("Highscores:", {align = "left"},
-        (25), (25), 800, 150)
+        (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
         suit.Label("Distance Traveled: " .. gameData.distanceTraveledHIGHSCORE * 0.1 / 60, {align = "left"},
-        (25), (125), 800, 150)
+        (25 * scaleStuff("w")), (125 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
         suit.Label("Near Misses: " .. gameData.nearMissesHIGHSCORE, {align = "left"},
-        (25), (225), 800, 150)
+        (25 * scaleStuff("w")), (225 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
         suit.Label("Awesome Near Misses: " .. gameData.awesomeNearMissesHIGHSCORE, {align = "left"},
-        (25), (325), 800, 150)
+        (25 * scaleStuff("w")), (325 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
         suit.Label("Police Takedowns: " .. gameData.policeTakedownsHIGHSCORE, {align = "left"},
-        (25), (425), 800, 150)
+        (25 * scaleStuff("w")), (425 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
         suit.Label("EMP Dodges: " .. gameData.EMPDodgesHIGHSCORE, {align = "left"},
-        (25), (525), 800, 150)
+        (25 * scaleStuff("w")), (525 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
         suit.Label("Time Survived: " .. gameData.timeSurvivedHIGHSCORE, {align = "left"},
-        (25), (625), 800, 150)
+        (25 * scaleStuff("w")), (625 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
     end
 
-    return "startGame"
+    return nil
 end
 
 function mainMenu.draw()
@@ -135,7 +146,8 @@ function saveGame()
     local success, message = love.filesystem.write("saveFile.txt", tableToString(gameData))
     if success then
         print("Game saved!")
-        print(love.filesystem.read("saveFile.txt"))
+        printTable(gameData, "  ")
+        -- print(love.filesystem.read("saveFile.txt"))
     else
         print("Could not save game. Error: " .. message)
     end
@@ -143,16 +155,16 @@ end
 
 function loadGame()
     if love.filesystem.getInfo("saveFile.txt") and love.filesystem.read("saveFile.txt") ~= nil then
-        print(love.filesystem.read("saveFile.txt"))
+        -- print(love.filesystem.read("saveFile.txt"))
         local str = love.filesystem.read("saveFile.txt")
         gameData = stringToTable(str)
         -- gameData["distanceTraveledHIGHSCORE"] = 100
-        printTable(gameData, "  ")
         if gameData["distanceTraveledHIGHSCORE"] ~= nil then
             print("Game loaded!")
         else
             print("Error while loading gamesave!")
         end
+        printTable(gameData, "  ")
     else
         print("No save file found.")
     end
@@ -212,7 +224,7 @@ end
 function printTable(tbl, indent)
     if not indent then indent = '' end
     
-    print("Printed table:")
+    print("Save Data:")
     for k, v in pairs(tbl) do
         if type(v) == 'table' then
             print(indent .. k .. " = ")
@@ -221,6 +233,19 @@ function printTable(tbl, indent)
             print(indent .. k .. " = " .. tostring(v))
         end
     end
+end
+
+function scaleStuff(widthorheight)
+    local scale = 1
+    if widthorheight == "w" then -- width calc
+        scale = screenWidthA / screenWidth
+    elseif widthorheight == "h" then -- height calc
+        scale = screenHeightA / screenHeight
+    else
+        print("Function usage error: scaleStuff() w/h not specified.")
+    end
+
+    return scale
 end
 
 return mainMenu
