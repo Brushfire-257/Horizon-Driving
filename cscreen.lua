@@ -58,6 +58,11 @@ function CScreen.cease()
 
 		love.graphics.setColor(pr, pg, pb, pa)
 	end
+
+	love.graphics.translate(-tx, -ty)
+	if firstMenuLoad == 1 then -- odd bug / patchy fix
+		love.graphics.scale(fsvr, fsvr)
+	end
 end
 
 -- Scales and centers all graphics properly

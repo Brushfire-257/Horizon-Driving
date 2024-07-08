@@ -5,7 +5,7 @@ gameEndscreen = {}
 
 -- SUIT setup
 local suit = require "suit"
-local CScreen = require "cscreen"
+-- local CScreen = require "cscreen"
 
 -- misc. setup
 local screenWidthA = love.graphics.getWidth()
@@ -35,7 +35,7 @@ function gameEndscreen.load()
     love.graphics.setFont(font)
 
     -- Scaling init
-    CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, debugMode)
+    -- CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, debugMode)
 
     -- Update Highscores
     if distanceTraveled > gameData.distanceTraveledHIGHSCORE then gameData.distanceTraveledHIGHSCORE = distanceTraveled end
@@ -56,22 +56,23 @@ function gameEndscreen.update(dt)
         return "mainMenu"
     end
 
-    love.graphics.setFont(font2)
+    love.graphics.setFont(font1)
     
     -- Prepare the player statistics
     suit.Label("Highscores:", {align = "left"},
     (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    suit.Label("Distance Traveled: " .. gameData.distanceTraveledHIGHSCORE * 0.1 / 60, {align = "left"},
+    love.graphics.setFont(font2)
+    suit.Label("Distance Traveled: " .. distanceTraveled * 0.1 / 60, {align = "left"},
     (25 * scaleStuff("w")), (125 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    suit.Label("Near Misses: " .. gameData.nearMissesHIGHSCORE, {align = "left"},
+    suit.Label("Near Misses: " .. nearMisses, {align = "left"},
     (25 * scaleStuff("w")), (225 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    suit.Label("Awesome Near Misses: " .. gameData.awesomeNearMissesHIGHSCORE, {align = "left"},
+    suit.Label("Awesome Near Misses: " .. awesomeNearMisses, {align = "left"},
     (25 * scaleStuff("w")), (325 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    suit.Label("Police Takedowns: " .. gameData.policeTakedownsHIGHSCORE, {align = "left"},
+    suit.Label("Police Takedowns: " .. policeTakedowns, {align = "left"},
     (25 * scaleStuff("w")), (425 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    suit.Label("EMP Dodges: " .. gameData.EMPDodgesHIGHSCORE, {align = "left"},
+    suit.Label("EMP Dodges: " .. EMPDodges, {align = "left"},
     (25 * scaleStuff("w")), (525 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    suit.Label("Time Survived: " .. gameData.timeSurvivedHIGHSCORE, {align = "left"},
+    suit.Label("Time Survived: " .. timeSurvived, {align = "left"},
     (25 * scaleStuff("w")), (625 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
     
     return nil
@@ -92,9 +93,9 @@ function love.keypressed(key)
     end
 end
 
-function love.resize(width, height)
-	CScreen.update(width, height)
-end
+-- function love.resize(width, height)
+-- 	CScreen.update(width, height)
+-- end
 
 function scaleStuff(widthorheight)
     local scale = 1

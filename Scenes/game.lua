@@ -783,7 +783,7 @@ function updateDebris(dt)
         -- print(debris.timer)
         
         local timerChangeBy = 0
-        if debris.timer == 0 then -- notification just started
+        if debris.timer == 0 then
             timerChangeBy = 1
         end
         
@@ -797,7 +797,6 @@ function updateDebris(dt)
         debris.timer = debris.timer + timerChangeBy
     end
 
-    -- Remove notifications whose timer has reached 0
     for i = #debrisTable, 1, -1 do
         if debrisTable[i].timer == 0 then
             table.remove(debrisTable, i)
@@ -820,8 +819,8 @@ function loadCar()
     carSprite.prevX = 1000
     carSprite.prevY = 800
     carSprite.maxSpeed = 3500
-    carSprite.health = 3 -- (Much lower for death debugging!! CHANGE BACK)
-    carSprite.maxHealth = 3
+    carSprite.health = 30
+    carSprite.maxHealth = 30
 
     -- Load Nitro
     nitroImage = love.graphics.newImage("Sprites/nitro.png")
@@ -894,7 +893,7 @@ function playerUpdate(dt)
         carSprite.speed = carSprite.speed - carSprite.accel * 1.5 * dt
         camerayShake = camerayShake + carSprite.accel / 5 * carSprite.speed / 1000
     end
-    if love.keyboard.isDown('a') then --and nitroSprite.amount > 0 then -- Nitro
+    if love.keyboard.isDown('a') and nitroSprite.amount > 0 then -- Nitro
         carSprite.speed = carSprite.speed + nitroSprite.boostamount * dt
         camerayShake = camerayShake - nitroSprite.boostamount / 7.5 * carSprite.speed / 1000
         nitroSprite.appear = 1
@@ -1776,7 +1775,7 @@ function updatePolice(dt)
 
     -- Deal with collisions
     if carCollider:collidesWith(policeCollider) and policeSprite.hittimer == 0 then
-        carSprite.speed = carSprite.speed * 0.85
+        carSprite.speed = carSprite.speed * 0.9
         policeSprite.speed = 200 + carSprite.speed * 1.1
         camerayShake = camerayShake + 400
         policeSprite.health = math.floor(policeSprite.health - 1)

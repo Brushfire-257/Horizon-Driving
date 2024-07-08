@@ -2,6 +2,9 @@
 
 -- Get the game running on computer then port over to android. (No iphone, too much work...)
 
+-- Game version
+gameVersion = 0.1
+
 -- Hold the current state of the game
 local state = {}
 
@@ -17,8 +20,8 @@ function love.load()
     -- loadHighscores()
 
     -- Load window values
-    -- love.window.setFullscreen(true)
-    love.window.setMode(192*4, 72*4) -- Set to 1920 x 1080 on launch
+    love.window.setFullscreen(true)
+    -- love.window.setMode(1280, 720) -- Set to 1920 x 1080 on launch
     love.window.setTitle("Horizon Driving")
     love.math.setRandomSeed(os.time())
 
