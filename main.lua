@@ -29,7 +29,7 @@ function love.load()
     -- CScreen.init(1920, 1080, true)
 
     -- Load the menu state
-    state.current = require("Scenes/mainMenu")
+    state.current = require("Scenes/playerDeath")
     state.current.load()
 end
 
@@ -60,6 +60,11 @@ function love.update(dt) -- Runs every frame.
         -- Switch to the main menu scene
         print("Switching to the main menu scene")
         state.current = require("Scenes/mainMenu")
+        state.current.load()
+    elseif nextState == "playerDeath" then
+        -- Switch to the player death scene
+        print("Switching to the player death scene")
+        state.current = require("Scenes/playerDeath")
         state.current.load()
     end
 end

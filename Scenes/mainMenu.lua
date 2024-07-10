@@ -2,7 +2,7 @@
 mainMenu = {}
 
 -- SUIT setup (This is gonna make the GUI so much easier to make..)
-local suit = require("suit")
+local suit = require("SUIT")
 
 -- library setup
 local CScreen = require "cscreen"
