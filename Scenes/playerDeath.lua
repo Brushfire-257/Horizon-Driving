@@ -3,6 +3,7 @@ deathAnim = {}
 
 -- library setup
 local CScreen = require "cscreen"
+local suit = require("SUIT")
 
 -- misc. setup
 local screenWidthA = love.graphics.getWidth()
@@ -17,6 +18,8 @@ local darkCurrent = 0
 local animatedDebris = {}
 local mac = {}
 local endAnimation = 0
+local text = {}
+local texte = {}
 
 function deathAnim.load()
     -- Scaling init
@@ -26,15 +29,19 @@ function deathAnim.load()
     screenWidthA = love.graphics.getWidth()
     screenHeightA = love.graphics.getHeight()
 
+    darkOffset = 0
+    darkCurrent = 0
     endAnimation = 0
 
-    loadAnimations()
-    -- print("Animations loaded")
+    font = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 100 * math.min(scaleStuff("w"), scaleStuff("h")))
+
+    loadAnimations1()
+    -- print("Load Function called")
 end
 
 function deathAnim.update(dt)
 
-    updateAnimations(dt)
+    updateAnimations1(dt)
 
     if love.keyboard.isDown('p') then -- DEBUG
         return "playerDeath"
@@ -66,12 +73,10 @@ function deathAnim.draw()
         mac.trafficScaleX, mac.trafficScaleY,
         mac.trafficRotationX, mac.trafficRotationY)
     end
-    if mac.playerAppear == 1 then
-        love.graphics.draw(mac.playerImage, math.floor(mac.playerx),
-        math.floor(mac.playery), mac.playerRotation,
-        mac.playerScaleX, mac.playerScaleY,
-        mac.playerRotationX, mac.playerRotationY)
-    end
+    love.graphics.draw(mac.playerImage, math.floor(mac.playerx),
+    math.floor(mac.playery), mac.playerRotation,
+    mac.playerScaleX, mac.playerScaleY,
+    mac.playerRotationX, mac.playerRotationY)
     local debrisImage = love.graphics.newImage("Sprites/debris.png")
     local debrisRX = debrisImage:getWidth() / 2
     local debrisRY = debrisImage:getHeight() / 2
@@ -84,7 +89,12 @@ function deathAnim.draw()
 
     drawRectangle(mac.box1x, mac.box1y, mac.box1Width, mac.box1Height, mac.box1Rotation, mac.box1Color)
     drawRectangle(mac.box2x, mac.box2y, mac.box2Width, mac.box2Height, mac.box2Rotation, mac.box2Color)
-    
+
+    love.graphics.setColor(text.color)
+    love.graphics.print(text.content, text.x, text.y, 0, text.size / 50)
+    love.graphics.setColor(texte.color)
+    love.graphics.print(texte.content, texte.x, texte.y, 0, texte.size / 50)
+
     CScreen.cease()
 end
 
@@ -116,7 +126,7 @@ function drawRectangle(x, y, width, height, rotation, color)
     love.graphics.pop()
 end
 
-function loadAnimations()
+function loadAnimations1()
     animScale = 1
 
     menuAnimationImages = {
@@ -133,7 +143,6 @@ function loadAnimations()
         playerRotationY = menuAnimationImages.playerCar:getHeight() / 2,
         playerScaleX = animScale,
         playerScaleY = animScale,
-        playerAppear = 1,
         playerImage = menuAnimationImages.playerCar,
 
         trafficx = 1050, -- Traffic Car
@@ -158,13 +167,13 @@ function loadAnimations()
         roadAppear = 0,
         roadImage = menuAnimationImages.road,
 
-        box1x = screenWidth/3,
+        box1x = screenWidth/5 - 400,
         box1y = 0,
         box1Rotation = math.rad(45),
         box1Width = screenHeight+100,
         box1Height = 50,
         box1Color = {1, 0, 0},
-        box2x = 2*screenWidth/3,
+        box2x = 4*screenWidth/5 + 400,
         box2y = screenHeight,
         box2Rotation = math.rad(45),
         box2Width = screenHeight+100,
@@ -176,14 +185,33 @@ function loadAnimations()
         counter = 0
     }
 
-    addDebris(950, 550, 0, 3.6, -.1, -.005)
-    addDebris(850, 450, 1, 3.5, -.1, .004)
-    addDebris(850, 400, 2, 3.4, -.1, -.003)
-    addDebris(900, 350, 2, 3.5, -.1, .003)
-    addDebris(750, 400, 2, 3.7, -.1, -.004)
+    clearDebris1()
+    addDebris1(950, 550, 0, 3.6, -.1, -.005)
+    addDebris1(850, 450, 1, 3.5, -.1, .004)
+    addDebris1(850, 400, 2, 3.4, -.1, -.003)
+    addDebris1(900, 350, 2, 3.5, -.1, .003)
+    addDebris1(750, 400, 2, 3.7, -.1, -.004)
+
+    love.graphics.setFont(font)
+
+    text = {
+        content = "Busted!",
+        x = screenWidth/2,
+        y = screenHeight/2,
+        size = 100 * math.min(scaleStuff("w"), scaleStuff("h")),
+        color = {1, 0, 0, 1} -- Red color
+    }
+    
+    texte = {
+        content = "Busted!",
+        x = screenWidth/2,
+        y = screenHeight/2,
+        size = 100 * math.min(scaleStuff("w"), scaleStuff("h")),
+        color = {1, 0, 0, 1} -- White color
+    }    
 end
 
-function updateAnimations(dt)
+function updateAnimations1(dt)
     local darkDifference = darkOffset - darkCurrent
     darkCurrent = darkCurrent + darkDifference * 0.2
 
@@ -206,11 +234,18 @@ function updateAnimations(dt)
     mac.playerRotation = mac.playerRotation + math.rad(0.2)
     mac.trafficRotation = mac.trafficRotation + math.rad(-0.16)
 
-    updateRoad()
+    text.size = text.size - 10 * dt
+    if text.size < 0 then text.size = 0 end
+
+    texte.size = texte.size + 10 * dt
+    texte.color[4] = texte.color[4] - 0.5 * dt
+    if texte.color[4] < 0 then texte.color[4] = 0 end
+
+    updateRoad1()
     updateDebris2()
 end
 
-function updateRoad()
+function updateRoad1()
     -- mac.road1x = math.floor(mac.road1x)
     -- mac.road1y = math.floor(mac.road1y)
     local roadEndX = mac.road1x - (mac.roadImage:getHeight() * (animScale * 8)) * math.cos(mac.roadRotation + math.rad(90))
@@ -220,7 +255,7 @@ function updateRoad()
     mac.road2y = roadEndY
 end
 
-function addDebris(x, y, rotation, speedX, speedY, rotationSpeed)
+function addDebris1(x, y, rotation, speedX, speedY, rotationSpeed)
     local debris = {
         x = x,
         y = y,
@@ -235,7 +270,7 @@ function addDebris(x, y, rotation, speedX, speedY, rotationSpeed)
     table.insert(animatedDebris, debris)
 end
 
-function clearDebris()
+function clearDebris1()
     animatedDebris = {}
 end
 
