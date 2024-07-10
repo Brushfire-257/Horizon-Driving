@@ -90,45 +90,19 @@ function deathAnim.draw()
     drawRectangle(mac.box1x, mac.box1y, mac.box1Width, mac.box1Height, mac.box1Rotation, mac.box1Color)
     drawRectangle(mac.box2x, mac.box2y, mac.box2Width, mac.box2Height, mac.box2Rotation, mac.box2Color)
 
+    love.graphics.setFont(font)
     love.graphics.setColor(text.color)
-    love.graphics.print(text.content, text.x, text.y, 0, text.size / 50)
+    love.graphics.print(text.content, text.x, text.y, math.rad(45))
+    love.graphics.setFont(font1)
     love.graphics.setColor(texte.color)
-    love.graphics.print(texte.content, texte.x, texte.y, 0, texte.size / 50)
+    love.graphics.print(texte.content, texte.x, texte.y, math.rad(45))
 
     CScreen.cease()
 end
 
-function drawRectangle(x, y, width, height, rotation, color)
-    -- Save the current transformation
-    love.graphics.push()
-
-    -- Set the color
-    if color then
-        love.graphics.setColor(color)
-    end
-
-    -- Translate to the rectangle's location
-    if x and y then
-        love.graphics.translate(x, y)
-    end
-
-    -- Rotate by the rectangle's rotation
-    if rotation then
-        love.graphics.rotate(rotation)
-    end
-
-    -- Draw the rectangle
-    if width and height then
-        love.graphics.rectangle('fill', -width / 2, -height / 2, width, height)
-    end
-
-    -- Restore the transformation
-    love.graphics.pop()
-end
-
 function loadAnimations1()
     animScale = 1
-
+    
     menuAnimationImages = {
         playerCar = love.graphics.newImage("Sprites/yellowcar.png"),
         trafficCar = love.graphics.newImage("Sprites/yellowcar.png"),
@@ -144,7 +118,7 @@ function loadAnimations1()
         playerScaleX = animScale,
         playerScaleY = animScale,
         playerImage = menuAnimationImages.playerCar,
-
+        
         trafficx = 1050, -- Traffic Car
         trafficy = 500,
         trafficRotation = math.rad(-25),
@@ -154,7 +128,7 @@ function loadAnimations1()
         trafficScaleY = animScale,
         trafficAppear = 1,
         trafficImage = menuAnimationImages.trafficCar,
-
+        
         road1x = 0,
         road2x = 0,
         road1y = 2600,
@@ -167,80 +141,94 @@ function loadAnimations1()
         roadAppear = 0,
         roadImage = menuAnimationImages.road,
 
-        box1x = screenWidth/5 - 400,
+        box1x = screenWidth/5 - 500,
         box1y = 0,
         box1Rotation = math.rad(45),
         box1Width = screenHeight+100,
         box1Height = 50,
         box1Color = {1, 0, 0},
-        box2x = 4*screenWidth/5 + 400,
+        box2x = 4*screenWidth/5 + 500,
         box2y = screenHeight,
         box2Rotation = math.rad(45),
         box2Width = screenHeight+100,
         box2Height = 50,
         box2Color = {1, 0, 0},
         boxAlpha = 1,
-
+        
         timer = 4,
         counter = 0
     }
-
+    
     clearDebris1()
     addDebris1(950, 550, 0, 3.6, -.1, -.005)
     addDebris1(850, 450, 1, 3.5, -.1, .004)
     addDebris1(850, 400, 2, 3.4, -.1, -.003)
     addDebris1(900, 350, 2, 3.5, -.1, .003)
     addDebris1(750, 400, 2, 3.7, -.1, -.004)
-
+    
     love.graphics.setFont(font)
-
+    
     text = {
         content = "Busted!",
-        x = screenWidth/2,
-        y = screenHeight/2,
-        size = 100 * math.min(scaleStuff("w"), scaleStuff("h")),
-        color = {1, 0, 0, 1} -- Red color
+        x = screenWidth/2 - 500,
+        y = screenHeight/2 - 150,
+        scale = 100,
+        color = {1, 0, 0, 1}
     }
     
     texte = {
         content = "Busted!",
-        x = screenWidth/2,
-        y = screenHeight/2,
-        size = 100 * math.min(scaleStuff("w"), scaleStuff("h")),
-        color = {1, 0, 0, 1} -- White color
+        x = screenWidth/2 - 500,
+        y = screenHeight/2 - 150,
+        scale = 100,
+        color = {1, 0, 0, 1}
     }    
 end
 
 function updateAnimations1(dt)
     local darkDifference = darkOffset - darkCurrent
     darkCurrent = darkCurrent + darkDifference * 0.2
-
+    
     print(mac.timer)
-
+    
     mac.timer = mac.timer - dt
-
+    
     if mac.timer <= 0 then endAnimation = 1 end
-
+    
     if mac.timer <= 0.3 then darkOffset = 1 end
-
+    
     mac.road1x = mac.road1x - 1
-
+    
     mac.playerx = mac.playerx + 4
     mac.trafficx = mac.trafficx + 4.2
-
+    
     -- mac.playery = mac.playery + 0.1
     mac.trafficy = mac.trafficy - 0.15
-
+    
     mac.playerRotation = mac.playerRotation + math.rad(0.2)
     mac.trafficRotation = mac.trafficRotation + math.rad(-0.16)
 
-    text.size = text.size - 10 * dt
-    if text.size < 0 then text.size = 0 end
+    font = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", text.scale * math.min(scaleStuff("w"), scaleStuff("h")))
+    font1 = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", texte.scale * math.min(scaleStuff("w"), scaleStuff("h")))
+    love.graphics.setFont(font)
 
-    texte.size = texte.size + 10 * dt
-    texte.color[4] = texte.color[4] - 0.5 * dt
+    local textWidth = font:getWidth(text.content)
+    local textHeight = font:getHeight()
+
+    text.x = mac.box1x + 100
+    text.y = (screenHeight/2) - (textHeight/2)
+
+    love.graphics.setFont(font1)
+
+    local textWidth = font:getWidth(texte.content)
+    local textHeight = font:getHeight()
+
+    texte.x = mac.box2x - 100
+    texte.y = (screenHeight/2) - (textHeight/2)
+    
+    texte.color[4] = texte.color[4] - 1 * dt
     if texte.color[4] < 0 then texte.color[4] = 0 end
-
+    
     updateRoad1()
     updateDebris2()
 end
@@ -250,7 +238,7 @@ function updateRoad1()
     -- mac.road1y = math.floor(mac.road1y)
     local roadEndX = mac.road1x - (mac.roadImage:getHeight() * (animScale * 8)) * math.cos(mac.roadRotation + math.rad(90))
     local roadEndY = mac.road1y - (mac.roadImage:getHeight() * (animScale * 8)) * math.sin(mac.roadRotation + math.rad(90))
-
+    
     mac.road2x = roadEndX
     mac.road2y = roadEndY
 end
@@ -284,7 +272,7 @@ end
 
 function love.keypressed(key)
     if key == "1" then -- Exit the game (Debug)
-      love.event.quit()
+        love.event.quit()
     end
 end
 
@@ -297,8 +285,36 @@ function scaleStuff(widthorheight)
     else
         print("Function usage error: scaleStuff() w/h not specified.")
     end
-
+    
     return scale
+end
+
+function drawRectangle(x, y, width, height, rotation, color)
+    -- Save the current transformation
+    love.graphics.push()
+
+    -- Set the color
+    if color then
+        love.graphics.setColor(color)
+    end
+
+    -- Translate to the rectangle's location
+    if x and y then
+        love.graphics.translate(x, y)
+    end
+
+    -- Rotate by the rectangle's rotation
+    if rotation then
+        love.graphics.rotate(rotation)
+    end
+
+    -- Draw the rectangle
+    if width and height then
+        love.graphics.rectangle('fill', -width / 2, -height / 2, width, height)
+    end
+
+    -- Restore the transformation
+    love.graphics.pop()
 end
 
 return deathAnim
