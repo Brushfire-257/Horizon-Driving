@@ -15,6 +15,7 @@ local darkCurrent = 0
 
 -- anim setup
 local animatedDebris = {}
+local mac = {}
 local endAnimation = 0
 
 function deathAnim.load()
@@ -25,7 +26,10 @@ function deathAnim.load()
     screenWidthA = love.graphics.getWidth()
     screenHeightA = love.graphics.getHeight()
 
+    endAnimation = 0
+
     loadAnimations()
+    -- print("Animations loaded")
 end
 
 function deathAnim.update(dt)
@@ -77,8 +81,39 @@ function deathAnim.draw()
             debrisRX, debrisRY)
             love.graphics.setColor(1 - darkCurrent, 1 - darkCurrent, 1 - darkCurrent, 1)
     end
+
+    drawRectangle(mac.box1x, mac.box1y, mac.box1Width, mac.box1Height, mac.box1Rotation, mac.box1Color)
+    drawRectangle(mac.box2x, mac.box2y, mac.box2Width, mac.box2Height, mac.box2Rotation, mac.box2Color)
     
     CScreen.cease()
+end
+
+function drawRectangle(x, y, width, height, rotation, color)
+    -- Save the current transformation
+    love.graphics.push()
+
+    -- Set the color
+    if color then
+        love.graphics.setColor(color)
+    end
+
+    -- Translate to the rectangle's location
+    if x and y then
+        love.graphics.translate(x, y)
+    end
+
+    -- Rotate by the rectangle's rotation
+    if rotation then
+        love.graphics.rotate(rotation)
+    end
+
+    -- Draw the rectangle
+    if width and height then
+        love.graphics.rectangle('fill', -width / 2, -height / 2, width, height)
+    end
+
+    -- Restore the transformation
+    love.graphics.pop()
 end
 
 function loadAnimations()
@@ -91,8 +126,8 @@ function loadAnimations()
     }
 
     mac = { -- Menu animation container
-        playerx = 400, -- Player Car
-        playery = 200,
+        playerx = 600, -- Player Car
+        playery = 500,
         playerRotation = 0,
         playerRotationX = menuAnimationImages.playerCar:getWidth() / 2,
         playerRotationY = menuAnimationImages.playerCar:getHeight() / 2,
@@ -101,9 +136,9 @@ function loadAnimations()
         playerAppear = 1,
         playerImage = menuAnimationImages.playerCar,
 
-        trafficx = 500, -- Traffic Car
+        trafficx = 1050, -- Traffic Car
         trafficy = 500,
-        trafficRotation = 0,
+        trafficRotation = math.rad(-25),
         trafficRotationX = menuAnimationImages.trafficCar:getWidth() / 2,
         trafficRotationY = menuAnimationImages.trafficCar:getHeight() / 2,
         trafficScaleX = animScale,
@@ -123,21 +158,53 @@ function loadAnimations()
         roadAppear = 0,
         roadImage = menuAnimationImages.road,
 
+        box1x = screenWidth/3,
+        box1y = 0,
+        box1Rotation = math.rad(45),
+        box1Width = screenHeight+100,
+        box1Height = 50,
+        box1Color = {1, 0, 0},
+        box2x = 2*screenWidth/3,
+        box2y = screenHeight,
+        box2Rotation = math.rad(45),
+        box2Width = screenHeight+100,
+        box2Height = 50,
+        box2Color = {1, 0, 0},
+        boxAlpha = 1,
+
         timer = 4,
         counter = 0
     }
+
+    addDebris(950, 550, 0, 3.6, -.1, -.005)
+    addDebris(850, 450, 1, 3.5, -.1, .004)
+    addDebris(850, 400, 2, 3.4, -.1, -.003)
+    addDebris(900, 350, 2, 3.5, -.1, .003)
+    addDebris(750, 400, 2, 3.7, -.1, -.004)
 end
 
 function updateAnimations(dt)
-    darkOffset = 0
     local darkDifference = darkOffset - darkCurrent
     darkCurrent = darkCurrent + darkDifference * 0.2
+
+    print(mac.timer)
 
     mac.timer = mac.timer - dt
 
     if mac.timer <= 0 then endAnimation = 1 end
 
+    if mac.timer <= 0.3 then darkOffset = 1 end
+
     mac.road1x = mac.road1x - 1
+
+    mac.playerx = mac.playerx + 4
+    mac.trafficx = mac.trafficx + 4.2
+
+    -- mac.playery = mac.playery + 0.1
+    mac.trafficy = mac.trafficy - 0.15
+
+    mac.playerRotation = mac.playerRotation + math.rad(0.2)
+    mac.trafficRotation = mac.trafficRotation + math.rad(-0.16)
 
     updateRoad()
     updateDebris2()

@@ -122,7 +122,7 @@ function arcadeGame.update(dt) -- Runs every frame.
     
     -- Exit game?
     if exitGame == 1 then
-        return "gameEndscreen"
+        return "playerDeath"
     end
 
     -- Moved down here so it only updates if the game is actually running

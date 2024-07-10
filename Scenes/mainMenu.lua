@@ -15,6 +15,7 @@ local screenWidthA = love.graphics.getWidth()
 local screenHeightA = love.graphics.getHeight()
 local screenWidth = 1920
 local screenHeight = 1080
+local mac = {}
 
 local darkOffset = 0
 local darkCurrent = 0
