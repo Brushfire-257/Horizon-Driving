@@ -63,6 +63,13 @@ function mainMenu.load()
 
     loadAnimations()
 
+    -- Load sound(s)
+    bgSong = love.audio.newSource("Sounds/NaturalHighSnip.mp3", "stream")
+    bgSong:setLooping(true)
+
+    -- Play bg song
+    bgSong:play()
+
     -- Set SUIT colors
     suit.theme.color.normal.fg = {255,255,255}
     suit.theme.color.hovered = {bg = {200,230,255}, fg = {0,0,0}}
@@ -95,6 +102,7 @@ function mainMenu.update(dt)
     updateAnimations(dt)
 
     if love.keyboard.isDown('p') then -- DEBUG
+        bgSong:stop()
         return "mainMenu"
     end
 
@@ -110,6 +118,7 @@ function mainMenu.update(dt)
         if suit.Button("Play", 50 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
         300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
             firstMenuLoad = 0
+            bgSong:stop()
             return "startGame"
         end
 

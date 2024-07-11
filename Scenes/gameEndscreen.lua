@@ -33,6 +33,13 @@ function gameEndscreen.load()
     font2 = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 50 * math.min(scaleStuff("w"), scaleStuff("h")))
     font3 = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 25 * math.min(scaleStuff("w"), scaleStuff("h")))
     love.graphics.setFont(font)
+    
+    -- Load sound(s)
+    bgSong = love.audio.newSource("Sounds/bustedsong.wav", "static")
+    bgSong:setLooping(true)
+
+    -- Play bg song
+    bgSong:play()
 
     -- Scaling init
     -- CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, debugMode)
@@ -53,6 +60,7 @@ function gameEndscreen.update(dt)
     love.graphics.setFont(font1)
 
     if suit.Button("Continue", (screenWidth - 425) * scaleStuff("w"), 25 * scaleStuff("h"), 400 * scaleStuff("w"), 100 * scaleStuff("h")).hit then
+        bgSong:stop()
         return "mainMenu"
     end
 

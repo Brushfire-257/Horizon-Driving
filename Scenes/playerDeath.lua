@@ -40,6 +40,12 @@ function deathAnim.load()
 
     loadAnimations1()
     -- print("Load Function called")
+
+    -- Load sfx
+    local sfx1 = love.audio.newSource("Sounds/sfx/Busted.wav", "static")
+    
+    -- Play sfx
+    sfx1:play()
 end
 
 function deathAnim.update(dt)
@@ -93,15 +99,14 @@ function deathAnim.draw()
     drawRectangle(mac.box1x, mac.box1y, mac.box1Width, mac.box1Height, mac.box1Rotation, text.color)
     drawRectangle(mac.box2x, mac.box2y, mac.box2Width, mac.box2Height, mac.box2Rotation, text.color)
 
-    local textWidth = font:getWidth(text.content) * math.cos(math.rad(45))
-    local textHeight = font:getHeight() * math.sin(math.rad(45))
-
     love.graphics.setFont(font)
     love.graphics.setColor(text.color)
-    love.graphics.print(text.content, text.x + (textWidth/2), text.y - (textHeight/2), math.rad(45))
+    love.graphics.print(text.content, text.x, text.y, math.rad(45))
     love.graphics.setColor(text2.color)
-    love.graphics.print(text2.content, text2.x + (textWidth/2), text2.y - (textHeight/2), math.rad(45))
+    love.graphics.print(text2.content, text2.x, text2.y, math.rad(45))
 
+    -- local textWidth = font:getWidth(text.content)
+    -- local textHeight = font:getHeight()
 
     -- text.x = mac.box1x + 100
     -- text.y = (screenHeight/2) - (textHeight/2)
@@ -176,19 +181,21 @@ function loadAnimations1()
     addDebris1(750, 400, 2, 3.7, -.1, -.004)
     
     love.graphics.setFont(font)
+
+    local xyOffset = 350
     
     text = {
         content = "Busted!",
-        x = screenWidth/5 - 1200 + 350,
-        y = -700,
+        x = screenWidth/5 - 1200 + 350 - xyOffset,
+        y = -700 - xyOffset,
         scale = 100,
         color = {1, 0, 0, 1}
     }
     
     text2 = {
         content = "Busted!",
-        x = 4*screenWidth/5 + 1200 - 200,
-        y = screenHeight + 700,
+        x = 4*screenWidth/5 + 1200 - 50 - xyOffset,
+        y = screenHeight + 700 - xyOffset,
         scale = 100,
         color = {1, 0, 0, 1}
     }    
