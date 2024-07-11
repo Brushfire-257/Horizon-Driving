@@ -761,7 +761,7 @@ function loadDebris()
     }
 end
 
-function addDebris(x, y, rotation, velx, vely)
+function addDebris2(x, y, rotation, velx, vely)
     local debrisCopy = deepcopy(debrisSprite)
     debrisCopy.x = x
     debrisCopy.y = y
@@ -1256,7 +1256,7 @@ function updateTraffic(dt)
 
         for i = 1, math.floor(math.random(3,5)) do
             local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
-            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+            addDebris2(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
         end
         camerayShake = camerayShake + 1000
         trafficRight.crashed = 1
@@ -1283,7 +1283,7 @@ function updateTraffic(dt)
 
         for i = 1, math.floor(math.random(3,5)) do
             local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
-            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+            addDebris2(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
         end
         camerayShake = camerayShake + 1000
         trafficLeft.crashed = 1
@@ -1443,7 +1443,7 @@ function updateEMP(dt)
         
         for i = 1, math.floor(math.random(3,5)) do
             local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
-            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+            addDebris2(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
         end
         camerayShake = camerayShake + 1000
     end
@@ -1592,7 +1592,7 @@ function updateSpikestrip(dt)
 
         for i = 1, math.floor(math.random(3,5)) do
             local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
-            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+            addDebris2(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
         end
         camerayShake = camerayShake + 1000
     end
@@ -1798,7 +1798,7 @@ function updatePolice(dt)
 
         local velx, vely = splitSpeed(carSprite.speed, carSprite.rotation)
         for i = 1, math.floor(math.random(3,5)) do
-            addDebris(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+            addDebris2(carSprite.x + math.random(-50, 50), carSprite.y + math.random(-50, 50), carSprite.rotation + math.random(-0.2, 0.2), velx, vely)
         end
         if playerDifferencex > 0 then
             policeSprite.velocityx = 75 + carSprite.speed * 0.2

@@ -29,7 +29,7 @@ function love.load()
     -- CScreen.init(1920, 1080, true)
 
     -- Load the menu state
-    state.current = require("Scenes/playerDeath")
+    state.current = require("Scenes/mainMenu")
     state.current.load()
 end
 

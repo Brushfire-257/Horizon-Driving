@@ -45,12 +45,12 @@ function gameEndscreen.load()
     -- CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, debugMode)
 
     -- Update Highscores
-    -- if distanceTraveled > gameData.distanceTraveledHIGHSCORE then gameData.distanceTraveledHIGHSCORE = distanceTraveled end -- TURNED OFF FOR DEBUGGING THINGIES
-    -- if nearMisses > gameData.nearMissesHIGHSCORE then gameData.nearMissesHIGHSCORE = nearMisses end
-    -- if awesomeNearMisses > gameData.awesomeNearMissesHIGHSCORE then gameData.awesomeNearMissesHIGHSCORE = awesomeNearMisses end
-    -- if policeTakedowns > gameData.policeTakedownsHIGHSCORE then gameData.policeTakedownsHIGHSCORE = policeTakedowns end
-    -- if EMPDodges > gameData.EMPDodgesHIGHSCORE then gameData.EMPDodgesHIGHSCORE = EMPDodges end
-    -- if timeSurvived > gameData.timeSurvivedHIGHSCORE then gameData.timeSurvivedHIGHSCORE = timeSurvived end
+    if distanceTraveled > gameData.distanceTraveledHIGHSCORE then gameData.distanceTraveledHIGHSCORE = distanceTraveled end -- TURNED OFF FOR DEBUGGING THINGIES
+    if nearMisses > gameData.nearMissesHIGHSCORE then gameData.nearMissesHIGHSCORE = nearMisses end
+    if awesomeNearMisses > gameData.awesomeNearMissesHIGHSCORE then gameData.awesomeNearMissesHIGHSCORE = awesomeNearMisses end
+    if policeTakedowns > gameData.policeTakedownsHIGHSCORE then gameData.policeTakedownsHIGHSCORE = policeTakedowns end
+    if EMPDodges > gameData.EMPDodgesHIGHSCORE then gameData.EMPDodgesHIGHSCORE = EMPDodges end
+    if timeSurvived > gameData.timeSurvivedHIGHSCORE then gameData.timeSurvivedHIGHSCORE = timeSurvived end
 end
 
 function gameEndscreen.update(dt)
@@ -70,29 +70,34 @@ function gameEndscreen.update(dt)
     suit.Label("Highscores:", {align = "left"},
     (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
     love.graphics.setFont(font2)
-    -- suit.Label("Distance Traveled: " .. distanceTraveled * 0.1 / 60, {align = "left"}, -- TURNED OFF FOR DEBUGGING THINGIES
-    -- (25 * scaleStuff("w")), (125 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    -- suit.Label("Near Misses: " .. nearMisses, {align = "left"},
-    -- (25 * scaleStuff("w")), (225 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    -- suit.Label("Awesome Near Misses: " .. awesomeNearMisses, {align = "left"},
-    -- (25 * scaleStuff("w")), (325 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    -- suit.Label("Police Takedowns: " .. policeTakedowns, {align = "left"},
-    -- (25 * scaleStuff("w")), (425 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    -- suit.Label("EMP Dodges: " .. EMPDodges, {align = "left"},
-    -- (25 * scaleStuff("w")), (525 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    -- suit.Label("Time Survived: " .. timeSurvived, {align = "left"},
-    -- (25 * scaleStuff("w")), (625 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+    local decimalPlaces = 2
+    suit.Label("Distance Traveled: " .. roundNumber(distanceTraveled * 0.1 / 60, decimalPlaces), {align = "left"},
+    (25 * scaleStuff("w")), (125 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+    suit.Label("Near Misses: " .. roundNumber(nearMisses, decimalPlaces), {align = "left"},
+    (25 * scaleStuff("w")), (225 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+    suit.Label("Awesome Near Misses: " .. roundNumber(awesomeNearMisses, decimalPlaces), {align = "left"},
+    (25 * scaleStuff("w")), (325 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+    suit.Label("Police Takedowns: " .. roundNumber(policeTakedowns, decimalPlaces), {align = "left"},
+    (25 * scaleStuff("w")), (425 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+    suit.Label("EMP Dodges: " .. roundNumber(EMPDodges, decimalPlaces), {align = "left"},
+    (25 * scaleStuff("w")), (525 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+    suit.Label("Time Survived: " .. roundNumber(timeSurvived, decimalPlaces), {align = "left"},
+    (25 * scaleStuff("w")), (625 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
     
     return nil
 end
 
 function gameEndscreen.draw()
     -- CScreen.apply()
-
+    
     -- Draw GUI
     suit.draw()
-
+    
     -- CScreen.cease()
+end
+
+function roundNumber(number, decimalPlaces) -- Currently just cuts it off at that specified decimal
+    return math.floor(number * (math.pow(10, decimalPlaces))) / (math.pow(10, decimalPlaces))
 end
 
 function love.keypressed(key)

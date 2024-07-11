@@ -43,7 +43,7 @@ function deathAnim.load()
 
     -- Load sfx
     local sfx1 = love.audio.newSource("Sounds/sfx/Busted.wav", "static")
-    
+
     -- Play sfx
     sfx1:play()
 end
@@ -198,7 +198,9 @@ function loadAnimations1()
         y = screenHeight + 700 - xyOffset,
         scale = 100,
         color = {1, 0, 0, 1}
-    }    
+    }
+
+    speedOffset = 1000
 end
 
 function updateAnimations1(dt)
