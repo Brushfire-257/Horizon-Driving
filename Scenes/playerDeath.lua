@@ -14,12 +14,15 @@ local screenHeight = 1080
 local darkOffset = 0
 local darkCurrent = 0
 
+local speedOffset = 1000
+local speedCurrent = 1000
+
 -- anim setup
 local animatedDebris = {}
 local mac = {}
 local endAnimation = 0
 local text = {}
-local texte = {}
+local text2 = {}
 
 function deathAnim.load()
     -- Scaling init
@@ -33,7 +36,7 @@ function deathAnim.load()
     darkCurrent = 0
     endAnimation = 0
 
-    font = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 100 * math.min(scaleStuff("w"), scaleStuff("h")))
+    font = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 200 * math.min(scaleStuff("w"), scaleStuff("h")))
 
     loadAnimations1()
     -- print("Load Function called")
@@ -87,15 +90,21 @@ function deathAnim.draw()
             love.graphics.setColor(1 - darkCurrent, 1 - darkCurrent, 1 - darkCurrent, 1)
     end
 
-    drawRectangle(mac.box1x, mac.box1y, mac.box1Width, mac.box1Height, mac.box1Rotation, mac.box1Color)
-    drawRectangle(mac.box2x, mac.box2y, mac.box2Width, mac.box2Height, mac.box2Rotation, mac.box2Color)
+    drawRectangle(mac.box1x, mac.box1y, mac.box1Width, mac.box1Height, mac.box1Rotation, text.color)
+    drawRectangle(mac.box2x, mac.box2y, mac.box2Width, mac.box2Height, mac.box2Rotation, text.color)
+
+    local textWidth = font:getWidth(text.content) * math.cos(math.rad(45))
+    local textHeight = font:getHeight() * math.sin(math.rad(45))
 
     love.graphics.setFont(font)
     love.graphics.setColor(text.color)
-    love.graphics.print(text.content, text.x, text.y, math.rad(45))
-    love.graphics.setFont(font1)
-    love.graphics.setColor(texte.color)
-    love.graphics.print(texte.content, texte.x, texte.y, math.rad(45))
+    love.graphics.print(text.content, text.x + (textWidth/2), text.y - (textHeight/2), math.rad(45))
+    love.graphics.setColor(text2.color)
+    love.graphics.print(text2.content, text2.x + (textWidth/2), text2.y - (textHeight/2), math.rad(45))
+
+
+    -- text.x = mac.box1x + 100
+    -- text.y = (screenHeight/2) - (textHeight/2)
 
     CScreen.cease()
 end
@@ -141,16 +150,16 @@ function loadAnimations1()
         roadAppear = 0,
         roadImage = menuAnimationImages.road,
 
-        box1x = screenWidth/5 - 500,
-        box1y = 0,
+        box1x = screenWidth/5 - 1200,
+        box1y = -700,
         box1Rotation = math.rad(45),
-        box1Width = screenHeight+100,
+        box1Width = screenHeight+700,
         box1Height = 50,
         box1Color = {1, 0, 0},
-        box2x = 4*screenWidth/5 + 500,
-        box2y = screenHeight,
+        box2x = 4*screenWidth/5 + 1200,
+        box2y = screenHeight + 700,
         box2Rotation = math.rad(45),
-        box2Width = screenHeight+100,
+        box2Width = screenHeight+700,
         box2Height = 50,
         box2Color = {1, 0, 0},
         boxAlpha = 1,
@@ -170,16 +179,16 @@ function loadAnimations1()
     
     text = {
         content = "Busted!",
-        x = screenWidth/2 - 500,
-        y = screenHeight/2 - 150,
+        x = screenWidth/5 - 1200 + 350,
+        y = -700,
         scale = 100,
         color = {1, 0, 0, 1}
     }
     
-    texte = {
+    text2 = {
         content = "Busted!",
-        x = screenWidth/2 - 500,
-        y = screenHeight/2 - 150,
+        x = 4*screenWidth/5 + 1200 - 200,
+        y = screenHeight + 700,
         scale = 100,
         color = {1, 0, 0, 1}
     }    
@@ -188,6 +197,9 @@ end
 function updateAnimations1(dt)
     local darkDifference = darkOffset - darkCurrent
     darkCurrent = darkCurrent + darkDifference * 0.2
+
+    local speedDifference = speedOffset - speedCurrent
+    speedCurrent = speedCurrent + speedDifference * 0.04
     
     print(mac.timer)
     
@@ -197,37 +209,54 @@ function updateAnimations1(dt)
     
     if mac.timer <= 0.3 then darkOffset = 1 end
     
-    mac.road1x = mac.road1x - 1
+    mac.road1x = mac.road1x - 1 * (speedCurrent / 1000)
     
-    mac.playerx = mac.playerx + 4
-    mac.trafficx = mac.trafficx + 4.2
+    mac.playerx = mac.playerx + 4 * (speedCurrent / 1000)
+    mac.trafficx = mac.trafficx + 4.2 * (speedCurrent / 1000)
     
     -- mac.playery = mac.playery + 0.1
-    mac.trafficy = mac.trafficy - 0.15
+    mac.trafficy = mac.trafficy - 0.15 * (speedCurrent / 1000)
     
-    mac.playerRotation = mac.playerRotation + math.rad(0.2)
-    mac.trafficRotation = mac.trafficRotation + math.rad(-0.16)
+    mac.playerRotation = mac.playerRotation + math.rad(0.2) * (speedCurrent / 1000)
+    mac.trafficRotation = mac.trafficRotation + math.rad(-0.16) * (speedCurrent / 1000)
 
-    font = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", text.scale * math.min(scaleStuff("w"), scaleStuff("h")))
-    font1 = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", texte.scale * math.min(scaleStuff("w"), scaleStuff("h")))
-    love.graphics.setFont(font)
+    if mac.timer < 3 and mac.timer > 2.3 then
+        speedOffset = 1000
+        mac.box1x = mac.box1x + 2000 * dt
+        mac.box1y = mac.box1y + 2000 * dt
+        mac.box2x = mac.box2x - 2000 * dt
+        mac.box2y = mac.box2y - 2000 * dt
 
-    local textWidth = font:getWidth(text.content)
-    local textHeight = font:getHeight()
+        text.x = text.x + speedCurrent * dt
+        text.y = text.y + speedCurrent * dt
+        text2.x = text2.x - speedCurrent * dt
+        text2.y = text2.y - speedCurrent * dt
+    elseif mac.timer < 3 then
+        speedOffset = 200
+        text.x = text.x + speedCurrent * dt
+        text.y = text.y + speedCurrent * dt
+        text2.x = text2.x - speedCurrent * dt
+        text2.y = text2.y - speedCurrent * dt
+    end
 
-    text.x = mac.box1x + 100
-    text.y = (screenHeight/2) - (textHeight/2)
+    if mac.timer < 0.75 then
+        text.color[4] = text.color[4] - 2.5 * dt
+        if text.color[4] < 0 then text.color[4] = 0 end
+        text2.color[4] = text2.color[4] - 2.5 * dt
+        if text2.color[4] < 0 then text2.color[4] = 0 end
+    end
 
-    love.graphics.setFont(font1)
+    -- local textWidth = font:getWidth(text.content)
+    -- local textHeight = font:getHeight()
 
-    local textWidth = font:getWidth(texte.content)
-    local textHeight = font:getHeight()
+    -- text.x = mac.box1x + 100
+    -- text.y = (screenHeight/2) - (textHeight/2)
 
-    texte.x = mac.box2x - 100
-    texte.y = (screenHeight/2) - (textHeight/2)
+    -- text2.x = mac.box2x - 100
+    -- text2.y = (screenHeight/2) - (textHeight/2)
     
-    texte.color[4] = texte.color[4] - 1 * dt
-    if texte.color[4] < 0 then texte.color[4] = 0 end
+    -- text2.color[4] = text2.color[4] - 1 * dt
+    -- if text2.color[4] < 0 then text2.color[4] = 0 end
     
     updateRoad1()
     updateDebris2()
@@ -264,9 +293,9 @@ end
 
 function updateDebris2()
     for i, debris in ipairs(animatedDebris) do
-        debris.x = debris.x + debris.speedx
-        debris.y = debris.y + debris.speedy
-        debris.rotation = debris.rotation + debris.rotationSpeed
+        debris.x = debris.x + debris.speedx * (speedCurrent / 1000)
+        debris.y = debris.y + debris.speedy * (speedCurrent / 1000)
+        debris.rotation = debris.rotation + debris.rotationSpeed * (speedCurrent / 1000)
     end
 end
 
