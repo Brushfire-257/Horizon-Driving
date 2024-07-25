@@ -819,7 +819,7 @@ function loadCar()
     carSprite.prevX = 1000
     carSprite.prevY = 800
     carSprite.maxSpeed = 3500
-    carSprite.health = 1
+    carSprite.health = 30
     carSprite.maxHealth = 30
 
     -- Load Nitro
