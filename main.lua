@@ -33,15 +33,6 @@ function love.load()
     state.current.load()
 end
 
--- function loadHighscores()
---     distanceTraveledHIGHSCORE = 0
---     nearMissesHIGHSCORE = 0
---     awesomeNearMissesHIGHSCORE = 0
---     policeTakedownsHIGHSCORE = 0
---     EMPDodgesHIGHSCORE = 0
---     timeSurvivedHIGHSCORE = 0
--- end
-
 function love.update(dt) -- Runs every frame.
     -- Update the current state
     local nextState = state.current.update(dt)

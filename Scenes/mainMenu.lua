@@ -36,15 +36,6 @@ gameData = {
 }
 
 function mainMenu.load()
-    -- Update game data list
-    -- gameData = {
-    --     distanceTraveledHIGHSCORE,
-    --     nearMissesHIGHSCORE,
-    --     awesomeNearMissesHIGHSCORE,
-    --     policeTakedownsHIGHSCORE,
-    --     EMPDodgesHIGHSCORE,
-    --     timeSurvivedHIGHSCORE
-    -- }
 
     -- Scaling init
     CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, debugMode)
@@ -53,11 +44,23 @@ function mainMenu.load()
     screenWidthA = love.graphics.getWidth()
     screenHeightA = love.graphics.getHeight()
 
-    if firstStart == true then
+    if firstStart == false then
         -- saveGame()
         loadGame()
-        firstStart = false
+        firstStart = true
     else
+        gameData.playerGarage = {
+            {
+                carName = "Jerry",
+                carID = 1,
+                carImage = "path/to/image.png",
+            },
+            {
+                carName = "Berry",
+                carID = 2,
+                carImage = "path/to/image2.png",
+            }
+        }
         saveGame()
     end
 
@@ -682,27 +685,56 @@ end
 
 function tableToString(tbl, indent)
     if not indent then indent = '' end
-    local format = string.format
+    local nextIndent = indent .. '\t'
+    local lines = {}
 
     local function formatValue(v)
         if type(v) == 'string' then
-            return format('%q', v)
-        else
+            return string.format('%q', v)
+        elseif type(v) == 'number' or type(v) == 'boolean' then
             return tostring(v)
+        else
+            return 'nil'
         end
     end
 
-    local lines = {}
-    table.insert(lines, "{")
-    for k, v in pairs(tbl) do
-        if type(v) == 'table' then
-            table.insert(lines, format('%s%s = {\n%s\n%s},', indent, k, tableToString(v, indent .. '\t'), indent))
-        else
-            table.insert(lines, format('%s%s = %s,', indent, k, formatValue(v)))
+    local function tableToLines(tbl, indent)
+        local lines = {}
+        local isArray = true
+
+        for k, _ in pairs(tbl) do
+            if type(k) ~= 'number' or k % 1 ~= 0 then
+                isArray = false
+                break
+            end
         end
+
+        if isArray then
+            table.insert(lines, "{")
+            for i, v in ipairs(tbl) do
+                if type(v) == 'table' then
+                    table.insert(lines, string.format('%s%s', nextIndent, tableToString(v, nextIndent)))
+                else
+                    table.insert(lines, string.format('%s%s', nextIndent, formatValue(v)))
+                end
+            end
+            table.insert(lines, indent .. "}")
+        else
+            table.insert(lines, "{")
+            for k, v in pairs(tbl) do
+                local keyStr = type(k) == 'string' and string.format('%q', k) or tostring(k)
+                if type(v) == 'table' then
+                    table.insert(lines, string.format('%s%s = {\n%s\n%s},', indent, keyStr, tableToString(v, nextIndent), indent))
+                else
+                    table.insert(lines, string.format('%s%s = %s,', indent, keyStr, formatValue(v)))
+                end
+            end
+            table.insert(lines, indent .. "}")
+        end
+        return table.concat(lines, '\n')
     end
-    table.insert(lines, "}")
-    return table.concat(lines, '\n')
+
+    return tableToLines(tbl, indent)
 end
 
 function stringToTable(str)
@@ -720,13 +752,17 @@ function stringToTable(str)
 end
 
 function printTable(tbl, indent)
+    print("Save Data:")
+    printTable1(tbl, indent)
+end
+
+function printTable1(tbl, indent)
     if not indent then indent = '' end
     
-    print("Save Data:")
     for k, v in pairs(tbl) do
         if type(v) == 'table' then
             print(indent .. k .. " = ")
-            printTable(v, indent .. "  ")
+            printTable1(v, indent .. "  ")
         else
             print(indent .. k .. " = " .. tostring(v))
         end
