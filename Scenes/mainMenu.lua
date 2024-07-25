@@ -44,10 +44,10 @@ function mainMenu.load()
     screenWidthA = love.graphics.getWidth()
     screenHeightA = love.graphics.getHeight()
 
-    if firstStart == false then
+    if firstStart == true then
         -- saveGame()
         loadGame()
-        firstStart = true
+        firstStart = false
     else
         gameData.playerGarage = {
             {
@@ -656,11 +656,11 @@ end
 
 function loadGame()
     if love.filesystem.getInfo("saveFile.txt") and love.filesystem.read("saveFile.txt") ~= nil then
-        -- print(love.filesystem.read("saveFile.txt"))
         local str = love.filesystem.read("saveFile.txt")
+        -- print(str)
         gameData = stringToTable(str)
-        -- gameData["distanceTraveledHIGHSCORE"] = 100
-        if gameData["distanceTraveledHIGHSCORE"] ~= nil then
+        -- gameData.distanceTraveledHIGHSCORE = 10000
+        if gameData.distanceTraveledHIGHSCORE ~= nil then
             print("Game loaded!")
         else
             print("Error while loading gamesave!")
@@ -684,61 +684,40 @@ function file_exists(name)
 end
 
 function tableToString(tbl, indent)
-    if not indent then indent = '' end
-    local nextIndent = indent .. '\t'
+    indent = indent or ''
+    local format = string.format
+
+    local function formatKey(key)
+        if type(key) == 'string' and key:match('^[_%a][_%w]*$') then
+            return key
+        else
+            return format('[%s]', tostring(key))
+        end
+    end
+
+    local function formatValue(value)
+        if type(value) == 'string' then
+            return format('%q', value)
+        else
+            return tostring(value)
+        end
+    end
+
     local lines = {}
-
-    local function formatValue(v)
-        if type(v) == 'string' then
-            return string.format('%q', v)
-        elseif type(v) == 'number' or type(v) == 'boolean' then
-            return tostring(v)
+    for k, v in pairs(tbl) do
+        local key = formatKey(k)
+        if type(v) == 'table' then
+            table.insert(lines, format('%s%s = {\n%s\n%s},', indent, key, tableToString(v, indent .. '    '), indent))
         else
-            return 'nil'
+            table.insert(lines, format('%s%s = %s,', indent, key, formatValue(v)))
         end
     end
-
-    local function tableToLines(tbl, indent)
-        local lines = {}
-        local isArray = true
-
-        for k, _ in pairs(tbl) do
-            if type(k) ~= 'number' or k % 1 ~= 0 then
-                isArray = false
-                break
-            end
-        end
-
-        if isArray then
-            table.insert(lines, "{")
-            for i, v in ipairs(tbl) do
-                if type(v) == 'table' then
-                    table.insert(lines, string.format('%s%s', nextIndent, tableToString(v, nextIndent)))
-                else
-                    table.insert(lines, string.format('%s%s', nextIndent, formatValue(v)))
-                end
-            end
-            table.insert(lines, indent .. "}")
-        else
-            table.insert(lines, "{")
-            for k, v in pairs(tbl) do
-                local keyStr = type(k) == 'string' and string.format('%q', k) or tostring(k)
-                if type(v) == 'table' then
-                    table.insert(lines, string.format('%s%s = {\n%s\n%s},', indent, keyStr, tableToString(v, nextIndent), indent))
-                else
-                    table.insert(lines, string.format('%s%s = %s,', indent, keyStr, formatValue(v)))
-                end
-            end
-            table.insert(lines, indent .. "}")
-        end
-        return table.concat(lines, '\n')
-    end
-
-    return tableToLines(tbl, indent)
+    return table.concat(lines, '\n')
 end
 
 function stringToTable(str)
-    local func, err = load("return " .. str)
+    local formattedStr = "return {\n" .. str .. "\n}"
+    local func, err = load(formattedStr)
     if func then
         local ok, result = pcall(func)
         if ok then
