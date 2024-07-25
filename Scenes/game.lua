@@ -569,6 +569,10 @@ function updateGUI(dt)
     local healthImageIndex = math.floor(healthFraction * 11) + 1
 
     healthImageIndex = math.max(1, math.min(healthImageIndex, 11))
+    
+    if carSprite.health ~= 0 and healthImageIndex == 1 then
+        healthImageIndex = 2
+    end
 
     healthBar.image = healthImageList[healthImageIndex]
 
@@ -838,7 +842,7 @@ function loadCar()
         amount = 4,
         maxAmount = 8,
         flag = 0,
-        boostamount = 1000
+        boostamount = 1500
     }
 
     -- polygon collider for the car
@@ -869,8 +873,8 @@ function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, w
         rotationY = rotationY,
         scaleX = scaleX,
         scaleY = scaleY,
-        speed = 0,
-        accel = 300,
+        speed = 1500,
+        accel = 360,
         rotationSpeed = 2,
         appear = 0,
         width = width,
@@ -1064,8 +1068,8 @@ function loadTraffic()
         trafficLeft.x, trafficLeft.y + trafficLeft.height
     )
     local nearMissColliderHeightOffset = 10
-    local nearMissColliderWidthOffset = 75
-    local awesomeMissColliderWidthOffset = 30
+    local nearMissColliderWidthOffset = 150
+    local awesomeMissColliderWidthOffset = 40
 
     -- polygon colliders for near miss
     trafficRightNearMissCollider = HC.polygon(
@@ -1242,7 +1246,7 @@ function updateTraffic(dt)
 
     -- Deal with collisions
     if carCollider:collidesWith(trafficRightCollider) and trafficRight.hittimer == 0 then
-        carSprite.speed = carSprite.speed * 0.75
+        carSprite.speed = carSprite.speed - 350
         if takedownCameraTimer == 0 then
             carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
         end 
@@ -1269,7 +1273,7 @@ function updateTraffic(dt)
         trafficRight.velocity = carSprite.speed * 1.5
         trafficRight.flag = 0
     elseif carCollider:collidesWith(trafficLeftCollider) and trafficLeft.hittimer == 0 then
-        carSprite.speed = carSprite.speed * 0.75
+        carSprite.speed = carSprite.speed - 350
         if takedownCameraTimer == 0 then
             carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 2000) + 0.5)
         end
@@ -1351,7 +1355,7 @@ function loadEMP()
         timer = 0,
         spawnTimer = 0,
         flag = 8,
-        speed = 500,
+        speed = 350,
         duration = 7,
         alpha = 1,
     }
@@ -1434,7 +1438,7 @@ function updateEMP(dt)
     
     -- Deal with collisions
     if carCollider:collidesWith(EMPCollider) and EMPSprite.timer == 0 and EMPSprite.visible == 1 then --and trafficRight.crashed == 0 then
-        carSprite.speed = carSprite.speed * 0.75
+        carSprite.speed = carSprite.speed - 400
         if takedownCameraTimer == 0 then
             carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 1000) + 0.5)
             EMPSprite.visible = 0
@@ -1582,7 +1586,7 @@ function updateSpikestrip(dt)
 
     -- Deal with collisions
     if carCollider:collidesWith(spikestripCollider) and spikestripSprite.timer < 0.75 and spikestripSprite.visible == 1 then
-        carSprite.speed = carSprite.speed * 0.75
+        carSprite.speed = carSprite.speed - 500
         if takedownCameraTimer == 0 then
             carSprite.health = carSprite.health - 1 * math.floor((carSprite.speed / 2000) + 0.5)
         end
@@ -1644,7 +1648,7 @@ function loadPolice()
         rotationY = trafficImage:getHeight() / 2,
         scaleX = scaleX,
         scaleY = scaleY,
-        speed = 1200,
+        speed = 1600,
         acc = 200,
         width = trafficImage:getWidth() * scaleX,
         height = trafficImage:getHeight() * scaleY,
@@ -1775,7 +1779,7 @@ function updatePolice(dt)
 
     -- Deal with collisions
     if carCollider:collidesWith(policeCollider) and policeSprite.hittimer == 0 then
-        carSprite.speed = carSprite.speed * 0.9
+        carSprite.speed = carSprite.speed - 280
         policeSprite.speed = 200 + carSprite.speed * 1.1
         camerayShake = camerayShake + 400
         policeSprite.health = math.floor(policeSprite.health - 1)
