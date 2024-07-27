@@ -6,10 +6,10 @@ carList = {
     {
         carID = 1,
         defaultCarName = "Jerry",
-        defaultCarImage = "path/to/image.png",
+        defaultCarImage = "Sprites/yellowcar.png",
         maxSpeed = 3500,
-        acceleration = 400,
-        grip = 100,
+        acceleration = 360,
+        grip = 30,
         health = 30,
     },
     {
@@ -110,15 +110,15 @@ function mainMenu.load()
 
     -- print(love.filesystem.read("saveFile.txt"))
     local carIndex = 1
-    local carInfo = getCarInfo(carIndex)
+    playerCarInfo = getCarInfo(carIndex)
     print("Car info at index: " .. carIndex)
-    if carInfo then
-        print("Name:", carInfo.name)
-        print("Image:", carInfo.image)
-        print("Max Speed:", carInfo.maxSpeed)
-        print("Acceleration:", carInfo.acceleration)
-        print("Grip:", carInfo.grip)
-        print("Health:", carInfo.health)
+    if playerCarInfo then
+        print("Name:", playerCarInfo.name)
+        print("Image:", playerCarInfo.image)
+        print("Max Speed:", playerCarInfo.maxSpeed)
+        print("Acceleration:", playerCarInfo.acceleration)
+        print("Grip:", playerCarInfo.grip)
+        print("Health:", playerCarInfo.health)
     else
         print("Car not found.")
     end

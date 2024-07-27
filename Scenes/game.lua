@@ -817,14 +817,29 @@ end
 function loadCar()
     local scaleX = 0.5
     local scaleY = 0.5
-    image = love.graphics.newImage("Sprites/yellowcar.png")
-    carSprite = loadObject("playerCar", ((screenWidth / 2)), 1000, (-math.pi / 2), scaleX, scaleY, 30, "Sprites/yellowcar.png",
-        (image:getWidth() * scaleX), (image:getHeight() * scaleY), (image:getWidth() / 2), (image:getHeight() / 2))
-    carSprite.prevX = 1000
-    carSprite.prevY = 800
-    carSprite.maxSpeed = 3500
-    carSprite.health = 30
-    carSprite.maxHealth = 30
+    local image = love.graphics.newImage(playerCarInfo.image)
+    carSprite = {
+        x = (screenWidth / 2),
+        y = 1000,
+        rotation = (-math.pi / 2),
+        rotationX = (image:getWidth() / 2),
+        rotationY = (image:getHeight() / 2),
+        scaleX = scaleX,
+        scaleY = scaleY,
+        speed = 1500,
+        appear = 0,
+        width = (image:getWidth() * scaleX),
+        height = (image:getHeight() * scaleY),
+        image = image,
+        prevX = 1000,
+        prevY = 800,
+        health = playerCarInfo.health,
+        maxHealth = playerCarInfo.health,
+        maxSpeed = playerCarInfo.maxSpeed,
+        accel = playerCarInfo.acceleration,
+        grip = playerCarInfo.grip,
+        rotationSpeed = 2,
+    }
 
     -- Load Nitro
     nitroImage = love.graphics.newImage("Sprites/nitro.png")
@@ -862,26 +877,6 @@ function loadCar()
         carSprite.x, carSprite.y + carSprite.height - xOffset
     )
     table.insert(colliders, carCollider)
-end
-
-function loadObject(objectName, x, y, rotation, scaleX, scaleY, health, image, width, height, rotationX, rotationY)
-    local object = {
-        x = x,
-        y = y,
-        rotation = rotation,
-        rotationX = rotationX,
-        rotationY = rotationY,
-        scaleX = scaleX,
-        scaleY = scaleY,
-        speed = 1500,
-        accel = 360,
-        rotationSpeed = 2,
-        appear = 0,
-        width = width,
-        height = height,
-        image = love.graphics.newImage(image)
-    }
-    return object
 end
 
 function playerUpdate(dt)
