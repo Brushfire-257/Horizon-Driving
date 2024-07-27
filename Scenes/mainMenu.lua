@@ -157,101 +157,111 @@ function getCarInfo(index)
 end
 
 function mainMenu.update(dt)
-    -- Update game data list
-    -- gameData = {
-    --     distanceTraveledHIGHSCORE,
-    --     nearMissesHIGHSCORE,
-    --     awesomeNearMissesHIGHSCORE,
-    --     policeTakedownsHIGHSCORE,
-    --     EMPDodgesHIGHSCORE,
-    --     timeSurvivedHIGHSCORE
-    -- }
-    -- print("DistanceTH: " .. gameData["distanceTraveledHIGHSCORE"])
-
-    updateAnimations(dt)
-
     if love.keyboard.isDown('p') then -- DEBUG
         bgSong:stop()
         return "mainMenu"
     end
 
-    -- Prepare GUI
-    if screen == "mainMenu" then
-        darkOffset = 0
-        local darkDifference = darkOffset - darkCurrent
-        darkCurrent = darkCurrent + darkDifference * 0.2
-        suit.layout:reset(0, 0)
+    darkOffset = 0
+    local darkDifference = darkOffset - darkCurrent
+    darkCurrent = darkCurrent + darkDifference * 0.2
+    suit.layout:reset(0, 0)
 
-        love.graphics.setFont(font)
+    love.graphics.setFont(font)
 
-        if suit.Button("Play", 50 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
-        300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
-            firstMenuLoad = 0
-            bgSong:stop()
-            return "startGame"
+    if screen == "carSelect" then
+        if suit.Button("Play", (screenWidth - 350) * scaleStuff("w"), (screenHeight - 275) * scaleStuff("h"),
+            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                firstMenuLoad = 0
+                bgSong:stop()
+                return "startGame"
         end
 
-        if suit.Button("Help", 400 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
-        300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
-            screen = "help"
-        end
-
-        if suit.Button("Highscores", 750 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
-        650 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
-            screen = "highscores"
-        end
-
-        if suit.Button("Quit", 1450 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
-        300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
-            love.event.quit()
-        end
-
-        love.graphics.setFont(font2)
-
-        suit.Label("Made by: Logan Peterson (With LOVE)", {align = "center"},
-        ((screenWidth - 1050)) * scaleStuff("w"), (screenHeight - 75) * scaleStuff("h"),
-        1050 * scaleStuff("w"), 75 * scaleStuff("h"))
-
-    elseif screen == "highscores" then
-        darkOffset = 0.5
-        local darkDifference = darkOffset - darkCurrent
-        darkCurrent = darkCurrent + darkDifference * 0.2
-
-        if suit.Button("Back", (screenWidth - 425) * scaleStuff("w"), 25 * scaleStuff("h"), 400 * scaleStuff("w"), 100 * scaleStuff("h")).hit then
+        if suit.Button("Back", (screenWidth - 350) * scaleStuff("w"),  (screenHeight - 275 - 150) * scaleStuff("h"), 300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+            mac.counter = 0
+            mac.switchAnimation = 1
+            -- currentAnimation = 1
             screen = "mainMenu"
         end
 
-        love.graphics.setFont(font1)
+        suit.Label("CAR SELECT", {align = "left"},
+        (25 * scaleStuff("w")), (-15 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
 
-        suit.Label("Highscores:", {align = "left"},
-        (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-        love.graphics.setFont(font2)
-        local decimalPlaces = 2
-        suit.Label("Distance Traveled: " .. roundNumber(gameData.distanceTraveledHIGHSCORE * 0.1 / 60, decimalPlaces), {align = "left"},
-        (25 * scaleStuff("w")), (125 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-        suit.Label("Near Misses: " .. roundNumber(gameData.nearMissesHIGHSCORE, decimalPlaces), {align = "left"},
-        (25 * scaleStuff("w")), (225 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-        suit.Label("Awesome Near Misses: " .. roundNumber(gameData.awesomeNearMissesHIGHSCORE, decimalPlaces), {align = "left"},
-        (25 * scaleStuff("w")), (325 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-        suit.Label("Police Takedowns: " .. roundNumber(gameData.policeTakedownsHIGHSCORE, decimalPlaces), {align = "left"},
-        (25 * scaleStuff("w")), (425 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-        suit.Label("EMP Dodges: " .. roundNumber(gameData.EMPDodgesHIGHSCORE, decimalPlaces), {align = "left"},
-        (25 * scaleStuff("w")), (525 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-        suit.Label("Time Survived: " .. roundNumber(gameData.timeSurvivedHIGHSCORE, decimalPlaces), {align = "left"},
-        (25 * scaleStuff("w")), (625 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
-    elseif screen == "help" then
-        darkOffset = 0.5
-        local darkDifference = darkOffset - darkCurrent
-        darkCurrent = darkCurrent + darkDifference * 0.2
+        carSelectUpdate(dt)
 
-        if suit.Button("Back", (screenWidth - 425) * scaleStuff("w"), 25 * scaleStuff("h"), 400 * scaleStuff("w"), 100 * scaleStuff("h")).hit then
-            screen = "mainMenu"
+    else
+        updateAnimations(dt)
+    
+        -- Prepare GUI
+        if screen == "mainMenu" then
+            if suit.Button("Play", 50 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                carSelectLoad()
+                screen = "carSelect"
+            end
+    
+            if suit.Button("Help", 400 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                screen = "help"
+            end
+    
+            if suit.Button("Highscores", 750 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            650 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                screen = "highscores"
+            end
+    
+            if suit.Button("Quit", 1450 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                love.event.quit()
+            end
+    
+            love.graphics.setFont(font2)
+    
+            suit.Label("Made by: Logan Peterson (With LOVE)", {align = "center"},
+            ((screenWidth - 1050)) * scaleStuff("w"), (screenHeight - 75) * scaleStuff("h"),
+            1050 * scaleStuff("w"), 75 * scaleStuff("h"))
+    
+        elseif screen == "highscores" then
+            darkOffset = 0.5
+            local darkDifference = darkOffset - darkCurrent
+            darkCurrent = darkCurrent + darkDifference * 0.2
+    
+            if suit.Button("Back", (screenWidth - 425) * scaleStuff("w"), 25 * scaleStuff("h"), 400 * scaleStuff("w"), 100 * scaleStuff("h")).hit then
+                screen = "mainMenu"
+            end
+    
+            love.graphics.setFont(font1)
+    
+            suit.Label("Highscores:", {align = "left"},
+            (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+            love.graphics.setFont(font2)
+            local decimalPlaces = 2
+            suit.Label("Distance Traveled: " .. roundNumber(gameData.distanceTraveledHIGHSCORE * 0.1 / 60, decimalPlaces), {align = "left"},
+            (25 * scaleStuff("w")), (125 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+            suit.Label("Near Misses: " .. roundNumber(gameData.nearMissesHIGHSCORE, decimalPlaces), {align = "left"},
+            (25 * scaleStuff("w")), (225 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+            suit.Label("Awesome Near Misses: " .. roundNumber(gameData.awesomeNearMissesHIGHSCORE, decimalPlaces), {align = "left"},
+            (25 * scaleStuff("w")), (325 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+            suit.Label("Police Takedowns: " .. roundNumber(gameData.policeTakedownsHIGHSCORE, decimalPlaces), {align = "left"},
+            (25 * scaleStuff("w")), (425 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+            suit.Label("EMP Dodges: " .. roundNumber(gameData.EMPDodgesHIGHSCORE, decimalPlaces), {align = "left"},
+            (25 * scaleStuff("w")), (525 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+            suit.Label("Time Survived: " .. roundNumber(gameData.timeSurvivedHIGHSCORE, decimalPlaces), {align = "left"},
+            (25 * scaleStuff("w")), (625 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+        elseif screen == "help" then
+            darkOffset = 0.5
+            local darkDifference = darkOffset - darkCurrent
+            darkCurrent = darkCurrent + darkDifference * 0.2
+    
+            if suit.Button("Back", (screenWidth - 425) * scaleStuff("w"), 25 * scaleStuff("h"), 400 * scaleStuff("w"), 100 * scaleStuff("h")).hit then
+                screen = "mainMenu"
+            end
+    
+            love.graphics.setFont(font2)
+    
+            suit.Label("No help screen yet lol", {align = "left"},
+            (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
         end
-
-        love.graphics.setFont(font2)
-
-        suit.Label("No help screen yet lol", {align = "left"},
-        (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
     end
 
     return nil
@@ -305,6 +315,64 @@ function mainMenu.draw()
     CScreen.cease()
     -- Draw GUI
     suit.draw()
+end
+
+function carSelectLoad()
+    mac.switchAnimation = 0
+    mac.stage = 0
+    mac.counter = 0
+    
+    animScale = 0.475
+
+    mac.playerAppear = 1
+    -- mac.playerImage = 
+    mac.playerx = 650
+    mac.playery = 400
+    mac.playerRotation = 0
+    mac.playerScaleX = animScale
+    mac.playerScaleY = animScale
+    mac.playerRotation = math.rad(145 - 90)
+    
+    mac.policeAppear = 1
+    mac.policex = 750
+    mac.policey = -900
+    mac.policeRotation = 0
+    mac.policeScaleX = animScale
+    mac.policeScaleY = animScale
+    mac.policeRotation = math.rad(145 - 90)
+    mac.road1x = 1800
+    mac.road1y = 200
+    mac.roadScaleX = animScale * 8
+    mac.roadScaleY = animScale * 8
+    mac.roadRotation = math.rad(145)
+
+    clearDebris()
+end
+
+function carSelectUpdate(dt)
+
+    mac.road1x = mac.road1x - 4500 * math.sin(mac.roadRotation) * dt
+    mac.road1y = mac.road1y - 4500 * -math.cos(mac.roadRotation) * dt
+
+    if mac.counter >= 45 then
+        mac.policex = mac.policex + 825 * math.sin(mac.roadRotation) * dt
+        mac.policey = mac.policey + 825 * -math.cos(mac.roadRotation) * dt
+
+        mac.playerx = mac.playerx + 850 * math.sin(mac.roadRotation) * dt
+        mac.playery = mac.playery + 850 * -math.cos(mac.roadRotation) * dt
+
+
+        mac.counter = mac.counter + 1
+    elseif mac.counter <= 180 then
+        mac.counter = 0
+    end
+
+    if mac.road2x <= 1800 then
+        mac.road1x = 1800
+        mac.road1y = 200
+    end
+
+    updateRoad()
 end
 
 function loadAnimations(dt)
