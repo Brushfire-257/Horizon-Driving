@@ -1,6 +1,28 @@
 -- The main menu for the game
 mainMenu = {}
 
+-- Car List
+carList = {
+    {
+        carID = 1,
+        defaultCarName = "Jerry",
+        defaultCarImage = "path/to/image.png",
+        maxSpeed = 3500,
+        acceleration = 400,
+        grip = 100,
+        health = 30,
+    },
+    {
+        carID = 2,
+        defaultCarName = "Berry",
+        defaultCarImage = "path/to/image2.png",
+        maxSpeed = 3500,
+        acceleration = 400,
+        grip = 100,
+        health = 30,
+    }
+}
+
 -- SUIT setup (This is gonna make the GUI so much easier to make..)
 local suit = require("SUIT")
 
@@ -32,7 +54,18 @@ gameData = {
     awesomeNearMissesHIGHSCORE = 0,
     policeTakedownsHIGHSCORE = 0,
     EMPDodgesHIGHSCORE = 0,
-    timeSurvivedHIGHSCORE = 0
+    timeSurvivedHIGHSCORE = 0,
+    playerGarage = {
+        {
+            carID = 1,
+            carName = "Jerry",
+        },
+        {
+            carID = 2,
+            carName = "Berry",
+            carImage = "path/to/image3.png",
+        }
+    }
 }
 
 function mainMenu.load()
@@ -49,18 +82,6 @@ function mainMenu.load()
         loadGame()
         firstStart = false
     else
-        gameData.playerGarage = {
-            {
-                carName = "Jerry",
-                carID = 1,
-                carImage = "path/to/image.png",
-            },
-            {
-                carName = "Berry",
-                carID = 2,
-                carImage = "path/to/image2.png",
-            }
-        }
         saveGame()
     end
 
@@ -88,6 +109,51 @@ function mainMenu.load()
     screen = "mainMenu"
 
     -- print(love.filesystem.read("saveFile.txt"))
+    local carIndex = 1
+    local carInfo = getCarInfo(carIndex)
+    print("Car info at index: " .. carIndex)
+    if carInfo then
+        print("Name:", carInfo.name)
+        print("Image:", carInfo.image)
+        print("Max Speed:", carInfo.maxSpeed)
+        print("Acceleration:", carInfo.acceleration)
+        print("Grip:", carInfo.grip)
+        print("Health:", carInfo.health)
+    else
+        print("Car not found.")
+    end
+end
+
+function getCarInfo(index)
+    local playerCar = gameData.playerGarage[index]
+    if not playerCar then
+        print("getCarInfo() GARAGE INDEX FAILURE (Player Car not present at: " .. index .. ")")
+        return nil -- No car found
+    end
+
+    local carInfo
+    for _, car in ipairs(carList) do
+        if car.carID == playerCar.carID then
+            carInfo = car
+            break
+        end
+    end
+
+    if not carInfo then
+        print("getCarInfo() DATA INDEX FAILURE (Car Data not present at: " .. index .. ")")
+        return nil -- CarID not found
+    end
+
+    local carData = {
+        name = playerCar.carName or carInfo.defaultCarName,
+        image = playerCar.carImage or carInfo.defaultCarImage,
+        maxSpeed = carInfo.maxSpeed,
+        acceleration = carInfo.acceleration,
+        grip = carInfo.grip,
+        health = carInfo.health
+    }
+
+    return carData
 end
 
 function mainMenu.update(dt)
