@@ -54,6 +54,7 @@ local darkCurrent = 0
 
 local selectLeftImage = love.graphics.newImage("Sprites/GUI/leftCarSelect.png")
 local selectRightImage = love.graphics.newImage("Sprites/GUI/rightCarSelect.png")
+local optionsIcon = love.graphics.newImage("Sprites/GUI/gearIcon.png")
 
 -- anim setup
 local currentAnimation = 0
@@ -245,43 +246,57 @@ function mainMenu.update(dt)
 
     else
         updateAnimations(dt)
-    
+        
         -- Prepare GUI
         if screen == "mainMenu" then
-            if suit.Button("Play", 50 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            if suit.Button("Play", (screenWidth - 350) * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
             300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 carSelectLoad()
                 screen = "carSelect"
             end
-    
-            if suit.Button("Help", 400 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            
+            if suit.ImageButton(optionsIcon, (screenWidth - 150) * scaleStuff("w"), 20 * scaleStuff("h"), 1 * scaleStuff("w"), 1 * scaleStuff("h")).hit then
+                screen =  "options"
+            end
+
+            love.graphics.setFont(font2)
+            
+            suit.Label("Made by: Logan Peterson (With LOVE)", {align = "center"},
+            ((screenWidth - 1050)) * scaleStuff("w"), (screenHeight - 75) * scaleStuff("h"),
+            1050 * scaleStuff("w"), 75 * scaleStuff("h"))
+            
+        elseif screen == "options" then
+            darkOffset = 0.5
+            local darkDifference = darkOffset - darkCurrent
+            darkCurrent = darkCurrent + darkDifference * 0.2
+
+            if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
+            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                screen = "mainMenu"
+            end
+
+            if suit.Button("Help", (screenWidth/2 - 150) * scaleStuff("w"), (50) * scaleStuff("h"),
             300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 screen = "help"
             end
-    
-            if suit.Button("Highscores", 750 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            
+            if suit.Button("Highscores", (screenWidth/2 - 325) * scaleStuff("w"), (250) * scaleStuff("h"),
             650 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 screen = "highscores"
             end
-    
+            
             if suit.Button("Quit", 1450 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
             300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 love.event.quit()
             end
-    
-            love.graphics.setFont(font2)
-    
-            suit.Label("Made by: Logan Peterson (With LOVE)", {align = "center"},
-            ((screenWidth - 1050)) * scaleStuff("w"), (screenHeight - 75) * scaleStuff("h"),
-            1050 * scaleStuff("w"), 75 * scaleStuff("h"))
-    
         elseif screen == "highscores" then
             darkOffset = 0.5
             local darkDifference = darkOffset - darkCurrent
             darkCurrent = darkCurrent + darkDifference * 0.2
     
-            if suit.Button("Back", (screenWidth - 425) * scaleStuff("w"), 25 * scaleStuff("h"), 400 * scaleStuff("w"), 100 * scaleStuff("h")).hit then
-                screen = "mainMenu"
+            if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
+            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                screen = "options"
             end
     
             love.graphics.setFont(font1)
@@ -307,8 +322,9 @@ function mainMenu.update(dt)
             local darkDifference = darkOffset - darkCurrent
             darkCurrent = darkCurrent + darkDifference * 0.2
     
-            if suit.Button("Back", (screenWidth - 425) * scaleStuff("w"), 25 * scaleStuff("h"), 400 * scaleStuff("w"), 100 * scaleStuff("h")).hit then
-                screen = "mainMenu"
+            if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
+            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                screen = "options"
             end
     
             love.graphics.setFont(font2)
