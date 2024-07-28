@@ -42,6 +42,9 @@ local mac = {}
 local darkOffset = 0
 local darkCurrent = 0
 
+local selectLeftImage = love.graphics.newImage("Sprites/GUI/leftCarSelect.png")
+local selectRightImage = love.graphics.newImage("Sprites/GUI/rightCarSelect.png")
+
 -- anim setup
 local currentAnimation = 0
 local animatedDebris = {}
@@ -180,12 +183,20 @@ function mainMenu.update(dt)
         if suit.Button("Back", (screenWidth - 350) * scaleStuff("w"),  (screenHeight - 275 - 150) * scaleStuff("h"), 300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
             mac.counter = 0
             mac.switchAnimation = 1
-            -- currentAnimation = 1
+            loadAnimations()
             screen = "mainMenu"
         end
 
         suit.Label("CAR SELECT", {align = "left"},
         (25 * scaleStuff("w")), (-15 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+
+        if suit.ImageButton(selectLeftImage, (700 * scaleStuff("w")), (500 * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
+            -- Select to left (if there is a car to the left)
+
+        elseif suit.ImageButton(selectRightImage, (1000 * scaleStuff("w")), (500 * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
+            -- Select to right (if there is a car to the right)
+            
+        end
 
         carSelectUpdate(dt)
 
@@ -325,7 +336,7 @@ function carSelectLoad()
     animScale = 0.475
 
     mac.playerAppear = 1
-    -- mac.playerImage = 
+    mac.playerImage = love.graphics.newImage(playerCarInfo.image)
     mac.playerx = 650
     mac.playery = 400
     mac.playerRotation = 0
@@ -335,7 +346,7 @@ function carSelectLoad()
     
     mac.policeAppear = 1
     mac.policex = 750
-    mac.policey = -900
+    mac.policey = 200
     mac.policeRotation = 0
     mac.policeScaleX = animScale
     mac.policeScaleY = animScale
@@ -350,22 +361,17 @@ function carSelectLoad()
 end
 
 function carSelectUpdate(dt)
+    mac.timer = mac.timer + dt
+
 
     mac.road1x = mac.road1x - 4500 * math.sin(mac.roadRotation) * dt
     mac.road1y = mac.road1y - 4500 * -math.cos(mac.roadRotation) * dt
 
-    if mac.counter >= 45 then
-        mac.policex = mac.policex + 825 * math.sin(mac.roadRotation) * dt
-        mac.policey = mac.policey + 825 * -math.cos(mac.roadRotation) * dt
+    mac.policex = 950 + math.sin(mac.timer/1.5) * 15
+    mac.policey = 300 + math.cos(mac.timer/2) * 15
 
-        mac.playerx = mac.playerx + 850 * math.sin(mac.roadRotation) * dt
-        mac.playery = mac.playery + 850 * -math.cos(mac.roadRotation) * dt
-
-
-        mac.counter = mac.counter + 1
-    elseif mac.counter <= 180 then
-        mac.counter = 0
-    end
+    mac.playerx = 900 + math.sin(mac.timer/1.2) * 15
+    mac.playery = 600 + math.cos(mac.timer/1.7) * 15
 
     if mac.road2x <= 1800 then
         mac.road1x = 1800
