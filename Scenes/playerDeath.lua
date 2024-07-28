@@ -118,8 +118,8 @@ function loadAnimations1()
     animScale = 1
     
     menuAnimationImages = {
-        playerCar = love.graphics.newImage("Sprites/yellowcar.png"),
-        trafficCar = love.graphics.newImage("Sprites/yellowcar.png"),
+        playerCar = love.graphics.newImage(playerCarInfo.image),
+        trafficCar = love.graphics.newImage("Sprites/Cars/yellowcar.png"),
         road = love.graphics.newImage("Sprites/road1.png"),
     }
 

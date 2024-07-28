@@ -1001,7 +1001,7 @@ function cameraUpdate(dt)
 end
 
 function loadTraffic()
-    trafficImage = love.graphics.newImage("Sprites/yellowcar.png")
+    trafficImage = love.graphics.newImage("Sprites/Cars/yellowcar.png")
     trafficWarning = love.graphics.newImage("Sprites/trafficwarning.png")
     local scaleX = 0.5
     local scaleY = 0.5
@@ -1025,7 +1025,8 @@ function loadTraffic()
         velocityx = 0,
         nmtimer = 0,
         hittimer = 0,
-        warningOffset = 700
+        warningOffset = 700,
+        nitro = 1
     }
     trafficLeft = {
         x = 0,
@@ -1046,7 +1047,8 @@ function loadTraffic()
         velocityx = 0,
         nmtimer = 0,
         hittimer = 0,
-        warningOffset = 700
+        warningOffset = 700,
+        nitro = 1
     }
 
     -- polygon colliders for the traffic
@@ -1140,6 +1142,7 @@ function updateTraffic(dt)
         trafficRight.x = math.random(1500, 2000)
         trafficRight.crashed = 0
         trafficRight.rotation = -math.rad(90)
+        trafficRight.nitro = 1
     end
 
     if trafficLeft.y > 1080 + 500 then
@@ -1148,6 +1151,7 @@ function updateTraffic(dt)
         trafficLeft.x = math.random(-100, 500)
         trafficLeft.crashed = 0
         trafficLeft.rotation = -math.rad(90)
+        trafficLeft.nitro = 1
     end
 
     -- Ensure traffic stays within the screen bounds
@@ -1250,6 +1254,10 @@ function updateTraffic(dt)
         else -- Left
             trafficRight.velocityx = trafficRight.velocityx - 100 * (carSprite.speed / 1000) * math.abs(carSprite.x - trafficRight.x) / 100
         end
+        if trafficRight.nitro == 1 then
+            nitroSprite.amount = nitroSprite.amount + 0.5
+            trafficRight.nitro = 0
+        end
 
         trafficRight.hittimer = 0.1
 
@@ -1276,6 +1284,10 @@ function updateTraffic(dt)
             trafficLeft.velocityx = trafficLeft.velocityx + 100 * (carSprite.speed / 2000) * math.abs(carSprite.x - trafficLeft.x) / 100
         else -- Left
             trafficLeft.velocityx = trafficLeft.velocityx - 100 * (carSprite.speed / 2000) * math.abs(carSprite.x - trafficLeft.x) / 100
+        end
+        if trafficLeft.nitro == 1 then
+            nitroSprite.amount = nitroSprite.amount + 0.5
+            trafficLeft.nitro = 0
         end
 
         trafficLeft.hittimer = 0.1
@@ -1628,7 +1640,7 @@ function updateSpikestrip(dt)
 end
 
 function loadPolice()
-    local policeImage = love.graphics.newImage("Sprites/yellowcar.png")
+    local policeImage = love.graphics.newImage("Sprites/Cars/PoliceCar.png")
 
     heatLevel = 0
 

@@ -6,7 +6,7 @@ carList = {
     {
         carID = 1,
         defaultCarName = "Jerry",
-        defaultCarImage = "Sprites/yellowcar.png",
+        defaultCarImage = "Sprites/Cars/yellowcar.png",
         maxSpeed = 3500,
         acceleration = 360,
         grip = 30,
@@ -15,13 +15,23 @@ carList = {
     {
         carID = 2,
         defaultCarName = "Berry",
-        defaultCarImage = "path/to/image2.png",
+        defaultCarImage = "Sprites/Cars/Berry.png",
+        maxSpeed = 3500,
+        acceleration = 400,
+        grip = 100,
+        health = 30,
+    },
+    {
+        carID = 3,
+        defaultCarName = "Police Car",
+        defaultCarImage = "Sprites/Cars/PoliceCar.png",
         maxSpeed = 3500,
         acceleration = 400,
         grip = 100,
         health = 30,
     }
 }
+local carIndex = 1
 
 -- SUIT setup (This is gonna make the GUI so much easier to make..)
 local suit = require("SUIT")
@@ -66,7 +76,7 @@ gameData = {
         {
             carID = 2,
             carName = "Berry",
-            carImage = "path/to/image3.png",
+            -- carImage = "path/to/image3.png",
         }
     }
 }
@@ -112,7 +122,7 @@ function mainMenu.load()
     screen = "mainMenu"
 
     -- print(love.filesystem.read("saveFile.txt"))
-    local carIndex = 1
+    carIndex = 1
     playerCarInfo = getCarInfo(carIndex)
     print("Car info at index: " .. carIndex)
     if playerCarInfo then
@@ -192,11 +202,44 @@ function mainMenu.update(dt)
 
         if suit.ImageButton(selectLeftImage, (700 * scaleStuff("w")), (500 * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
             -- Select to left (if there is a car to the left)
+            if carIndex ~= 1 then
+                carIndex = carIndex - 1
+            end
 
+            -- print(love.filesystem.read("saveFile.txt"))
+            playerCarInfo = getCarInfo(carIndex)
+            print("Car info at index: " .. carIndex)
+            if playerCarInfo then
+                print("Name:", playerCarInfo.name)
+                print("Image:", playerCarInfo.image)
+                print("Max Speed:", playerCarInfo.maxSpeed)
+                print("Acceleration:", playerCarInfo.acceleration)
+                print("Grip:", playerCarInfo.grip)
+                print("Health:", playerCarInfo.health)
+            else
+                print("Car not found.")
+            end
         elseif suit.ImageButton(selectRightImage, (1000 * scaleStuff("w")), (500 * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
             -- Select to right (if there is a car to the right)
+            if carIndex ~= #gameData.playerGarage then
+                carIndex = carIndex + 1
+            end
             
+            -- print(love.filesystem.read("saveFile.txt"))
+            playerCarInfo = getCarInfo(carIndex)
+            print("Car info at index: " .. carIndex)
+            if playerCarInfo then
+                print("Name:", playerCarInfo.name)
+                print("Image:", playerCarInfo.image)
+                print("Max Speed:", playerCarInfo.maxSpeed)
+                print("Acceleration:", playerCarInfo.acceleration)
+                print("Grip:", playerCarInfo.grip)
+                print("Health:", playerCarInfo.health)
+            else
+                print("Car not found.")
+            end
         end
+        mac.playerImage = love.graphics.newImage(playerCarInfo.image)
 
         carSelectUpdate(dt)
 
@@ -385,9 +428,9 @@ function loadAnimations(dt)
     currentAnimation = 0 -- SET TO 0 WHEN ANIMATIONS DONE!!!
 
     menuAnimationImages = {
-        playerCar = love.graphics.newImage("Sprites/yellowcar.png"),
-        policeCar = love.graphics.newImage("Sprites/yellowcar.png"),
-        trafficCar = love.graphics.newImage("Sprites/yellowcar.png"),
+        playerCar = love.graphics.newImage("Sprites/Cars/Berry.png"),
+        policeCar = love.graphics.newImage("Sprites/Cars/PoliceCar.png"),
+        trafficCar = love.graphics.newImage("Sprites/Cars/yellowcar.png"),
         road = love.graphics.newImage("Sprites/road1.png"),
     }
 
@@ -457,7 +500,7 @@ function updateAnimations(dt)
             animScale = 0.65
 
             mac.playerAppear = 1
-            -- mac.playerImage = 
+            mac.playerImage = love.graphics.newImage("Sprites/Cars/Berry.png")
             mac.playerx = 100
             mac.playery = 500
             mac.playerRotation = 0
@@ -562,6 +605,7 @@ function updateAnimations(dt)
             animScale = 1
 
             mac.playerAppear = 1
+            mac.playerImage = love.graphics.newImage("Sprites/Cars/Berry.png")
             mac.playerx = 1100
             mac.playery = 625
             mac.playerRotation = 0
@@ -617,7 +661,7 @@ function updateAnimations(dt)
             animScale = 0.5
 
             mac.playerAppear = 1
-            -- mac.playerImage = 
+            mac.playerImage = love.graphics.newImage("Sprites/Cars/Berry.png")
             mac.playerx = 650
             mac.playery = -100
             mac.playerRotation = 0
@@ -676,6 +720,7 @@ function updateAnimations(dt)
             animScale = 1
 
             mac.playerAppear = 1
+            mac.playerImage = love.graphics.newImage("Sprites/Cars/Berry.png")
             mac.playerx = 1200
             mac.playery = 300
             mac.playerRotation = 0
