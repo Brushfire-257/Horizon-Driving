@@ -56,6 +56,24 @@ local selectLeftImage = love.graphics.newImage("Sprites/GUI/leftCarSelect.png")
 local selectRightImage = love.graphics.newImage("Sprites/GUI/rightCarSelect.png")
 local optionsIcon = love.graphics.newImage("Sprites/GUI/gearIcon.png")
 
+-- Precalculate button positions in options menu
+local numberOfButtons = 4
+local buttonHeight = 250
+
+local usableHeight = screenHeight - (2 * 50)
+local totalButtonHeight = numberOfButtons * buttonHeight
+local gapSpace = usableHeight - totalButtonHeight
+local gapHeight = gapSpace / (numberOfButtons - 1)
+
+-- Precalculate button positions in main menu
+local numberOfButtons1 = 3
+local buttonWidth = 500
+
+local usableWidth = screenWidth - (2 * 50)
+local totalButtonWidth = numberOfButtons1 * buttonWidth
+local gapSpace1 = usableWidth - totalButtonWidth
+local gapWidth = gapSpace1 / (numberOfButtons1 - 1)
+
 -- anim setup
 local currentAnimation = 0
 local animatedDebris = {}
@@ -249,8 +267,19 @@ function mainMenu.update(dt)
         
         -- Prepare GUI
         if screen == "mainMenu" then
-            if suit.Button("Play", (screenWidth - 350) * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
-            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+
+            if suit.Button("Shop", (50) * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            buttonWidth * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                screen = "carShop"
+            end
+
+            if suit.Button("Garage", (50 + buttonWidth + gapWidth) * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            buttonWidth * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                screen = "playerGarage"
+            end
+
+            if suit.Button("Play", (50 + 2 * buttonWidth + 2 * gapWidth) * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
+            buttonWidth * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 carSelectLoad()
                 screen = "carSelect"
             end
@@ -275,20 +304,40 @@ function mainMenu.update(dt)
                 screen = "mainMenu"
             end
 
-            if suit.Button("Help", (screenWidth/2 - 150) * scaleStuff("w"), (50) * scaleStuff("h"),
-            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+            if suit.Button("Help", (screenWidth/2 - 325) * scaleStuff("w"), (50) * scaleStuff("h"),
+            650 * scaleStuff("w"), buttonHeight * scaleStuff("h")).hit then
                 screen = "help"
             end
             
-            if suit.Button("Highscores", (screenWidth/2 - 325) * scaleStuff("w"), (250) * scaleStuff("h"),
-            650 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+            if suit.Button("Highscores", (screenWidth/2 - 325) * scaleStuff("w"), (50 + buttonHeight + gapHeight) * scaleStuff("h"),
+            650 * scaleStuff("w"), buttonHeight * scaleStuff("h")).hit then
                 screen = "highscores"
             end
+
+            if suit.Button("Settings", (screenWidth/2 - 325) * scaleStuff("w"), (50 + 2 * buttonHeight + 2 * gapHeight) * scaleStuff("h"),
+            650 * scaleStuff("w"), buttonHeight * scaleStuff("h")).hit then
+                screen = "settings"
+            end
             
-            if suit.Button("Quit", 1450 * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
-            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+            if suit.Button("Quit", (screenWidth/2 - 325) * scaleStuff("w"), (50 + 3 * buttonHeight + 3 * gapHeight) * scaleStuff("h"),
+            650 * scaleStuff("w"), buttonHeight * scaleStuff("h")).hit then
                 love.event.quit()
             end
+        elseif screen == "settings" then
+            darkOffset = 0.5
+            local darkDifference = darkOffset - darkCurrent
+            darkCurrent = darkCurrent + darkDifference * 0.2
+
+            if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
+            300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+                screen = "options"
+            end
+    
+            love.graphics.setFont(font2)
+    
+            suit.Label("No Settings to tweak yet!", {align = "left"},
+            (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+
         elseif screen == "highscores" then
             darkOffset = 0.5
             local darkDifference = darkOffset - darkCurrent
