@@ -33,6 +33,44 @@ carList = {
 }
 local carIndex = 1
 
+-- GUI lists
+accelLevelImages = {
+    love.graphics.newImage("Sprites/GUI/Acceleration Level/1.png"),
+    love.graphics.newImage("Sprites/GUI/Acceleration Level/2.png"),
+    love.graphics.newImage("Sprites/GUI/Acceleration Level/3.png"),
+    love.graphics.newImage("Sprites/GUI/Acceleration Level/4.png"),
+    love.graphics.newImage("Sprites/GUI/Acceleration Level/5.png"),
+    love.graphics.newImage("Sprites/GUI/Acceleration Level/6.png"),
+}
+gripLevelImages = {
+    love.graphics.newImage("Sprites/GUI/Grip Level/1.png"),
+    love.graphics.newImage("Sprites/GUI/Grip Level/2.png"),
+    love.graphics.newImage("Sprites/GUI/Grip Level/3.png"),
+    love.graphics.newImage("Sprites/GUI/Grip Level/4.png"),
+    love.graphics.newImage("Sprites/GUI/Grip Level/5.png"),
+    love.graphics.newImage("Sprites/GUI/Grip Level/6.png"),
+}
+healthLevelImages = {
+    love.graphics.newImage("Sprites/GUI/Health Level/1.png"),
+    love.graphics.newImage("Sprites/GUI/Health Level/2.png"),
+    love.graphics.newImage("Sprites/GUI/Health Level/3.png"),
+    love.graphics.newImage("Sprites/GUI/Health Level/4.png"),
+    love.graphics.newImage("Sprites/GUI/Health Level/5.png"),
+    love.graphics.newImage("Sprites/GUI/Health Level/6.png"),
+}
+speedLevelImages = {
+    love.graphics.newImage("Sprites/GUI/Speed Level/1.png"),
+    love.graphics.newImage("Sprites/GUI/Speed Level/2.png"),
+    love.graphics.newImage("Sprites/GUI/Speed Level/3.png"),
+    love.graphics.newImage("Sprites/GUI/Speed Level/4.png"),
+    love.graphics.newImage("Sprites/GUI/Speed Level/5.png"),
+    love.graphics.newImage("Sprites/GUI/Speed Level/6.png"),
+}
+local accelLevelSprite = {
+    x = 0,
+    y = 0,
+}
+
 -- SUIT setup (This is gonna make the GUI so much easier to make..)
 local suit = require("SUIT")
 
