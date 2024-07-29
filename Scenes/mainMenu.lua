@@ -219,6 +219,31 @@ function mainMenu.update(dt)
         suit.Label("CAR SELECT", {align = "left"},
         (25 * scaleStuff("w")), (-15 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
 
+        suit.Label(playerCarInfo.name, {align = "left"},
+        (screenWidth - 50 - (#playerCarInfo.name * 60) * scaleStuff("w")), (-15 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+
+        love.graphics.setFont(font1)
+
+        suit.Label("Speed: " .. (playerCarInfo.maxSpeed/10), {align = "left"},
+        (screenWidth - 50 - (7*45) - (#tostring(playerCarInfo.maxSpeed/10) * 45) * scaleStuff("w")), (50 * scaleStuff("h")),
+        (11*45) + (#tostring(playerCarInfo.maxSpeed/10) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
+
+        suit.Label("Accel: " .. (playerCarInfo.acceleration/10), {align = "left"},
+        (screenWidth - 50 - (7*45) - (#tostring(playerCarInfo.acceleration/10) * 45) * scaleStuff("w")), (100 * scaleStuff("h")),
+        (11*45) + (#tostring(playerCarInfo.acceleration/10) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
+
+        suit.Label("Grip: " .. (playerCarInfo.grip), {align = "left"},
+        (screenWidth - 50 - (6*45) - (#tostring(playerCarInfo.grip) * 45) * scaleStuff("w")), (150 * scaleStuff("h")),
+        (11*45) + (#tostring(playerCarInfo.grip) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
+
+        suit.Label("Health: " .. (playerCarInfo.health), {align = "left"},
+        (screenWidth - 50 - (8*45) - (#tostring(playerCarInfo.health) * 45) * scaleStuff("w")), (200 * scaleStuff("h")),
+        (11*45) + (#tostring(playerCarInfo.health) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
+
+        -- love.graphics.setFont(font2)
+        -- suit.Label("CLICK TO CHANGE", {align = "left"},
+        -- (1000 * scaleStuff("w")), (500 * scaleStuff("h")), 800 * scaleStuff("w"), 25 * scaleStuff("h"))
+
         if suit.ImageButton(selectLeftImage, (700 * scaleStuff("w")), (500 * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
             -- Select to left (if there is a car to the left)
             if carIndex ~= 1 then
