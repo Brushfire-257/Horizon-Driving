@@ -66,10 +66,6 @@ speedLevelImages = {
     love.graphics.newImage("Sprites/GUI/Speed Level/5.png"),
     love.graphics.newImage("Sprites/GUI/Speed Level/6.png"),
 }
-local accelLevelSprite = {
-    x = 0,
-    y = 0,
-}
 
 -- SUIT setup (This is gonna make the GUI so much easier to make..)
 local suit = require("SUIT")
@@ -281,6 +277,11 @@ function mainMenu.update(dt)
         -- love.graphics.setFont(font2)
         -- suit.Label("CLICK TO CHANGE", {align = "left"},
         -- (1000 * scaleStuff("w")), (500 * scaleStuff("h")), 800 * scaleStuff("w"), 25 * scaleStuff("h"))
+
+        suit.ImageButton(speedLevelImages[1], (700 * scaleStuff("w")), (500 * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(accelLevelImages[1], (700 * scaleStuff("w")), (600 * scaleStuff("h")), 4 * scaleStuff("w"), 4 * scaleStuff("h"))
+        suit.ImageButton(gripLevelImages[1], (700 * scaleStuff("w")), (700 * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(healthLevelImages[1], (700 * scaleStuff("w")), (800 * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
 
         if suit.ImageButton(selectLeftImage, (700 * scaleStuff("w")), (500 * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
             -- Select to left (if there is a car to the left)
