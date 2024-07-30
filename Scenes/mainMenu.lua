@@ -16,10 +16,10 @@ carList = {
         carID = 2,
         defaultCarName = "Berry",
         defaultCarImage = "Sprites/Cars/Berry.png",
-        maxSpeed = 3500,
-        acceleration = 400,
-        grip = 100,
-        health = 30,
+        maxSpeed = 4000,
+        acceleration = 700,
+        grip = 50,
+        health = 10,
     },
     {
         carID = 3,
@@ -32,6 +32,12 @@ carList = {
     }
 }
 local carIndex = 1
+
+-- Max speeds (for bar GUIs)
+local overallMaxSpeed = 5000
+local overallMaxAcceleration = 800
+local overallMaxGrip = 100
+local overallMaxHealth = 40
 
 -- GUI lists
 accelLevelImages = {
@@ -260,21 +266,21 @@ function mainMenu.update(dt)
 
         love.graphics.setFont(font1)
 
-        suit.Label("Speed: " .. (playerCarInfo.maxSpeed/10), {align = "left"},
-        (screenWidth - 50 - (7*45) - (#tostring(playerCarInfo.maxSpeed/10) * 45) * scaleStuff("w")), (50 * scaleStuff("h")),
-        (11*45) + (#tostring(playerCarInfo.maxSpeed/10) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
+        -- suit.Label("Speed: " .. (playerCarInfo.maxSpeed/10), {align = "left"},
+        -- (screenWidth - 50 - (7*45) - (#tostring(playerCarInfo.maxSpeed/10) * 45) * scaleStuff("w")), (50 * scaleStuff("h")),
+        -- (11*45) + (#tostring(playerCarInfo.maxSpeed/10) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
 
-        suit.Label("Accel: " .. (playerCarInfo.acceleration/10), {align = "left"},
-        (screenWidth - 50 - (7*45) - (#tostring(playerCarInfo.acceleration/10) * 45) * scaleStuff("w")), (100 * scaleStuff("h")),
-        (11*45) + (#tostring(playerCarInfo.acceleration/10) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
+        -- suit.Label("Accel: " .. (playerCarInfo.acceleration/10), {align = "left"},
+        -- (screenWidth - 50 - (7*45) - (#tostring(playerCarInfo.acceleration/10) * 45) * scaleStuff("w")), (100 * scaleStuff("h")),
+        -- (11*45) + (#tostring(playerCarInfo.acceleration/10) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
 
-        suit.Label("Grip: " .. (playerCarInfo.grip), {align = "left"},
-        (screenWidth - 50 - (6*45) - (#tostring(playerCarInfo.grip) * 45) * scaleStuff("w")), (150 * scaleStuff("h")),
-        (11*45) + (#tostring(playerCarInfo.grip) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
+        -- suit.Label("Grip: " .. (playerCarInfo.grip), {align = "left"},
+        -- (screenWidth - 50 - (6*45) - (#tostring(playerCarInfo.grip) * 45) * scaleStuff("w")), (150 * scaleStuff("h")),
+        -- (11*45) + (#tostring(playerCarInfo.grip) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
 
-        suit.Label("Health: " .. (playerCarInfo.health), {align = "left"},
-        (screenWidth - 50 - (8*45) - (#tostring(playerCarInfo.health) * 45) * scaleStuff("w")), (200 * scaleStuff("h")),
-        (11*45) + (#tostring(playerCarInfo.health) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
+        -- suit.Label("Health: " .. (playerCarInfo.health), {align = "left"},
+        -- (screenWidth - 50 - (8*45) - (#tostring(playerCarInfo.health) * 45) * scaleStuff("w")), (200 * scaleStuff("h")),
+        -- (11*45) + (#tostring(playerCarInfo.health) * 45) * scaleStuff("w"), 150 * scaleStuff("h"))
 
         -- love.graphics.setFont(font2)
         -- suit.Label("CLICK TO CHANGE", {align = "left"},
@@ -288,11 +294,13 @@ function mainMenu.update(dt)
         local levelguiyOffset = 100
 
         -- print(guiPositiony)
+        
+        print(calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6))
 
-        suit.ImageButton(speedLevelImages[1], ((guiPositionx - 400) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-        suit.ImageButton(accelLevelImages[1], ((guiPositionx - 300) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-        suit.ImageButton(gripLevelImages[1], ((guiPositionx + 300) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-        suit.ImageButton(healthLevelImages[1], ((guiPositionx + 400) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(speedLevelImages[calculateLevelFractions(playerCarInfo.maxSpeed, overallMaxSpeed, 6)], ((guiPositionx - 400) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(accelLevelImages[calculateLevelFractions(playerCarInfo.acceleration, overallMaxAcceleration, 6)], ((guiPositionx - 300) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(gripLevelImages[calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6)], ((guiPositionx + 200 + 98 - 66) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(healthLevelImages[calculateLevelFractions(playerCarInfo.health, overallMaxHealth, 6)], ((guiPositionx + 300 + 98 - 66) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
 
         if suit.ImageButton(selectLeftImage, ((guiPositionx - 200) * scaleStuff("w")), ((guiPositiony - 50) * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
             -- Select to left (if there is a car to the left)
@@ -461,6 +469,11 @@ function mainMenu.update(dt)
     return nil
 end
 
+function calculateLevelFractions(amount, maxAmount, indexLength)
+    local fraction = amount / maxAmount
+    return math.floor((fraction * indexLength) + 0.5)
+end
+
 function roundNumber(number, decimalPlaces) -- Currently just cuts it off at that specified decimal
     return math.floor(number * (math.pow(10, decimalPlaces))) / (math.pow(10, decimalPlaces))
 end
@@ -509,6 +522,20 @@ function mainMenu.draw()
     CScreen.cease()
     -- Draw GUI
     suit.draw()
+
+    if screen == "carSelect" then
+        love.graphics.push()
+
+        love.graphics.translate(guiPositionx, guiPositiony)
+        love.graphics.rotate(math.rad(90))
+
+        love.graphics.print(" Speed:", -400, 330)
+        love.graphics.print(" Accel:", -400, 230)
+        love.graphics.print("  Grip:", -400, -300)
+        love.graphics.print("Health:", -400, -400)
+
+        love.graphics.pop()
+    end
 end
 
 function carSelectLoad()
