@@ -164,6 +164,7 @@ function mainMenu.load()
     -- Load sound(s)
     bgSong = love.audio.newSource("Sounds/NaturalHighSnip.mp3", "stream")
     bgSong:setLooping(true)
+    bgSong:setVolume(0.2)
 
     -- Play bg song
     bgSong:play()
@@ -345,6 +346,34 @@ function mainMenu.update(dt)
 
         carSelectUpdate(dt)
 
+    elseif screen == "playerGarage" then
+        darkOffset = 0.5
+        local darkDifference = darkOffset - darkCurrent
+        darkCurrent = darkCurrent + darkDifference * 0.2
+
+        if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
+        300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+            screen = "mainMenu"
+        end
+
+        love.graphics.setFont(font2)
+
+        suit.Label("Car Garage is a work in progress!", {align = "left"},
+        (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+    elseif screen == "carShop" then
+        darkOffset = 0.5
+        local darkDifference = darkOffset - darkCurrent
+        darkCurrent = darkCurrent + darkDifference * 0.2
+
+        if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
+        300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
+            screen = "mainMenu"
+        end
+
+        love.graphics.setFont(font2)
+
+        suit.Label("Car Shop is a work in progress!", {align = "left"},
+        (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
     else
         updateAnimations(dt)
         

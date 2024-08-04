@@ -264,10 +264,10 @@ end
 
 function loadSongs()
     local songs = {
-        {path = "Sounds/song4.mp3", volume = 1},
-        {path = "Sounds/song1.mp3", volume = 1},
-        -- {path = "Sounds/song2.mp3", volume = 1},
-        {path = "Sounds/song3.mp3", volume = 1},
+        {path = "Sounds/song4.mp3", volume = 0.2},
+        {path = "Sounds/song1.mp3", volume = 0.2},
+        -- {path = "Sounds/song2.mp3", volume = 0.2},
+        {path = "Sounds/song3.mp3", volume = 0.2},
     }
 
     for i, song in ipairs(songs) do
@@ -2017,6 +2017,7 @@ end
 
 function SoundManager:playSound(name)
     if self.sounds[name] then
+        self.sounds[name]:setVolume(0.2)
         self.sounds[name]:play()
     end
 end
