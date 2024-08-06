@@ -298,10 +298,10 @@ function mainMenu.update(dt)
         
         print(calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6))
 
-        suit.ImageButton(speedLevelImages[calculateLevelFractions(playerCarInfo.maxSpeed, overallMaxSpeed, 6)], ((guiPositionx - 400) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-        suit.ImageButton(accelLevelImages[calculateLevelFractions(playerCarInfo.acceleration, overallMaxAcceleration, 6)], ((guiPositionx - 300) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-        suit.ImageButton(gripLevelImages[calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6)], ((guiPositionx + 200 + 98 - 66) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-        suit.ImageButton(healthLevelImages[calculateLevelFractions(playerCarInfo.health, overallMaxHealth, 6)], ((guiPositionx + 300 + 98 - 66) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")), 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(speedLevelImages[calculateLevelFractions(playerCarInfo.maxSpeed, overallMaxSpeed, 6)], ((guiPositionx) * scaleStuff("w")) - 400, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(accelLevelImages[calculateLevelFractions(playerCarInfo.acceleration, overallMaxAcceleration, 6)], ((guiPositionx) * scaleStuff("w")) - 300, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(gripLevelImages[calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6)], ((guiPositionx) * scaleStuff("w")) + 200 + 98 - 66, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
+        suit.ImageButton(healthLevelImages[calculateLevelFractions(playerCarInfo.health, overallMaxHealth, 6)], ((guiPositionx) * scaleStuff("w")) + 300 + 98 - 66, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
 
         if suit.ImageButton(selectLeftImage, ((guiPositionx - 200) * scaleStuff("w")), ((guiPositiony - 50) * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
             -- Select to left (if there is a car to the left)
@@ -396,7 +396,7 @@ function mainMenu.update(dt)
                 screen = "carSelect"
             end
             
-            if suit.ImageButton(optionsIcon, (screenWidth - 150) * scaleStuff("w"), 20 * scaleStuff("h"), 1 * scaleStuff("w"), 1 * scaleStuff("h")).hit then
+            if suit.ImageButton(optionsIcon, (screenWidth * scaleStuff("w")) - 150, 20 * scaleStuff("h"), 1, 1).hit then
                 screen =  "options"
             end
 
