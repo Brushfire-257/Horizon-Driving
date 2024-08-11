@@ -296,7 +296,7 @@ function mainMenu.update(dt)
 
         -- print(guiPositiony)
         
-        print(calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6))
+        -- print(calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6))
 
         suit.ImageButton(speedLevelImages[calculateLevelFractions(playerCarInfo.maxSpeed, overallMaxSpeed, 6)], ((guiPositionx) * scaleStuff("w")) - 400, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
         suit.ImageButton(accelLevelImages[calculateLevelFractions(playerCarInfo.acceleration, overallMaxAcceleration, 6)], ((guiPositionx) * scaleStuff("w")) - 300, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
