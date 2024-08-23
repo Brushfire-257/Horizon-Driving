@@ -292,18 +292,13 @@ function mainMenu.update(dt)
         guiPositionx = guiPositionx + (mac.playerx - guiPositionx) * guiSpeed * dt
         guiPositiony = guiPositiony + (mac.playery - guiPositiony) * guiSpeed * dt
 
-        local levelguiyOffset = 100
+        -- local levelguiyOffset = 100
 
         -- print(guiPositiony)
         
         -- print(calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6))
 
-        suit.ImageButton(speedLevelImages[calculateLevelFractions(playerCarInfo.maxSpeed, overallMaxSpeed, 6)], ((guiPositionx) * scaleStuff("w")) - 400, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-        suit.ImageButton(accelLevelImages[calculateLevelFractions(playerCarInfo.acceleration, overallMaxAcceleration, 6)], ((guiPositionx) * scaleStuff("w")) - 300, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-        suit.ImageButton(gripLevelImages[calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6)], ((guiPositionx) * scaleStuff("w")) + 200 + 98 - 66, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-        suit.ImageButton(healthLevelImages[calculateLevelFractions(playerCarInfo.health, overallMaxHealth, 6)], ((guiPositionx) * scaleStuff("w")) + 300 + 98 - 66, ((guiPositiony) * scaleStuff("h")) - levelguiyOffset, 3 * scaleStuff("w"), 3 * scaleStuff("h"))
-
-        if suit.ImageButton(selectLeftImage, ((guiPositionx - 200) * scaleStuff("w")), ((guiPositiony - 50) * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
+        if suit.ImageButton(selectLeftImage, ((guiPositionx - 250) * scaleStuff("w")), ((guiPositiony - 50) * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
             -- Select to left (if there is a car to the left)
             if carIndex ~= 1 then
                 carIndex = carIndex - 1
@@ -551,19 +546,42 @@ function mainMenu.draw()
     CScreen.cease()
     -- Draw GUI
     suit.draw()
-
+    
     if screen == "carSelect" then
         love.graphics.push()
-
-        love.graphics.translate(guiPositionx, guiPositiony)
+        
+        love.graphics.translate(guiPositionx * scaleStuff("h"), guiPositiony * scaleStuff("w"))
         love.graphics.rotate(math.rad(90))
-
-        love.graphics.print(" Speed:", -400, 330)
-        love.graphics.print(" Accel:", -400, 230)
-        love.graphics.print("  Grip:", -400, -300)
-        love.graphics.print("Health:", -400, -400)
-
+        love.graphics.print(" Speed:", -250, 360 * scaleStuff("w"))
+        love.graphics.print(" Accel:", -250, 260 * scaleStuff("w"))
+        love.graphics.print("  Grip:", -250, -340 * scaleStuff("w"))
+        love.graphics.print("Health:", -250, -440 * scaleStuff("w"))
+    
         love.graphics.pop()
+
+        local levelguiyOffset = -100
+        local statScale = 1 * scaleStuff("w")
+        local statImageSizeExample = speedLevelImages[1]
+        local statImageRX = statImageSizeExample:getWidth() / 2
+        local statImageRY = statImageSizeExample:getHeight() / 2
+
+        love.graphics.draw(speedLevelImages[calculateLevelFractions(playerCarInfo.maxSpeed, overallMaxSpeed, 6)],
+        ((guiPositionx - 400) * scaleStuff("w")), ((guiPositiony) * scaleStuff("h")) - levelguiyOffset,
+        0, statScale, statScale,
+        statImageRX, statImageRY)
+        
+        love.graphics.draw(accelLevelImages[calculateLevelFractions(playerCarInfo.acceleration, overallMaxAcceleration, 6)],
+        ((guiPositionx - 300) * scaleStuff("w")), ((guiPositiony) * scaleStuff("h")) - levelguiyOffset,
+        0, statScale, statScale,
+        statImageRX, statImageRY)
+        love.graphics.draw(gripLevelImages[calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6)],
+        ((guiPositionx + 300) * scaleStuff("w")), ((guiPositiony) * scaleStuff("h")) - levelguiyOffset,
+        0, statScale, statScale,
+        statImageRX, statImageRY)
+        love.graphics.draw(healthLevelImages[calculateLevelFractions(playerCarInfo.health, overallMaxHealth, 6)],
+        ((guiPositionx + 400) * scaleStuff("w")), ((guiPositiony) * scaleStuff("h")) - levelguiyOffset,
+        0, statScale, statScale,
+        statImageRX, statImageRY)
     end
 end
 
