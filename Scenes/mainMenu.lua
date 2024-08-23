@@ -552,10 +552,10 @@ function mainMenu.draw()
         
         love.graphics.translate(guiPositionx * scaleStuff("h"), guiPositiony * scaleStuff("w"))
         love.graphics.rotate(math.rad(90))
-        love.graphics.print(" Speed:", -250, 360 * scaleStuff("w"))
-        love.graphics.print(" Accel:", -250, 260 * scaleStuff("w"))
-        love.graphics.print("  Grip:", -250, -340 * scaleStuff("w"))
-        love.graphics.print("Health:", -250, -440 * scaleStuff("w"))
+        love.graphics.print(" Speed:", -425 * scaleStuff("h"), 360 * scaleStuff("w"))
+        love.graphics.print(" Accel:", -425 * scaleStuff("h"), 260 * scaleStuff("w"))
+        love.graphics.print("  Grip:", -425 * scaleStuff("h"), -340 * scaleStuff("w"))
+        love.graphics.print("Health:", -425 * scaleStuff("h"), -440 * scaleStuff("w"))
     
         love.graphics.pop()
 
@@ -566,20 +566,20 @@ function mainMenu.draw()
         local statImageRY = statImageSizeExample:getHeight() / 2
 
         love.graphics.draw(speedLevelImages[calculateLevelFractions(playerCarInfo.maxSpeed, overallMaxSpeed, 6)],
-        ((guiPositionx - 400) * scaleStuff("w")), ((guiPositiony) * scaleStuff("h")) - levelguiyOffset,
+        ((guiPositionx - 400) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")),
         0, statScale, statScale,
         statImageRX, statImageRY)
         
         love.graphics.draw(accelLevelImages[calculateLevelFractions(playerCarInfo.acceleration, overallMaxAcceleration, 6)],
-        ((guiPositionx - 300) * scaleStuff("w")), ((guiPositiony) * scaleStuff("h")) - levelguiyOffset,
+        ((guiPositionx - 300) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")),
         0, statScale, statScale,
         statImageRX, statImageRY)
         love.graphics.draw(gripLevelImages[calculateLevelFractions(playerCarInfo.grip, overallMaxGrip, 6)],
-        ((guiPositionx + 300) * scaleStuff("w")), ((guiPositiony) * scaleStuff("h")) - levelguiyOffset,
+        ((guiPositionx + 300) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")),
         0, statScale, statScale,
         statImageRX, statImageRY)
         love.graphics.draw(healthLevelImages[calculateLevelFractions(playerCarInfo.health, overallMaxHealth, 6)],
-        ((guiPositionx + 400) * scaleStuff("w")), ((guiPositiony) * scaleStuff("h")) - levelguiyOffset,
+        ((guiPositionx + 400) * scaleStuff("w")), ((guiPositiony - levelguiyOffset) * scaleStuff("h")),
         0, statScale, statScale,
         statImageRX, statImageRY)
     end
