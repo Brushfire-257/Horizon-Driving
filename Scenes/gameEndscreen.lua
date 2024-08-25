@@ -21,6 +21,10 @@ local screenHeight = 1080
 -- local EMPDodges = 0
 -- local timeSurvived = 0
 
+local colorR = 0
+local colorG = 0
+local colorB = 0
+
 function gameEndscreen.load()
     -- Set SUIT colors
     suit.theme.color.normal.fg = {255,255,255}
@@ -36,6 +40,7 @@ function gameEndscreen.load()
     
     -- Load sound(s)
     bgSong = love.audio.newSource("Sounds/bustedsong.wav", "static")
+    bgSong:setVolume(0.4)
     bgSong:setLooping(true)
 
     -- Play bg song
@@ -51,6 +56,17 @@ function gameEndscreen.load()
     if policeTakedowns > gameData.policeTakedownsHIGHSCORE then gameData.policeTakedownsHIGHSCORE = policeTakedowns end
     if EMPDodges > gameData.EMPDodgesHIGHSCORE then gameData.EMPDodgesHIGHSCORE = EMPDodges end
     if timeSurvived > gameData.timeSurvivedHIGHSCORE then gameData.timeSurvivedHIGHSCORE = timeSurvived end
+
+    rectangleAnim = {
+        x = 0,
+        y = 0,
+        width = screenWidthA,
+        height = screenHeightA,
+        speed = 300
+    }
+    colorR = 0
+    colorG = 0
+    colorB = 0
 end
 
 function gameEndscreen.update(dt)
@@ -67,7 +83,7 @@ function gameEndscreen.update(dt)
     love.graphics.setFont(font1)
     
     -- Prepare the player statistics
-    suit.Label("Highscores:", {align = "left"},
+    suit.Label("Scores:", {align = "left"},
     (25 * scaleStuff("w")), (25 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
     love.graphics.setFont(font2)
     local decimalPlaces = 2
@@ -84,15 +100,31 @@ function gameEndscreen.update(dt)
     suit.Label("Time Survived: " .. roundNumber(timeSurvived, decimalPlaces), {align = "left"},
     (25 * scaleStuff("w")), (625 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
     
+
+    if rectangleAnim.y < screenHeightA then
+        rectangleAnim.y = rectangleAnim.y + rectangleAnim.speed * dt
+    end
+
+    colorR = colorR + 10 * dt
+    colorG = colorG + 10 * dt
+    colorB = colorB + 10 * dt
+
+    if colorR >= 27 then colorR = 27 end
+    if colorG >= 26 then colorG = 26 end
+    if colorB >= 50 then colorB = 50 end
+
     return nil
 end
 
 function gameEndscreen.draw()
+    love.graphics.clear(colorR/255, colorG/255, colorB/255)
     -- CScreen.apply()
     
     -- Draw GUI
     suit.draw()
-    
+
+    love.graphics.setColor(colorR/255, colorG/255, colorB/255)
+    love.graphics.rectangle("fill", rectangleAnim.x, rectangleAnim.y, rectangleAnim.width, rectangleAnim.height)
     -- CScreen.cease()
 end
 

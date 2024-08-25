@@ -33,7 +33,7 @@ function deathAnim.load()
     screenHeightA = love.graphics.getHeight()
 
     darkOffset = 0
-    darkCurrent = 0
+    darkCurrent = 1
     endAnimation = 0
 
     font = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 200 * math.min(scaleStuff("w"), scaleStuff("h")))
@@ -43,7 +43,7 @@ function deathAnim.load()
 
     -- Load sfx
     local sfx1 = love.audio.newSource("Sounds/sfx/Busted.wav", "static")
-
+    sfx1:setVolume(0.4)
     -- Play sfx
     sfx1:play()
 end
@@ -52,9 +52,9 @@ function deathAnim.update(dt)
 
     updateAnimations1(dt)
 
-    if love.keyboard.isDown('p') then -- DEBUG
-        return "playerDeath"
-    end
+    -- if love.keyboard.isDown('p') then -- DEBUG
+    --     return "playerDeath"
+    -- end
 
     if endAnimation == 1 then
         return "gameEndscreen"
@@ -129,8 +129,8 @@ function loadAnimations1()
         playerRotation = 0,
         playerRotationX = menuAnimationImages.playerCar:getWidth() / 2,
         playerRotationY = menuAnimationImages.playerCar:getHeight() / 2,
-        playerScaleX = animScale,
-        playerScaleY = animScale,
+        playerScaleX = animScale * playerScaleMultiplier,
+        playerScaleY = animScale * playerScaleMultiplier,
         playerImage = menuAnimationImages.playerCar,
         
         trafficx = 1050, -- Traffic Car

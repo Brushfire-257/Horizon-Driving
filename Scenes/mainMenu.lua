@@ -1,35 +1,154 @@
 -- The main menu for the game
 mainMenu = {}
 
+playTutorial = 0
+
 -- Car List
 carList = {
     {
         carID = 1,
         defaultCarName = "Jerry",
         defaultCarImage = "Sprites/Cars/yellowcar.png",
-        maxSpeed = 3500,
-        acceleration = 360,
-        grip = 30,
-        health = 30,
+        maxSpeed = 2500,  
+        acceleration = 400,  
+        grip = 50,  
+        health = 30,  
     },
     {
         carID = 2,
         defaultCarName = "Berry",
         defaultCarImage = "Sprites/Cars/Berry.png",
-        maxSpeed = 4000,
-        acceleration = 700,
-        grip = 50,
-        health = 10,
+        maxSpeed = 2000,  
+        acceleration = 700,  
+        grip = 70,  
+        health = 15,  
     },
     {
         carID = 3,
         defaultCarName = "Police Car",
         defaultCarImage = "Sprites/Cars/PoliceCar.png",
-        maxSpeed = 3500,
-        acceleration = 400,
-        grip = 100,
-        health = 30,
-    }
+        maxSpeed = 3000,  
+        acceleration = 450,  
+        grip = 60,  
+        health = 25,  
+    },
+    {
+        carID = 4,
+        defaultCarName = "Pagani Zonda R",
+        defaultCarImage = "Sprites/Cars/2007 Pagani Zonda R.png",
+        maxSpeed = 4166,  
+        acceleration = 700,  
+        grip = 60,  
+        health = 15,  
+    },
+    {
+        carID = 5,
+        defaultCarName = "S2000 GT1 Turbo",
+        defaultCarImage = "Sprites/Cars/2009 Amuse S2000 GT1 Turbo.png",
+        maxSpeed = 3666,  
+        acceleration = 600,  
+        grip = 50,  
+        health = 20,  
+    },
+    {
+        carID = 6,
+        defaultCarName = "Lamborghini Gallardo",
+        defaultCarImage = "Sprites/Cars/2010 Lamborghini Gallardo.png",
+        maxSpeed = 3333,  
+        acceleration = 550,  
+        grip = 50,  
+        health = 25,  
+    },
+    {
+        carID = 7,
+        defaultCarName = "Koenigsegg Jesko",
+        defaultCarImage = "Sprites/Cars/2019 Koenigsegg Jesko.png",
+        maxSpeed = 5000,  
+        acceleration = 700,  
+        grip = 40,  
+        health = 10,  
+    },
+    {
+        carID = 8,
+        defaultCarName = "Lotus Evija",
+        defaultCarImage = "Sprites/Cars/2019 Lotus Evija.png",
+        maxSpeed = 4000,  
+        acceleration = 800,  
+        grip = 80,  
+        health = 15,  
+    },
+    {
+        carID = 9,
+        defaultCarName = "RAESR Tachyon Speed",
+        defaultCarImage = "Sprites/Cars/2019 RAESR Tachyon Speed.png",
+        maxSpeed = 5000,  
+        acceleration = 750,  
+        grip = 60,  
+        health = 10,  
+    },
+    {
+        carID = 10,
+        defaultCarName = "Ferrari 488 GT3 EVO",
+        defaultCarImage = "Sprites/Cars/2020 Ferrari 488 GT3 EVO.png",
+        maxSpeed = 4166,  
+        acceleration = 600,  
+        grip = 70,  
+        health = 15,  
+    },
+    {
+        carID = 11,
+        defaultCarName = "McLaren Senna GTR",
+        defaultCarImage = "Sprites/Cars/2021 McLaren Senna GTR.png",
+        maxSpeed = 4500,  
+        acceleration = 700,  
+        grip = 50,  
+        health = 15,  
+    },
+    {
+        carID = 12,
+        defaultCarName = "Porsche 911 GT3",
+        defaultCarImage = "Sprites/Cars/Porsche 911 GT3.png",
+        maxSpeed = 4500,  
+        acceleration = 700,  
+        grip = 70,  
+        health = 12,  
+    },
+    {
+        carID = 13,
+        defaultCarName = "Porsche Cayenne Turbo GT",
+        defaultCarImage = "Sprites/Cars/Porsche Cayenne Turbo GT.png",
+        maxSpeed = 3000,  
+        acceleration = 500,  
+        grip = 40,
+        health = 30,  
+    },
+    {
+        carID = 14,
+        defaultCarName = "Valarra Corvette",
+        defaultCarImage = "Sprites/Cars/2022 Valarra Corvette.png",
+        maxSpeed = 4666,  
+        acceleration = 700,  
+        grip = 50,  
+        health = 15,  
+    },
+    {
+        carID = 15,
+        defaultCarName = "Valhalla Concept",
+        defaultCarImage = "Sprites/Cars/valhallaconceptORIG.png",
+        maxSpeed = 4333,  
+        acceleration = 750,  
+        grip = 80,  
+        health = 10,  
+    },
+    {
+        carID = 16,
+        defaultCarName = "McLaren 675",
+        defaultCarImage = "Sprites/Cars/2021 McLaren 765.png",
+        maxSpeed = 3000,  
+        acceleration = 700,  
+        grip = 60,  
+        health = 20,  
+    },
 }
 local carIndex = 1
 
@@ -92,11 +211,27 @@ local screenHeight = 1080
 local mac = {}
 
 local darkOffset = 0
-local darkCurrent = 0
+local darkCurrent = 1
 
 local selectLeftImage = love.graphics.newImage("Sprites/GUI/leftCarSelect.png")
 local selectRightImage = love.graphics.newImage("Sprites/GUI/rightCarSelect.png")
 local optionsIcon = love.graphics.newImage("Sprites/GUI/gearIcon.png")
+
+-- Police anim
+local policeAnimTimer = 0
+local currentFrame = 1
+local timePerFrame = 0.07
+
+policeAnimationSequence = {
+    love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7 red.png"), love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png"),
+    love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7 red.png"), love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png"),
+    love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7 blue.png"), love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png"),
+    love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7 blue.png"), love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png")
+}
+
+-- Selecting SFX
+selectSound = love.audio.newSource("Sounds/sfx/select.wav", "static")
+deselectSound = love.audio.newSource("Sounds/sfx/deselect.wav", "static")
 
 -- Precalculate button positions in options menu
 local numberOfButtons = 4
@@ -130,20 +265,62 @@ gameData = {
     EMPDodgesHIGHSCORE = 0,
     timeSurvivedHIGHSCORE = 0,
     playerGarage = {
+        -- {
+        --     carID = 1,
+        --     carName = "Jerry",
+        -- },
+        -- {
+        --     carID = 2,
+        --     carName = "Berry",
+        --     -- carImage = "path/to/image3.png",
+        -- },
+        -- {
+        --     carID = 3,
+        --     carName = "Police Car"
+        -- },
         {
-            carID = 1,
-            carName = "Jerry",
+            carID = 6,
         },
         {
-            carID = 2,
-            carName = "Berry",
-            -- carImage = "path/to/image3.png",
-        }
+            carID = 5,
+        },
+        {
+            carID = 4,
+        },
+        {
+            carID = 7,
+        },
+        {
+            carID = 8,
+        },
+        {
+            carID = 9,
+        },
+        {
+            carID = 10,
+        },
+        {
+            carID = 11,
+        },
+        {
+            carID = 12,
+        },
+        {
+            carID = 13,
+        },
+        {
+            carID = 14,
+        },
+        {
+            carID = 15,
+        },
+        {
+            carID = 16,
+        },
     }
 }
 
 function mainMenu.load()
-
     -- Scaling init
     CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, debugMode)
 
@@ -164,10 +341,12 @@ function mainMenu.load()
     -- Load sound(s)
     bgSong = love.audio.newSource("Sounds/NaturalHighSnip.mp3", "stream")
     bgSong:setLooping(true)
-    bgSong:setVolume(0.2)
+    bgSong:setVolume(0.3)
 
     -- Play bg song
     bgSong:play()
+
+    darkCurrent = 1
 
     -- Set SUIT colors
     suit.theme.color.normal.fg = {255,255,255}
@@ -232,14 +411,14 @@ function getCarInfo(index)
 end
 
 function mainMenu.update(dt)
-    if love.keyboard.isDown('p') then -- DEBUG
-        bgSong:stop()
-        return "mainMenu"
-    end
+    -- if love.keyboard.isDown('p') then -- DEBUG
+    --     bgSong:stop()
+    --     return "mainMenu"
+    -- end
 
     darkOffset = 0
     local darkDifference = darkOffset - darkCurrent
-    darkCurrent = darkCurrent + darkDifference * 0.2
+    darkCurrent = darkCurrent + darkDifference * 0.1
     suit.layout:reset(0, 0)
 
     love.graphics.setFont(font)
@@ -249,6 +428,7 @@ function mainMenu.update(dt)
             300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 firstMenuLoad = 0
                 bgSong:stop()
+                selectSound:play()
                 return "startGame"
         end
 
@@ -256,14 +436,18 @@ function mainMenu.update(dt)
             mac.counter = 0
             mac.switchAnimation = 1
             loadAnimations()
+            deselectSound:play()
             screen = "mainMenu"
         end
 
         suit.Label("CAR SELECT", {align = "left"},
         (25 * scaleStuff("w")), (-15 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
 
+        love.graphics.setFont(font2)
+
         suit.Label(playerCarInfo.name, {align = "left"},
-        (screenWidth - 50 - (#playerCarInfo.name * 60) * scaleStuff("w")), (-15 * scaleStuff("h")), 800 * scaleStuff("w"), 150 * scaleStuff("h"))
+        (screenWidth - 50 - (math.min(#playerCarInfo.name, 16) * 30) * scaleStuff("w")), (-30 * scaleStuff("h")),
+        (math.min(#playerCarInfo.name, 16) * 30 * scaleStuff("w")), 150 * scaleStuff("h"))
 
         love.graphics.setFont(font1)
 
@@ -302,6 +486,7 @@ function mainMenu.update(dt)
             -- Select to left (if there is a car to the left)
             if carIndex ~= 1 then
                 carIndex = carIndex - 1
+                selectSound:play()
             end
 
             -- print(love.filesystem.read("saveFile.txt"))
@@ -317,10 +502,12 @@ function mainMenu.update(dt)
             else
                 print("Car not found.")
             end
-        elseif suit.ImageButton(selectRightImage, ((guiPositionx + 100) * scaleStuff("w")), ((guiPositiony - 50) * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
+        end
+        if suit.ImageButton(selectRightImage, ((guiPositionx + 100) * scaleStuff("w")), ((guiPositiony - 50) * scaleStuff("h")), 2 * scaleStuff("w"), 2 * scaleStuff("h")).hit then
             -- Select to right (if there is a car to the right)
             if carIndex ~= #gameData.playerGarage then
                 carIndex = carIndex + 1
+                selectSound:play()
             end
             
             -- print(love.filesystem.read("saveFile.txt"))
@@ -349,6 +536,7 @@ function mainMenu.update(dt)
         if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
         300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
             screen = "mainMenu"
+            deselectSound:play()
         end
 
         love.graphics.setFont(font2)
@@ -363,6 +551,7 @@ function mainMenu.update(dt)
         if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
         300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
             screen = "mainMenu"
+            deselectSound:play()
         end
 
         love.graphics.setFont(font2)
@@ -378,21 +567,25 @@ function mainMenu.update(dt)
             if suit.Button("Shop", (50) * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
             buttonWidth * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 screen = "carShop"
+                selectSound:play()
             end
 
             if suit.Button("Garage", (50 + buttonWidth + gapWidth) * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
             buttonWidth * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 screen = "playerGarage"
+                selectSound:play()
             end
 
             if suit.Button("Play", (50 + 2 * buttonWidth + 2 * gapWidth) * scaleStuff("w"), (screenHeight - 225) * scaleStuff("h"),
             buttonWidth * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 carSelectLoad()
                 screen = "carSelect"
+                selectSound:play()
             end
             
             if suit.ImageButton(optionsIcon, (screenWidth * scaleStuff("w")) - 150, 20 * scaleStuff("h"), 1, 1).hit then
                 screen =  "options"
+                selectSound:play()
             end
 
             love.graphics.setFont(font2)
@@ -409,21 +602,25 @@ function mainMenu.update(dt)
             if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
             300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 screen = "mainMenu"
+                deselectSound:play()
             end
 
             if suit.Button("Help", (screenWidth/2 - 325) * scaleStuff("w"), (50) * scaleStuff("h"),
             650 * scaleStuff("w"), buttonHeight * scaleStuff("h")).hit then
                 screen = "help"
+                selectSound:play()
             end
             
             if suit.Button("Highscores", (screenWidth/2 - 325) * scaleStuff("w"), (50 + buttonHeight + gapHeight) * scaleStuff("h"),
             650 * scaleStuff("w"), buttonHeight * scaleStuff("h")).hit then
                 screen = "highscores"
+                selectSound:play()
             end
 
             if suit.Button("Settings", (screenWidth/2 - 325) * scaleStuff("w"), (50 + 2 * buttonHeight + 2 * gapHeight) * scaleStuff("h"),
             650 * scaleStuff("w"), buttonHeight * scaleStuff("h")).hit then
                 screen = "settings"
+                selectSound:play()
             end
             
             if suit.Button("Quit", (screenWidth/2 - 325) * scaleStuff("w"), (50 + 3 * buttonHeight + 3 * gapHeight) * scaleStuff("h"),
@@ -438,6 +635,7 @@ function mainMenu.update(dt)
             if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
             300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 screen = "options"
+                deselectSound:play()
             end
     
             love.graphics.setFont(font2)
@@ -453,6 +651,7 @@ function mainMenu.update(dt)
             if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
             300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 screen = "options"
+                deselectSound:play()
             end
     
             love.graphics.setFont(font1)
@@ -481,6 +680,7 @@ function mainMenu.update(dt)
             if suit.Button("Back", (screenWidth - 325) * scaleStuff("w"), 20 * scaleStuff("h"),
             300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then
                 screen = "options"
+                deselectSound:play()
             end
     
             love.graphics.setFont(font2)
@@ -514,6 +714,24 @@ function mainMenu.draw()
     math.floor(mac.road2y), mac.roadRotation,
     mac.roadScaleX, mac.roadScaleY,
     mac.roadRotationX, mac.roadRotationY)
+
+    -- Shadows
+    if mac.trafficAppear == 1 then
+        drawShadow(mac.trafficImage, mac.trafficx, mac.trafficy, mac.trafficRotation,
+        shadowAngle, shadowDistance, mac.trafficScaleX, mac.trafficScaleY, mac.trafficRotationX, mac.trafficRotationY)
+    end
+    shadowDistance = 25 * mac.policeScaleX
+    if mac.policeAppear == 1 then
+        drawShadow(mac.policeImage, mac.policex, mac.policey, mac.policeRotation,
+        shadowAngle, shadowDistance, mac.policeScaleX, mac.policeScaleY, mac.policeRotationX, mac.policeRotationY)
+    end
+    shadowDistance = 75 * mac.playerScaleX
+    if mac.playerAppear == 1 then
+        drawShadow(mac.playerImage, mac.playerx, mac.playery, mac.playerRotation,
+        shadowAngle, shadowDistance, mac.playerScaleX, mac.playerScaleY, mac.playerRotationX, mac.playerRotationY)
+    end
+
+    love.graphics.setColor(1 - darkCurrent, 1 - darkCurrent, 1 - darkCurrent, 1)
 
     if mac.trafficAppear == 1 then
         love.graphics.draw(mac.trafficImage, math.floor(mac.trafficx),
@@ -585,6 +803,38 @@ function mainMenu.draw()
     end
 end
 
+function drawShadow(image, x, y, angle, shadowAngle, shadowDistance, scaleX, scaleY, rotationX, rotationY)
+    -- Shadow offset
+    local shadowOffsetX = math.cos(shadowAngle) * shadowDistance
+    local shadowOffsetY = math.sin(shadowAngle) * shadowDistance
+
+    -- Set the color to black with some transparency
+    love.graphics.setColor(0, 0, 0, 0.5)
+
+    -- Draw the shadow, offset and scaled
+    love.graphics.draw(image, (x + shadowOffsetX),
+    (y + shadowOffsetY), angle,
+    scaleX * 0.9, scaleY * 0.9,
+    rotationX * 0.9, rotationY * 0.9)
+
+    -- Reset color
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+function updatePoliceCarAnimation(dt)
+    policeAnimTimer = policeAnimTimer + dt
+    
+    if policeAnimTimer >= timePerFrame then
+        policeAnimTimer = policeAnimTimer - timePerFrame
+        currentFrame = currentFrame + 1
+
+        if currentFrame > #policeAnimationSequence then
+            currentFrame = 1
+        end
+    end
+    mac.policeImage = policeAnimationSequence[currentFrame]
+end
+
 function carSelectLoad()
     mac.switchAnimation = 0
     mac.stage = 0
@@ -597,16 +847,16 @@ function carSelectLoad()
     mac.playerx = 650
     mac.playery = 400
     mac.playerRotation = 0
-    mac.playerScaleX = animScale
-    mac.playerScaleY = animScale
+    mac.playerScaleX = animScale * playerScaleMultiplier
+    mac.playerScaleY = animScale * playerScaleMultiplier
     mac.playerRotation = math.rad(145 - 90)
     
     mac.policeAppear = 1
     mac.policex = 750
     mac.policey = 200
     mac.policeRotation = 0
-    mac.policeScaleX = animScale
-    mac.policeScaleY = animScale
+    mac.policeScaleX = animScale * playerScaleMultiplier
+    mac.policeScaleY = animScale * playerScaleMultiplier
     mac.policeRotation = math.rad(145 - 90)
     mac.road1x = 1800
     mac.road1y = 200
@@ -614,12 +864,16 @@ function carSelectLoad()
     mac.roadScaleY = animScale * 8
     mac.roadRotation = math.rad(145)
 
+    mac.trafficAppear = 0
+    
+    shadowAngle = math.rad(170)
+    shadowDistance = 50 * mac.playerScaleX
+
     clearDebris()
 end
 
 function carSelectUpdate(dt)
     mac.timer = mac.timer + dt
-
 
     mac.road1x = mac.road1x - 4500 * math.sin(mac.roadRotation) * dt
     mac.road1y = mac.road1y - 4500 * -math.cos(mac.roadRotation) * dt
@@ -636,6 +890,7 @@ function carSelectUpdate(dt)
     end
 
     updateRoad()
+    updatePoliceCarAnimation(dt)
 end
 
 function loadAnimations(dt)
@@ -643,7 +898,7 @@ function loadAnimations(dt)
 
     menuAnimationImages = {
         playerCar = love.graphics.newImage("Sprites/Cars/Berry.png"),
-        policeCar = love.graphics.newImage("Sprites/Cars/PoliceCar.png"),
+        policeCar = love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png"),
         trafficCar = love.graphics.newImage("Sprites/Cars/yellowcar.png"),
         road = love.graphics.newImage("Sprites/road1.png"),
     }
@@ -696,6 +951,9 @@ function loadAnimations(dt)
         stage = 0,
         counter = 0
     }
+
+    shadowAngle = math.rad(90)
+    shadowDistance = 50 * mac.playerScaleX
 end
 
 function updateAnimations(dt)
@@ -704,6 +962,10 @@ function updateAnimations(dt)
     if mac.timer < 0 then
         mac.timer = 0
     end
+
+    playerScaleMultiplier = 0.6
+
+    shadowDistance = 50 * mac.playerScaleX
 
     if currentAnimation == 0 then
         if mac.switchAnimation == 1 then
@@ -714,21 +976,24 @@ function updateAnimations(dt)
             animScale = 0.65
 
             mac.playerAppear = 1
-            mac.playerImage = love.graphics.newImage("Sprites/Cars/Berry.png")
+            mac.playerImage = love.graphics.newImage("Sprites/Cars/2007 Pagani Zonda R.png")
             mac.playerx = 100
             mac.playery = 500
             mac.playerRotation = 0
-            mac.playerScaleX = animScale
-            mac.playerScaleY = animScale
+            mac.playerScaleX = animScale * playerScaleMultiplier
+            mac.playerScaleY = animScale * playerScaleMultiplier
             
             mac.policeAppear = 1
             mac.policex = 1200
             mac.policey = 400
             mac.policeRotation = 0
-            mac.policeScaleX = animScale
-            mac.policeScaleY = animScale
+            mac.policeScaleX = animScale * playerScaleMultiplier
+            mac.policeScaleY = animScale * playerScaleMultiplier
 
             mac.trafficAppear = 0
+
+            shadowAngle = math.rad(90)
+
 
             mac.road1x = 200
             mac.road1y = -450
@@ -736,10 +1001,12 @@ function updateAnimations(dt)
             mac.roadScaleY = animScale * 8
             mac.roadRotation = math.rad(90)
 
-            mac.timer = 140
+            mac.timer = 120
 
             clearDebris()
         end
+        
+        updatePoliceCarAnimation(dt)
         
         if mac.stage == 3 and mac.timer == 0 then
         else
@@ -781,9 +1048,6 @@ function updateAnimations(dt)
             end
         elseif mac.stage == 3 and mac.timer == 0 then
             if mac.counter <= 30 then
-                -- local carHeight = mac.playerImage:getHeight() - 50
-                -- local carEndX = mac.playerx + carHeight * math.cos(mac.playerRotation)
-                -- local carEndY = mac.playery + carHeight * math.sin(mac.playerRotation)
                 
                 mac.policex = mac.policex + 1
                 mac.policey = mac.policey - 3
@@ -819,20 +1083,23 @@ function updateAnimations(dt)
             animScale = 1
 
             mac.playerAppear = 1
-            mac.playerImage = love.graphics.newImage("Sprites/Cars/Berry.png")
-            mac.playerx = 1100
-            mac.playery = 625
+            mac.playerImage = love.graphics.newImage("Sprites/Cars/2007 Pagani Zonda R.png")
+            mac.playerx = 1000
+            mac.playery = 700
             mac.playerRotation = 0
-            mac.playerScaleX = animScale
-            mac.playerScaleY = animScale
+            mac.playerScaleX = animScale * playerScaleMultiplier
+            mac.playerScaleY = animScale * playerScaleMultiplier
             mac.playerRotation = math.rad(-80)
+
+            shadowAngle = math.rad(0)
             
+            mac.policeImage = menuAnimationImages.policeCar
             mac.policeAppear = 1
             mac.policex = 1200
             mac.policey = 300
             mac.policeRotation = 0
-            mac.policeScaleX = animScale
-            mac.policeScaleY = animScale
+            mac.policeScaleX = animScale * playerScaleMultiplier
+            mac.policeScaleY = animScale * playerScaleMultiplier
             mac.policeRotation = math.rad(5)
             mac.road1x = 200
             mac.road1y = -450
@@ -842,6 +1109,7 @@ function updateAnimations(dt)
 
             clearDebris()
         end
+
 
         if mac.stage == 0 then
             if mac.counter <= 150 then      
@@ -875,20 +1143,20 @@ function updateAnimations(dt)
             animScale = 0.5
 
             mac.playerAppear = 1
-            mac.playerImage = love.graphics.newImage("Sprites/Cars/Berry.png")
+            mac.playerImage = love.graphics.newImage("Sprites/Cars/2020 Ferrari 488 GT3 EVO.png")
             mac.playerx = 650
             mac.playery = -100
             mac.playerRotation = 0
-            mac.playerScaleX = animScale
-            mac.playerScaleY = animScale
+            mac.playerScaleX = animScale * playerScaleMultiplier
+            mac.playerScaleY = animScale * playerScaleMultiplier
             mac.playerRotation = math.rad(170 - 90)
             
             mac.policeAppear = 1
             mac.policex = 750
             mac.policey = -900
             mac.policeRotation = 0
-            mac.policeScaleX = animScale
-            mac.policeScaleY = animScale
+            mac.policeScaleX = animScale * playerScaleMultiplier
+            mac.policeScaleY = animScale * playerScaleMultiplier
             mac.policeRotation = math.rad(170 - 90)
             mac.road1x = 1800
             mac.road1y = -200
@@ -896,8 +1164,12 @@ function updateAnimations(dt)
             mac.roadScaleY = animScale * 8
             mac.roadRotation = math.rad(170)
 
+            shadowAngle = math.rad(0)
+
             clearDebris()
         end
+
+        updatePoliceCarAnimation(dt)
 
         if mac.stage == 0 then
             if mac.counter <= 160 then
@@ -934,14 +1206,16 @@ function updateAnimations(dt)
             animScale = 1
 
             mac.playerAppear = 1
-            mac.playerImage = love.graphics.newImage("Sprites/Cars/Berry.png")
-            mac.playerx = 1200
-            mac.playery = 300
+            mac.playerImage = love.graphics.newImage("Sprites/Cars/2019 Koenigsegg Jesko.png")
+            mac.playerx = 1300
+            mac.playery = 250
             mac.playerRotation = 0
-            mac.playerScaleX = animScale
-            mac.playerScaleY = animScale
+            mac.playerScaleX = animScale * playerScaleMultiplier
+            mac.playerScaleY = animScale * playerScaleMultiplier
             mac.playerRotation = math.rad(110)
             
+            shadowAngle = math.rad(180)
+
             mac.policeAppear = 0
 
             mac.trafficAppear = 1
@@ -986,12 +1260,6 @@ function updateAnimations(dt)
             currentAnimation = 0
             mac.switchAnimation = 1
         end
-
-    -- elseif currentAnimation == 4 then
-    --     if mac.switchAnimation == 1 then
-    --         mac.switchAnimation = 0
-    --     end
-
     end
 
     updateRoad()
@@ -1067,6 +1335,8 @@ function loadGame()
         printTable(gameData, "  ")
     else
         print("No save file found.")
+        playTutorial = 1
+        print("Tutorial enabled.")
     end
 end
 

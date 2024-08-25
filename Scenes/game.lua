@@ -24,12 +24,35 @@ nearMisses = 0
 awesomeNearMisses = 0
 timeSurvived = 0
 
+-- Police anim
+local policeAnimTimer = 0
+local currentFrame = 1
+local timePerFrame = 0.07
+
+policeAnimationSequence = {
+    love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7 red.png"), love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png"),
+    love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7 red.png"), love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png"),
+    love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7 blue.png"), love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png"),
+    love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7 blue.png"), love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png")
+}
+
+font1 = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 75 * math.min(scaleStuff("w"), scaleStuff("h")))
+
 -- Libraries
 HC = require 'HardonCollider'
 local Camera = require 'hump.camera'
 local CScreen = require "cscreen"
 
 function arcadeGame.load() -- Runs once at the start of the game.
+    love.graphics.setFont(font1)
+
+    gameSpeed = 1
+
+    tutorialStage = 1
+    pressedMovementkeys = 0
+    tutorialTimer = 1
+    pressedNitroKey = 0
+
     -- Load window values
     -- love.window.setMode(1280, 720) -- Set to 1920 x 1080 on launch
     love.window.setTitle("Horizon Driving - Arcade Mode")
@@ -94,9 +117,9 @@ end
 function arcadeGame.update(dt) -- Runs every frame.
     colliders = {} -- clear the table for new values
     
-    if takedownCameraTimer > 0 then
+    if takedownCameraTimer > 0 and exitGame == 0 then
         gameSpeed = 0.15
-    else
+    elseif exitGame == 0 then
         gameSpeed = 1
     end
 
@@ -107,8 +130,6 @@ function arcadeGame.update(dt) -- Runs every frame.
     end
     dt = dt * actualGameSpeed
 
-    -- print(actualGameSpeed)
-
     playerUpdate(dt)
     roadUpdate(dt)
     updateTraffic(dt)
@@ -117,11 +138,15 @@ function arcadeGame.update(dt) -- Runs every frame.
     updateDebris(dt)
     updateSpikestrip(dt)
     updateEMP(dt)
+    tutorialUpdate(dt)
 
     timeSurvived = timeSurvived + dt
     
     -- Exit game?
-    if exitGame == 1 then
+    if exitGame == 1 and actualGameSpeed <= 0.1 then
+        gamespeed = 1
+        actualGameSpeed = gamespeed
+        love.audio.stop()
         return "playerDeath"
     end
 
@@ -130,11 +155,41 @@ function arcadeGame.update(dt) -- Runs every frame.
 end
 
 function arcadeGame.draw() -- Draws every frame / Runs directly after love.update()
+    if exitGame == 1 then
+        love.graphics.setColor(1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1)
+    else
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+
     CScreen.apply()
 
     camera:attach()
     love.graphics.draw(road.image, math.floor(road.x), math.floor(road.v1y), 0, road.scaleX, road.scaleY) -- Draws the road sprites
     love.graphics.draw(road.image, math.floor(road.x), math.floor(road.v2y), 0, road.scaleX, road.scaleY)
+
+    shadowAngle = math.rad(0)
+    shadowDistance = 15
+
+    -- Shadows
+    drawShadow(carSprite.image, carSprite.x, carSprite.y, carSprite.rotation,
+    shadowAngle, shadowDistance, carSprite.scaleX, carSprite.scaleY, carSprite.rotationX, carSprite.rotationY)
+
+    drawShadow(policeSprite.image, policeSprite.x, policeSprite.y, policeSprite.rotation,
+    shadowAngle, shadowDistance, policeSprite.scaleX, policeSprite.scaleY, policeSprite.rotationX, policeSprite.rotationY)
+
+    drawShadow(trafficLeft.image, trafficLeft.x, trafficLeft.y, trafficLeft.rotation,
+    shadowAngle, shadowDistance, trafficLeft.scaleX, trafficLeft.scaleY, trafficLeft.rotationX, trafficLeft.rotationY)
+    drawShadow(trafficRight.image, trafficRight.x, trafficRight.y, trafficRight.rotation,
+    shadowAngle, shadowDistance, trafficRight.scaleX, trafficRight.scaleY, trafficRight.rotationX, trafficRight.rotationY)
+
+    drawSkidMarks()
+
+    if exitGame == 1 then
+        love.graphics.setColor(1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1)
+    else
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+
 
     if trafficRight.timer < 1 and trafficRight.timer > 0 then
         love.graphics.draw(trafficRight.image, trafficRight.x, trafficRight.y + trafficRight.warningOffset, trafficRight.rotation, trafficRight.scaleX, trafficRight.scaleY,
@@ -167,13 +222,20 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     love.graphics.draw(carSprite.image, carSprite.x, carSprite.y, carSprite.rotation, carSprite.scaleX, carSprite.scaleY,
     carSprite.rotationX, carSprite.rotationY) -- Draws the car sprite
     
-    
     for i, debris in ipairs(debrisTable) do
         if debris.image then
-            love.graphics.setColor(1, 1, 1, debris.alpha)
+            if exitGame == 1 then
+                love.graphics.setColor(1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), debris.alpha)
+            else
+                love.graphics.setColor(1, 1, 1, debris.alpha)
+            end
             love.graphics.draw(debris.image, debris.x, debris.y, debris.rotation, debris.scaleX, debris.scaleY,
             debris.rotationX, debris.rotationY)
-            love.graphics.setColor(1, 1, 1, 1)
+            if exitGame == 1 then
+                love.graphics.setColor(1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1)
+            else
+                love.graphics.setColor(1, 1, 1, 1)
+            end
         end
     end
 
@@ -185,10 +247,18 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     if takedownCameraTimer == 0 then
         for i, EMPSprite in ipairs(EMPCopies) do
             if EMPSprite.image then
-                love.graphics.setColor(1, 1, 1, EMPSprite.alpha)
+                if exitGame == 1 then
+                    love.graphics.setColor(1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), EMPSprite.alpha)
+                else
+                    love.graphics.setColor(1, 1, 1, EMPSprite.alpha)
+                end
                 love.graphics.draw(EMPSprite.image, EMPSprite.x, EMPSprite.y, EMPSprite.rotation, EMPSprite.scaleX, EMPSprite.scaleY,
                 EMPSprite.rotationX, EMPSprite.rotationY)
-                love.graphics.setColor(1, 1, 1, 1)
+                if exitGame == 1 then
+                    love.graphics.setColor(1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1)
+                else
+                    love.graphics.setColor(1, 1, 1, 1)
+                end
             end
         end
     end
@@ -204,7 +274,11 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
                 love.graphics.line(points[i], points[i+1], points[next_i], points[next_i+1])
             end
         end
-        love.graphics.setColor(1, 1, 1) -- Reset the color to white
+        if exitGame == 1 then
+            love.graphics.setColor(1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1)
+        else
+            love.graphics.setColor(1, 1, 1, 1)
+        end
     end
     camera:detach()
     love.graphics.translate(0, GUIyOffset)
@@ -251,30 +325,95 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
     end
     for i, emphasis in ipairs(notificationEmphasis) do
         if emphasis.image then
-            love.graphics.setColor(1, 1, 1, emphasis.alpha)
+            if exitGame == 1 then
+                love.graphics.setColor(1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), emphasis.alpha)
+            else
+                love.graphics.setColor(1, 1, 1, emphasis.alpha)
+            end
             love.graphics.draw(emphasis.image, emphasis.x + GUIxOffset, emphasis.y, emphasis.rotation, emphasis.scaleX, emphasis.scaleY,
             emphasis.rotationX, emphasis.rotationY)
-            love.graphics.setColor(1, 1, 1, 1)
+            if exitGame == 1 then
+                love.graphics.setColor(1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1 - (1 - actualGameSpeed), 1)
+            else
+                love.graphics.setColor(1, 1, 1, 1)
+            end
         end
     end
 
+    if playTutorial == 1 then
+        local text
+        if tutorialStage == 1 then
+            text = "Arrow Keys To Move!"
+            love.graphics.print(text, (screenWidth / 2) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight / 3) + math.random(-2, 2))
+        elseif tutorialStage == 2 then
+            text = "\"a\" To Boost!"
+            love.graphics.print(text, (screenWidth / 2) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight / 3) + math.random(-2, 2))
+        elseif tutorialStage == 3 then
+            text = "NITRO"
+            love.graphics.print(text, (3 * screenWidth / 4) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight - 75) + math.random(-2, 2))
+            text = "HEALTH"
+            love.graphics.print(text, (screenWidth / 4) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight - 75) + math.random(-2, 2))
+        elseif tutorialStage == 4 then
+            text = "SURVIVE AND DESTROY"
+            love.graphics.print(text, (screenWidth / 2) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight / 3) + math.random(-2, 2))
+        end
+    end
     love.graphics.translate(0, -GUIyOffset)
 	CScreen.cease()
 end
 
 function loadSongs()
     local songs = {
-        {path = "Sounds/song4.mp3", volume = 0.2},
-        {path = "Sounds/song1.mp3", volume = 0.2},
-        -- {path = "Sounds/song2.mp3", volume = 0.2},
-        {path = "Sounds/song3.mp3", volume = 0.2},
+        -- {path = "Sounds/song1.mp3", volume = 0.3},
+        {path = "Sounds/frantic-fast-forward-trim.mp3", volume = 0.3},
+        {path = "Sounds/too-much-data-trim.mp3", volume = 0.3},
+        {path = "Sounds/shadowy-aberrant-realities-anthem-fade.mp3", volume = 0.3},
     }
+
+    math.randomseed(os.time())
+    shuffleTable(songs)
 
     for i, song in ipairs(songs) do
         soundManager:addSongToQueue(song.path, song.volume)
     end
 
     soundManager:playNextSong()
+end
+
+-- Fisher-Yates algorithm made by AI
+function shuffleTable(t)
+    local n = #t
+    for i = n, 2, -1 do
+        local j = math.random(i)
+        t[i], t[j] = t[j], t[i]
+    end
+end
+
+function tutorialUpdate(dt)
+    tutorialTimer = tutorialTimer - dt
+    if tutorialTimer < 0 then tutorialTimer = 0 end
+
+    print(tutorialTimer)
+
+    if pressedMovementkeys == 1 and tutorialTimer <= 0 and tutorialStage == 1 then
+        tutorialStage = 2
+        tutorialTimer = 1
+    end
+    if pressedNitroKey == 1 and tutorialTimer <= 0 and tutorialStage == 2 then
+        tutorialStage = 3
+        tutorialTimer = 4
+    end
+    if tutorialStage == 3 and tutorialTimer <= 0 then
+        tutorialStage = 4
+        tutorialTimer = 4
+    end
+    if tutorialStage == 4 and tutorialTimer <= 0 then
+        tutorialStage = 5
+        tutorialTimer = 2
+    end
+    if tutorialStage == 5 and tutorialTimer <= 0 then
+        playTutorial = 0
+    end
 end
 
 function loadGUI()
@@ -814,6 +953,24 @@ function splitSpeed(speed, rotation)
     return speedx, speedy
 end
 
+function drawShadow(image, x, y, angle, shadowAngle, shadowDistance, scaleX, scaleY, rotationX, rotationY)
+    -- Shadow offset
+    local shadowOffsetX = math.cos(shadowAngle) * shadowDistance
+    local shadowOffsetY = math.sin(shadowAngle) * shadowDistance
+
+    -- Set the color to black with some transparency
+    love.graphics.setColor(0, 0, 0, 0.5)
+
+    -- Draw the shadow, offset and scaled
+    love.graphics.draw(image, (x + shadowOffsetX),
+    (y + shadowOffsetY), angle,
+    scaleX * 0.9, scaleY * 0.9,
+    rotationX * 0.9, rotationY * 0.9)
+
+    -- Reset color
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
 function loadCar()
     local scaleX = 0.5
     local scaleY = 0.5
@@ -822,14 +979,15 @@ function loadCar()
         x = (screenWidth / 2),
         y = 1000,
         rotation = (-math.pi / 2),
+        gripRotation = (-math.pi / 2),
         rotationX = (image:getWidth() / 2),
         rotationY = (image:getHeight() / 2),
-        scaleX = scaleX,
-        scaleY = scaleY,
+        scaleX = scaleX  * playerScaleMultiplier,
+        scaleY = scaleY  * playerScaleMultiplier,
         speed = 1500,
         appear = 0,
-        width = (image:getWidth() * scaleX),
-        height = (image:getHeight() * scaleY),
+        width = (image:getWidth() * scaleX  * playerScaleMultiplier),
+        height = (image:getHeight() * scaleY  * playerScaleMultiplier),
         image = image,
         prevX = 1000,
         prevY = 800,
@@ -840,6 +998,11 @@ function loadCar()
         grip = playerCarInfo.grip,
         rotationSpeed = 2,
     }
+
+    local minRotationSpeed = 1
+    local maxRotationSpeed = 2
+
+    carSprite.rotationSpeed = minRotationSpeed + (carSprite.grip / 100) * (maxRotationSpeed - minRotationSpeed)
 
     -- Load Nitro
     nitroImage = love.graphics.newImage("Sprites/nitro.png")
@@ -860,12 +1023,27 @@ function loadCar()
         boostamount = 1500
     }
 
+    -- Load Skid marks
+    skidMarkImage = love.graphics.newImage("Sprites/skidmark.png")
+    skidMarkSprite = {
+        horizontalOffset = 0,
+        verticalOffset = 0,
+        horizontalOffsetI = 40,
+        verticalOffsetI = 30,
+        rotation = (-math.pi / 2),
+        scaleX = 1.5,
+        scaleY = 1,
+        rotationX = skidMarkImage:getWidth(),
+        rotationY = skidMarkImage:getHeight() / 2,
+        alpha = 1,
+    }
+
     -- polygon collider for the car
     carCollider = HC.polygon(
         carSprite.x, carSprite.y,
-        carSprite.x + carSprite.width, carSprite.y,
-        carSprite.x + carSprite.width, carSprite.y + carSprite.height,
-        carSprite.x, carSprite.y + carSprite.height
+        carSprite.x + carSprite.width - 10, carSprite.y,
+        carSprite.x + carSprite.width - 10, carSprite.y + carSprite.height - 10,
+        carSprite.x, carSprite.y + carSprite.height - 10
     )
     table.insert(colliders, carCollider)
     local xOffset = carSprite.height * 0.9
@@ -879,15 +1057,70 @@ function loadCar()
     table.insert(colliders, carCollider)
 end
 
+function getWheelPositions()
+    local halfWidth = carSprite.width / 2
+    local halfHeight = carSprite.height / 2
+    
+    local offsetX = halfWidth - skidMarkSprite.horizontalOffsetI
+    local offsetY = halfHeight - skidMarkSprite.verticalOffsetI
+    
+    local cosRot = math.cos(carSprite.rotation)
+    local sinRot = math.sin(carSprite.rotation)
+    
+    local topLeftX = carSprite.x + (-offsetX * cosRot - -offsetY * sinRot)
+    local topLeftY = carSprite.y + (-offsetX * sinRot + -offsetY * cosRot)
+    
+    local topRightX = carSprite.x + (offsetX * cosRot - -offsetY * sinRot)
+    local topRightY = carSprite.y + (offsetX * sinRot + -offsetY * cosRot)
+    
+    local bottomLeftX = carSprite.x + (-offsetX * cosRot - offsetY * sinRot)
+    local bottomLeftY = carSprite.y + (-offsetX * sinRot + offsetY * cosRot)
+    
+    local bottomRightX = carSprite.x + (offsetX * cosRot - offsetY * sinRot)
+    local bottomRightY = carSprite.y + (offsetX * sinRot + offsetY * cosRot)
+    
+    return {
+        {x = topLeftX, y = topLeftY},
+        {x = topRightX, y = topRightY},
+        {x = bottomLeftX, y = bottomLeftY},
+        {x = bottomRightX, y = bottomRightY}
+    }
+end
+
+function drawSkidMarks()
+    local wheelPositions = getWheelPositions(carSprite)
+    skidMarkSprite.rotation = carSprite.gripRotation
+
+    local rotationDifference = math.abs(carSprite.rotation - carSprite.gripRotation)
+    rotationDifference = rotationDifference % (2 * math.pi)
+    if rotationDifference > math.pi then
+        rotationDifference = 2 * math.pi - rotationDifference
+    end
+    
+    skidMarkSprite.alpha = rotationDifference / (math.pi / 4)
+    
+    love.graphics.setColor(1, 1, 1, skidMarkSprite.alpha)
+
+    for _, pos in ipairs(wheelPositions) do
+        love.graphics.draw(skidMarkImage, math.floor(pos.x), math.floor(pos.y), skidMarkSprite.rotation,
+        skidMarkSprite.scaleX, skidMarkSprite.scaleY, skidMarkSprite.rotationX, skidMarkSprite.rotationY)
+    end
+    
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
 function playerUpdate(dt)
     if love.keyboard.isDown('right') then -- Turning
         carSprite.rotation = carSprite.rotation + carSprite.rotationSpeed * dt
+        pressedMovementkeys = 1
     elseif love.keyboard.isDown('left') then
         carSprite.rotation = carSprite.rotation - carSprite.rotationSpeed * dt
+        pressedMovementkeys = 1
     end
     if love.keyboard.isDown('up') then -- Moving
         carSprite.speed = carSprite.speed + carSprite.accel * dt
         camerayShake = camerayShake - carSprite.accel / 5 * carSprite.speed / 1000
+        pressedMovementkeys = 1
     elseif love.keyboard.isDown('down') then
         carSprite.speed = carSprite.speed - carSprite.accel * 1.5 * dt
         camerayShake = camerayShake + carSprite.accel / 5 * carSprite.speed / 1000
@@ -897,10 +1130,11 @@ function playerUpdate(dt)
         camerayShake = camerayShake - nitroSprite.boostamount / 7.5 * carSprite.speed / 1000
         nitroSprite.appear = 1
         nitroSprite.amount = nitroSprite.amount - dt
-        carSprite.maxSpeed = 4500
+        carSprite.maxSpeed = playerCarInfo.maxSpeed + 1000
+        pressedNitroKey = 1
     else
         nitroSprite.appear = 0
-        carSprite.maxSpeed = 3500
+        carSprite.maxSpeed = playerCarInfo.maxSpeed
     end
     -- print(nitroSprite.amount)
 
@@ -916,8 +1150,18 @@ function playerUpdate(dt)
         nitroSprite.amount = nitroSprite.maxAmount
     end
     
-    local dx = carSprite.speed * math.cos(carSprite.rotation)
-    roadFrameMove = carSprite.speed * math.sin(carSprite.rotation)
+    if carSprite.rotation < -math.rad(180) then carSprite.rotation = -math.rad(180) end
+    if carSprite.rotation > math.rad(0) then carSprite.rotation = math.rad(0) end
+
+    -- print(math.deg(carSprite.rotation))
+
+    local maxGripValue = 500
+    local gripFactor = carSprite.grip / maxGripValue
+    local rotationDifference = carSprite.rotation - carSprite.gripRotation
+    carSprite.gripRotation = carSprite.gripRotation + rotationDifference * gripFactor
+
+    local dx = carSprite.speed * math.cos(carSprite.gripRotation)
+    roadFrameMove = carSprite.speed * math.sin(carSprite.gripRotation)
     carSprite.x = carSprite.x + dx * dt
 
     distanceTraveled = distanceTraveled - roadFrameMove * dt
@@ -936,8 +1180,6 @@ function playerUpdate(dt)
     table.insert(colliders, carFrontCollider)
     
     -- Nitro Movement
-    -- nitroSprite.x = carSprite.x
-    -- nitroSprite.y = carSprite.y + 150
     local carEndX = carSprite.x - carSprite.height * math.cos(carSprite.rotation)
     local carEndY = carSprite.y - carSprite.height * math.sin(carSprite.rotation)
 
@@ -956,8 +1198,9 @@ function playerUpdate(dt)
 
     if carSprite.health <= 0 then
         print("Player Died")
-        exitGame = 1 -- Just returns to main menu for now.
-        love.audio.stop() -- Stop all current sounds
+        exitGame = 1
+        gameSpeed = 0
+        -- love.audio.stop() -- Stop all current sounds
         -- carSprite.health = 30
     end
 end
@@ -1054,15 +1297,15 @@ function loadTraffic()
     -- polygon colliders for the traffic
     trafficRightCollider = HC.polygon(
         trafficRight.x, trafficRight.y,
-        trafficRight.x + trafficRight.width, trafficRight.y,
-        trafficRight.x + trafficRight.width, trafficRight.y + trafficRight.height,
-        trafficRight.x, trafficRight.y + trafficRight.height
+        trafficRight.x + trafficRight.width - 10, trafficRight.y,
+        trafficRight.x + trafficRight.width - 10, trafficRight.y + trafficRight.height - 10,
+        trafficRight.x, trafficRight.y + trafficRight.height - 10
     )
     trafficLeftCollider = HC.polygon(
         trafficLeft.x, trafficLeft.y,
-        trafficLeft.x + trafficLeft.width, trafficLeft.y,
-        trafficLeft.x + trafficLeft.width, trafficLeft.y + trafficLeft.height,
-        trafficLeft.x, trafficLeft.y + trafficLeft.height
+        trafficLeft.x + trafficLeft.width - 10, trafficLeft.y,
+        trafficLeft.x + trafficLeft.width - 10, trafficLeft.y + trafficLeft.height - 10,
+        trafficLeft.x, trafficLeft.y + trafficLeft.height - 10
     )
     local nearMissColliderHeightOffset = 10
     local nearMissColliderWidthOffset = 150
@@ -1640,7 +1883,7 @@ function updateSpikestrip(dt)
 end
 
 function loadPolice()
-    local policeImage = love.graphics.newImage("Sprites/Cars/PoliceCar.png")
+    local policeImage = love.graphics.newImage("Sprites/Cars/PoliceAnim/police c7.png")
 
     heatLevel = 0
 
@@ -1651,14 +1894,14 @@ function loadPolice()
         x = 1000,
         y = 500,
         rotation = -math.pi/2,
-        rotationX = trafficImage:getWidth() / 2,
-        rotationY = trafficImage:getHeight() / 2,
-        scaleX = scaleX,
-        scaleY = scaleY,
+        rotationX = policeImage:getWidth() / 2,
+        rotationY = policeImage:getHeight() / 2,
+        scaleX = scaleX * playerScaleMultiplier,
+        scaleY = scaleY * playerScaleMultiplier,
         speed = 1600,
         acc = 200,
-        width = trafficImage:getWidth() * scaleX,
-        height = trafficImage:getHeight() * scaleY,
+        width = policeImage:getWidth() * scaleX * playerScaleMultiplier,
+        height = policeImage:getHeight() * scaleY * playerScaleMultiplier,
         image = policeImage,
         timer = 1,
         flag = 0,
@@ -1681,7 +1924,26 @@ function loadPolice()
     )
 end
 
+function updatePoliceCarAnimation1(dt)
+    policeAnimTimer = policeAnimTimer + dt
+    
+    if policeAnimTimer >= timePerFrame then
+        policeAnimTimer = policeAnimTimer - timePerFrame
+        currentFrame = currentFrame + 1
+
+        if currentFrame > #policeAnimationSequence then
+            currentFrame = 1
+        end
+    end
+    if policeSprite.crashed == 0 then
+        policeSprite.image = policeAnimationSequence[currentFrame]
+    else
+        policeSprite.image = policeAnimationSequence[2]
+    end
+end
+
 function updatePolice(dt)
+    updatePoliceCarAnimation1(dt)
     policeSprite.timer = policeSprite.timer - dt
     policeSprite.hittimer = policeSprite.hittimer - dt
     policeSprite.hittimer1 = policeSprite.hittimer1 + dt
@@ -1728,8 +1990,8 @@ function updatePolice(dt)
 
         if policeSprite.speed < 800 then
             policeSprite.speed = 800
-        elseif policeSprite.speed > 3500 then
-            policeSprite.speed = 3500
+        elseif policeSprite.speed > playerCarInfo.maxSpeed then
+            policeSprite.speed = playerCarInfo.maxSpeed
         end
 
         policeSprite.rotation = math.max(math.min(policeSprite.rotation, -math.pi/3), -2*math.pi/3)
@@ -1774,6 +2036,14 @@ function updatePolice(dt)
     if policeSprite.health <= 0 then
         policeSprite.crashed = 1
         if policeSprite.health <= -300 then
+            if policeDeathDustNum <= 0 then
+                local velx, vely = splitSpeed(policeSprite.speed, policeSprite.rotation)
+                velx = velx / 100
+                for i = 1, math.floor(math.random(1, 2)) do
+                    addDebris2(policeSprite.x + math.random(-50, 50), policeSprite.y + math.random(-50, 50), policeSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+                end
+                policeDeathDustNum = math.random(0.2, 0.75)
+            end
         else
             heatLevel = heatLevel + 1
             print(heatLevel)
@@ -1781,7 +2051,14 @@ function updatePolice(dt)
             policeSprite.health = -300
             nitroSprite.amount = nitroSprite.amount + 1
             takedownCamera = 1
+            local velx, vely = splitSpeed(policeSprite.speed, policeSprite.rotation)
+            velx = velx / 100
+            for i = 1, math.floor(math.random(4,6)) do
+                addDebris2(policeSprite.x + math.random(-50, 50), policeSprite.y + math.random(-50, 50), policeSprite.rotation + math.random(-0.2, 0.2), velx, vely)
+            end
+            policeDeathDustNum = math.random(0.1, 0.3)
         end
+        policeDeathDustNum = policeDeathDustNum - dt
     end
 
     -- Deal with collisions
@@ -1890,11 +2167,13 @@ function roadUpdate(dt)
     if carCollider:collidesWith(rightRoadCollider) then
         carSprite.x = (road.x + road.image:getWidth() * road.scaleX / 2) + rightRoadColliderOffset - (carSprite.image:getWidth() / 3)
         carSprite.rotation = -math.rad(90 + 15)
+        carSprite.gripRotation = carSprite.rotation
         carSprite.speed = carSprite.speed - 250
         camerayShake = camerayShake + 200
     elseif carCollider:collidesWith(leftRoadCollider) then
         carSprite.x = (road.x + road.image:getWidth() * road.scaleX / 2) - leftRoadColliderOffset + (carSprite.image:getWidth() / 3)
         carSprite.rotation = -math.rad(90 - 15)
+        carSprite.gripRotation = carSprite.rotation
         carSprite.speed = carSprite.speed - 250
         camerayShake = camerayShake + 200
     end
@@ -2004,7 +2283,11 @@ function SoundManager:update(dt)
     end
     for name, sound in pairs(self.sounds) do
         sound:setPitch(1 + (1 - actualGameSpeed) * -0.2)
-        sound:setVolume(1 + (1 - actualGameSpeed) * -0.4)
+        sound:setVolume((1 + (1 - actualGameSpeed) * -0.4) * 0.3)
+
+        if exitGame == 1 then
+            sound:setPitch(actualGameSpeed)
+        end
     end
 end
 
@@ -2017,7 +2300,7 @@ end
 
 function SoundManager:playSound(name)
     if self.sounds[name] then
-        self.sounds[name]:setVolume(0.2)
+        self.sounds[name]:setVolume(0.3)
         self.sounds[name]:play()
     end
 end
