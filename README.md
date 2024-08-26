@@ -6,13 +6,19 @@ Welcome to **Horizon Driving** – my _masterpiece✨_ - an adrenaline-pumping, 
 
 ### Awesome Features
 - **High-Octane Gameplay**: Engage in epic fast-paced driving.
-- **Multiple Vehicles**: Choose from a variety of cars, each with its own unique feel.
+- **Multiple Vehicles**: Choose from a variety of cars, each with its own unique feel. (More unique cars planned for future releases!)
 - **Stylish Animations**: Enjoy smooth and dynamic menu animations that keep it _fresh_.
 - **Skill Levels**: Easy to start with a really competitive skill ceiling. :shipit:
 
 ## Download
 
 Get the latest release of Horizon Driving from the [Releases page](https://github.com/Brushfire-257/Horizon-Driving/releases/).
+
+## Game Demo
+
+Check out my video demo!
+
+[![Watch the video](https://img.youtube.com/vi/cUhFgwBc6NY/maxresdefault.jpg)](https://www.youtube.com/watch?v=cUhFgwBc6NY)
 
 ## How to play
 - Arrow keys for movement, "a" to use nitro.
@@ -76,4 +82,4 @@ After setting up the environment and installing the required libraries, you can 
 ```sh
 love .
 ```
-or by dragging the game folder into love.exe
+or by dragging the game folder into love.exe!
