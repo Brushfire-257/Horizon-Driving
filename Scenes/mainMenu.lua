@@ -423,6 +423,8 @@ function mainMenu.update(dt)
 
     love.graphics.setFont(font)
 
+    -- print(firstMenuLoad)
+
     if screen == "carSelect" then
         if suit.Button("Play", (screenWidth - 350) * scaleStuff("w"), (screenHeight - 275) * scaleStuff("h"),
             300 * scaleStuff("w"), 150 * scaleStuff("h")).hit then

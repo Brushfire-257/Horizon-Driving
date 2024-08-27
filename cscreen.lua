@@ -60,7 +60,7 @@ function CScreen.cease()
 	end
 
 	love.graphics.translate(-tx, -ty)
-	if firstMenuLoad == 1 then -- odd bug / patchy fix
+	if firstMenuLoad == 1 or firstMenuLoad == 0 then -- odd bug / patchy fix
 		love.graphics.scale(fsvr, fsvr)
 	end
 end

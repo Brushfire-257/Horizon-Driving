@@ -344,18 +344,18 @@ function arcadeGame.draw() -- Draws every frame / Runs directly after love.updat
         local text
         if tutorialStage == 1 then
             text = "Arrow Keys To Move!"
-            love.graphics.print(text, (screenWidth / 2) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight / 3) + math.random(-2, 2))
+            love.graphics.print(text, (screenWidth / 2) - ((45 * (#text / 2)) * scaleStuff("w")) + math.random(-2, 2), (screenHeight / 3) + math.random(-2, 2))
         elseif tutorialStage == 2 then
             text = "\"a\" To Boost!"
-            love.graphics.print(text, (screenWidth / 2) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight / 3) + math.random(-2, 2))
+            love.graphics.print(text, (screenWidth / 2) - ((45 * (#text / 2)) * scaleStuff("w")) + math.random(-2, 2), (screenHeight / 3) + math.random(-2, 2))
         elseif tutorialStage == 3 then
             text = "NITRO"
-            love.graphics.print(text, (3 * screenWidth / 4) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight - 75) + math.random(-2, 2))
+            love.graphics.print(text, (3 * screenWidth / 4) - ((45 * (#text / 2)) * scaleStuff("w")) + math.random(-2, 2), (screenHeight - 75) + math.random(-2, 2))
             text = "HEALTH"
-            love.graphics.print(text, (screenWidth / 4) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight - 75) + math.random(-2, 2))
+            love.graphics.print(text, (screenWidth / 4) - ((45 * (#text / 2)) * scaleStuff("w")) + math.random(-2, 2), (screenHeight - 75) + math.random(-2, 2))
         elseif tutorialStage == 4 then
             text = "SURVIVE AND DESTROY"
-            love.graphics.print(text, (screenWidth / 2) - (45 * (#text / 2)) + math.random(-2, 2), (screenHeight / 3) + math.random(-2, 2))
+            love.graphics.print(text, (screenWidth / 2) - ((45 * (#text / 2)) * scaleStuff("w")) + math.random(-2, 2), (screenHeight / 3) + math.random(-2, 2))
         end
     end
     love.graphics.translate(0, -GUIyOffset)
@@ -393,7 +393,7 @@ function tutorialUpdate(dt)
     tutorialTimer = tutorialTimer - dt
     if tutorialTimer < 0 then tutorialTimer = 0 end
 
-    print(tutorialTimer)
+    -- print(tutorialTimer)
 
     if pressedMovementkeys == 1 and tutorialTimer <= 0 and tutorialStage == 1 then
         tutorialStage = 2
@@ -2046,7 +2046,7 @@ function updatePolice(dt)
             end
         else
             heatLevel = heatLevel + 1
-            print(heatLevel)
+            -- print(heatLevel)
 
             policeSprite.health = -300
             nitroSprite.amount = nitroSprite.amount + 1
