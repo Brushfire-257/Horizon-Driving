@@ -58,21 +58,18 @@ To install these libraries, follow these steps:
 
     ```sh
     git clone https://github.com/vrld/SUIT.git
-    mv SUIT suit
     ```
 
 4. Download and install the HUMP library:
 
     ```sh
     git clone https://github.com/vrld/hump.git
-    mv hump hump
     ```
 
 5. Download and install the HardonCollider library:
 
     ```sh
     git clone https://github.com/vrld/HardonCollider.git
-    mv HardonCollider hardoncollider
     ```
 
 ### Running the Game
