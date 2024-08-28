@@ -1117,13 +1117,14 @@ function playerUpdate(dt)
         carSprite.rotation = carSprite.rotation - carSprite.rotationSpeed * dt
         pressedMovementkeys = 1
     end
-    if love.keyboard.isDown('up') then -- Moving
-        carSprite.speed = carSprite.speed + carSprite.accel * dt
-        camerayShake = camerayShake - carSprite.accel / 5 * carSprite.speed / 1000
-        pressedMovementkeys = 1
-    elseif love.keyboard.isDown('down') then
+    -- if love.keyboard.isDown('up') then -- Moving
+        -- pressedMovementkeys = 1
+    if love.keyboard.isDown('down') then
         carSprite.speed = carSprite.speed - carSprite.accel * 1.5 * dt
         camerayShake = camerayShake + carSprite.accel / 5 * carSprite.speed / 1000
+    else
+        carSprite.speed = carSprite.speed + carSprite.accel * dt -- Accel forward
+        camerayShake = camerayShake - carSprite.accel / 5 * carSprite.speed / 1000
     end
     if love.keyboard.isDown('a') and nitroSprite.amount > 0 then -- Nitro
         carSprite.speed = carSprite.speed + nitroSprite.boostamount * dt

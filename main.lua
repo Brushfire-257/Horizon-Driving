@@ -21,9 +21,15 @@ firstStart = true -- After intro set this to false
 function love.load()
     -- Load window values
     love.window.setFullscreen(true)
-    local screen_width = love.graphics.getWidth() -- Goofy things to get the splash screen working with other GUI
-    local screen_height = love.graphics.getHeight()
+    local screen_width = 1340/2 --love.graphics.getWidth() -- Goofy things to get the splash screen working with other GUI
+    local screen_height = 1080/2 --love.graphics.getHeight()
+
     love.window.setMode(love.graphics.getWidth(), love.graphics.getHeight()) -- Set to 1920 x 1080 on launch
+
+    love.window.setFullscreen(true)
+
+    love.window.setMode(2340/2, 1080/2) -- Set to custom w / h for debug
+
     love.window.setTitle("Horizon Driving")
     love.math.setRandomSeed(os.time())
 
@@ -45,6 +51,8 @@ end
 
 function love.update(dt) -- Runs every frame.
     -- Update the current state
+
+    -- print("FPS: " .. love.timer.getFPS())
 
     if splashDone == 0 then
         splash:update(dt)

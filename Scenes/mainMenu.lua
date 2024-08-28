@@ -448,7 +448,7 @@ function mainMenu.update(dt)
         love.graphics.setFont(font2)
 
         suit.Label(playerCarInfo.name, {align = "left"},
-        (screenWidth - 50 - (math.min(#playerCarInfo.name, 16) * 30) * scaleStuff("w")), (-30 * scaleStuff("h")),
+        ((screenWidth - 50 - (math.min(#playerCarInfo.name, 16) * 30)) * scaleStuff("w")), (-30 * scaleStuff("h")),
         (math.min(#playerCarInfo.name, 16) * 30 * scaleStuff("w")), 150 * scaleStuff("h"))
 
         love.graphics.setFont(font1)
