@@ -65,7 +65,7 @@ function arcadeGame.load() -- Runs once at the start of the game.
     love.math.setRandomSeed(os.time())
 
     -- Scaling init
-    CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, debugMode)
+    CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, 1)
     
     -- Create the sound manager
     soundManager = SoundManager:new()

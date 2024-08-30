@@ -48,13 +48,13 @@ function CScreen.cease()
 		love.graphics.setColor(cr, cg, cb, ca)
 		love.graphics.scale(fsvr, fsvr)
 
-		if tx ~= 0 then
-			love.graphics.rectangle("fill", -tx, 0, tx, rhf)
-			love.graphics.rectangle("fill", rxv, 0, tx, rhf)
-		elseif ty ~= 0 then
-			love.graphics.rectangle("fill", 0, -ty, rwf, ty)
-			love.graphics.rectangle("fill", 0, ryv, rwf, ty)
-		end
+		-- if tx ~= 0 then -- Commented out in preparation for mobile w i d e screens
+		-- 	love.graphics.rectangle("fill", -tx, 0, tx, rhf)
+		-- 	love.graphics.rectangle("fill", rxv, 0, tx, rhf)
+		-- elseif ty ~= 0 then
+		-- 	love.graphics.rectangle("fill", 0, -ty, rwf, ty)
+		-- 	love.graphics.rectangle("fill", 0, ryv, rwf, ty)
+		-- end
 
 		love.graphics.setColor(pr, pg, pb, pa)
 	end

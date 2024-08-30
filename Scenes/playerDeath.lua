@@ -26,7 +26,7 @@ local text2 = {}
 
 function deathAnim.load()
     -- Scaling init
-    CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, debugMode)
+    CScreen.init(math.max(love.graphics.getWidth(), 1920), 1080, 1)
 
     love.window.setTitle("Horizon Driving - Game Endscreen")
     screenWidthA = love.graphics.getWidth()
@@ -210,7 +210,7 @@ function updateAnimations1(dt)
     local speedDifference = speedOffset - speedCurrent
     speedCurrent = speedCurrent + speedDifference * 0.04
     
-    print(mac.timer)
+    -- print(mac.timer)
     
     mac.timer = mac.timer - dt
     
