@@ -93,9 +93,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: "dev-release-${{ steps.date.outputs.date }}"
-        release_name: "Dev Release - ${{ steps.date.outputs.date }}"
-        body: "This is an automated dev release for an awesome new commit at: ${{ steps.date.outputs.date }}. Expect bugs and WIP features!"
+        tag_name: "dev-releases"
+        release_name: "Dev Release - GITHUB ACTIONS TEST"
+        body: "This is an automated dev release for an awesome new commit at: [time here plz]. Expect bugs and WIP features!"
         draft: false
         prerelease: true
     
