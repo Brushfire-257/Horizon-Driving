@@ -71,6 +71,11 @@ To install these libraries, follow these steps:
     ```sh
     git clone https://github.com/vrld/HardonCollider.git
     ```
+7. Download and install the Splashes library:
+
+    ```sh
+    git clone https://github.com/love2d-community/splashes.git
+    ```
 
 ### Running the Game
 
