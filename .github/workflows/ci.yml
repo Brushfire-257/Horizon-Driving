@@ -36,7 +36,8 @@ jobs:
       run: |
         mkdir build
         # cd build
-        cmd /c "powershell Compress-Archive -Path * -DestinationPath build\game.love"
+        # cmd /c "powershell Compress-Archive -Path * -DestinationPath build\game.love"
+        cmd /c "powershell Start-Process powershell -ArgumentList 'Compress-Archive -Path * -DestinationPath build\game.love' -Wait"
         dir build
         cd ..
         dir ..
@@ -61,7 +62,7 @@ jobs:
           
           # Append the game.love file to the executable
           $loveExeStream = [System.IO.File]::OpenWrite($outputExePath)
-          $gameLoveStream = [System.IO.File]::OpenRead($gameLovePath)
+          $gameLoveStream = [System.IO.File]::OpenRead('D:\a\Horizon-Driving\Horizon-Driving\build\game.love') # 'D:\a\Horizon-Driving\Horizon-Driving\build\game.love'
           $gameLoveStream.CopyTo($loveExeStream)
           $gameLoveStream.Close()
           $loveExeStream.Close()
