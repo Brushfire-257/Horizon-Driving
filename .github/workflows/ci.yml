@@ -72,9 +72,8 @@ jobs:
 
     - name: Package the game
       run: |
-        cd ${{ github.workspace }}/build
-        Compress-Archive -Path "HorizonDriving.exe, *.dll, dev-release-notes.txt" -DestinationPath HorizonDriving.zip
-        ls
+        cd ${{ github.workspace }}\build
+        Get-ChildItem -Exclude "game.love" | Compress-Archive -DestinationPath HorizonDriving.zip
         dir ..
         # Get-ChildItem -Path D:\Horizon-Driving -Recurse | Format-Tree
 
@@ -101,4 +100,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: game-build
-        path: ${{ github.workspace }}/build/HorizonDriving.zip
+        path: ${{ github.workspace }}\build\HorizonDriving.zip
