@@ -78,18 +78,17 @@ jobs:
         # Get-ChildItem -Path D:\Horizon-Driving -Recurse | Format-Tree
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: game-build
         path: ${{ github.workspace }}\build\HorizonDriving.zip
 
-    - name: Get current date and time
-      id: date
-      run: echo "::set-output name=date::$(date +"%Y-%m-%d %H:%M:%S")"
+    - name: Set date output
+      run: echo "date=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
 
     - name: Create GitHub Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: actions/create-release@v1.1.5
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
