@@ -84,7 +84,7 @@ jobs:
         path: ${{ github.workspace }}\build\HorizonDriving.zip
 
     - name: Set date output
-      run: echo "date=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+      run: echo "DATE=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
     - name: Create GitHub Release
       id: create_release
@@ -92,9 +92,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: "dev-release-${{ steps.date.outputs.date }}"
-        release_name: "Dev Release - ${{ steps.date.outputs.date }}"
-        body: "This is an automated dev release for an awesome new commit at: ${{ steps.date.outputs.date }}. Expect bugs and WIP features!"
+        tag_name: "dev-release-${{ env.DATE }}"
+        release_name: "Dev Release - ${{ env.DATE }}"
+        body: "This is an automated dev release for an awesome new commit at: ${{ env.DATE }}. Expect bugs and WIP features!"
         draft: false
         prerelease: true
     
