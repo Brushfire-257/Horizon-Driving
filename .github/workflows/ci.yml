@@ -72,7 +72,7 @@ jobs:
 
     - name: Package the game
       run: |
-        cd D:\Horizon-Driving
+        cd D:\a\Horizon-Driving
         Compress-Archive -Path "HorizonDriving.exe, *.dll, dev-release-notes.txt" -DestinationPath HorizonDriving.zip
         dir ..
         # Get-ChildItem -Path D:\Horizon-Driving -Recurse | Format-Tree
@@ -100,4 +100,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: game-build
-        path: 'D:\Horizon-Driving\HorizonDriving.zip'
+        path: 'D:\a\Horizon-Driving\HorizonDriving.zip'
