@@ -41,8 +41,22 @@ jobs:
       run: |
         cd build
         cp ../dev-release-notes.txt .
-        copy /b C:\love\love-11.4-win64\love.exe+game.love HorizonDriving.exe
-        Copy-Item C:\love\love-11.4-win64\*.dll . # Copy all necessary LOVE2D DLLs
+        Copy-Item -Path C:\love\love-11.4-win64\*.dll -Destination . # Copy all necessary LOVE2D DLLs
+
+        # Create a new executable by concatenating
+        $loveExePath = "C:\love\love-11.4-win64\love.exe"
+        $gameLovePath = "game.love"
+        $outputExePath = "HorizonDriving.exe"
+        
+        # Create a copy of the LOVE executable
+        Copy-Item -Path $loveExePath -Destination $outputExePath
+        
+        # Append the game.love file to the executable
+        $loveExeStream = [System.IO.File]::OpenWrite($outputExePath)
+        $gameLoveStream = [System.IO.File]::OpenRead($gameLovePath)
+        $gameLoveStream.CopyTo($loveExeStream)
+        $gameLoveStream.Close()
+        $loveExeStream.Close()
 
     - name: Package the game
       run: |
