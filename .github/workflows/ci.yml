@@ -19,7 +19,7 @@ jobs:
         mkdir C:\love
         Invoke-WebRequest -Uri "https://github.com/love2d/love/releases/download/11.4/love-11.4-win64.zip" -OutFile "C:\love\love.zip"
         Expand-Archive -Path "C:\love\love.zip" -DestinationPath "C:\love"
-        $env:Path += ";C:\love\love-11.4-win64"
+        [System.Environment]::SetEnvironmentVariable("Path", "$env:Path;C:\love\love-11.4-win64", [System.EnvironmentVariableTarget]::Machine)
 
     - name: Download Libraries
       run: |
