@@ -77,27 +77,34 @@ jobs:
         dir ..
         # Get-ChildItem -Path D:\Horizon-Driving -Recurse | Format-Tree
 
-    - name: Print Directory Tree
-      run: |
-        function Print-Tree {
-            param (
-                [string]$Path,
-                [int]$Level = 0
-            )
-    
-            $indent = " " * ($Level * 2)
-            Get-ChildItem -Path $Path | ForEach-Object {
-                Write-Output "$indent$($_.Name)"
-                if ($_.PSIsContainer) {
-                    Print-Tree -Path $_.FullName -Level ($Level + 1)
-                }
-            }
-        }
-    
-        Print-Tree -Path D:\
-
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: game-build
         path: ${{ github.workspace }}\build\HorizonDriving.zip
+
+    - name: Get current date and time
+      id: date
+      run: echo "::set-output name=date::$(date +"%Y-%m-%d %H:%M:%S")"
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "dev-release-${{ steps.date.outputs.date }}"
+        release_name: "Dev Release - ${{ steps.date.outputs.date }}"
+        body: "This is an automated dev release for an awesome new commit at: ${{ steps.date.outputs.date }}. Expect bugs and WIP features!"
+        draft: false
+        prerelease: true
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/build/HorizonDriving.zip
+        asset_name: HorizonDriving.zip
+        asset_content_type: application/zip
