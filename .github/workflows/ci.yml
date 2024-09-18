@@ -35,7 +35,7 @@ jobs:
     - name: Build the game
       run: |
         mkdir build
-        "C:\love\love-11.4-win64\love.exe" . --console --extract --output build\game.love
+        & "C:\love\love-11.4-win64\love.exe" $PWD --console --extract --output build\game.love
 
     - name: Create game executable
       run: |
