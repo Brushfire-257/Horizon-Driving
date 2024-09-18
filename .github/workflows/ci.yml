@@ -35,7 +35,7 @@ jobs:
     - name: Build the game
       run: |
         mkdir build
-        call "C:\love\love-11.4-win64\love.exe" . --console --extract --output build\game.love
+        cmd /c "powershell Compress-Archive -Path * -DestinationPath build\game.love"
         dir build
 
     - name: Create game executable
