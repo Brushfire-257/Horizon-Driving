@@ -36,11 +36,7 @@ jobs:
       run: |
         mkdir build
         & "C:\love\love-11.4-win64\love.exe" . --console --extract --output build\game.love
-
-    - name: List build directory contents
-      run: |
-        cd build
-        dir
+        dir build
 
     - name: Create game executable
       run: |
