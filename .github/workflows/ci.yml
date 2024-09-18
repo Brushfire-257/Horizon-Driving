@@ -72,11 +72,11 @@ jobs:
 
     - name: Package the game
       run: |
+        cd D:\
         Compress-Archive -Path "HorizonDriving.exe, *.dll, dev-release-notes.txt" -DestinationPath HorizonDriving.zip
-        cd
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: game-build
-        path: 'HorizonDriving.zip'
+        path: 'D:\HorizonDriving.zip'
