@@ -74,7 +74,7 @@ jobs:
       run: |
         cd ${{ github.workspace }}/build
         Compress-Archive -Path "HorizonDriving.exe, *.dll, dev-release-notes.txt" -DestinationPath HorizonDriving.zip
-        ls -la
+        ls
         dir ..
         # Get-ChildItem -Path D:\Horizon-Driving -Recurse | Format-Tree
 
