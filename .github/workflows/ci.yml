@@ -27,7 +27,6 @@ jobs:
         git clone https://github.com/vrld/suit.git
         git clone https://github.com/vrld/HardonCollider.git
         git clone https://github.com/love2d-community/splashes.git
-        mkdir libraries
         Move-Item -Path "hump" -Destination "libraries\hump"
         Move-Item -Path "suit" -Destination "libraries\suit"
         Move-Item -Path "HardonCollider" -Destination "libraries\HardonCollider"
