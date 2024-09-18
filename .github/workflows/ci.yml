@@ -74,6 +74,8 @@ jobs:
       run: |
         cd D:\
         Compress-Archive -Path "HorizonDriving.exe, *.dll, dev-release-notes.txt" -DestinationPath HorizonDriving.zip
+        dir ..
+        Get-ChildItem -Path D:\ -Recurse | Format-Tree
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
