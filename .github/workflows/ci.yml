@@ -35,28 +35,40 @@ jobs:
     - name: Build the game
       run: |
         mkdir build
-        & "C:\love\love-11.4-win64\love.exe" $PWD --console --extract --output build\game.love
+        & "C:\love\love-11.4-win64\love.exe" . --console --extract --output build\game.love
+
+    - name: List build directory contents
+      run: |
+        cd build
+        dir
 
     - name: Create game executable
       run: |
         cd build
         cp ../dev-release-notes.txt .
-        Copy-Item -Path C:\love\love-11.4-win64\*.dll -Destination . # Copy all necessary LOVE2D DLLs
+        
+        # Verify that game.love is present
+        if (Test-Path -Path "game.love") {
+          # Copy the LOVE2D executable and the game.love file
+          Copy-Item -Path C:\love\love-11.4-win64\*.dll -Destination . # Copy necessary LOVE2D DLLs
 
-        # Create a new executable by concatenating
-        $loveExePath = "C:\love\love-11.4-win64\love.exe"
-        $gameLovePath = "game.love"
-        $outputExePath = "HorizonDriving.exe"
-        
-        # Create a copy of the LOVE executable
-        Copy-Item -Path $loveExePath -Destination $outputExePath
-        
-        # Append the game.love file to the executable
-        $loveExeStream = [System.IO.File]::OpenWrite($outputExePath)
-        $gameLoveStream = [System.IO.File]::OpenRead($gameLovePath)
-        $gameLoveStream.CopyTo($loveExeStream)
-        $gameLoveStream.Close()
-        $loveExeStream.Close()
+          # Create a new executable by concatenating love.exe and game.love
+          $loveExePath = "C:\love\love-11.4-win64\love.exe"
+          $gameLovePath = "game.love"
+          $outputExePath = "HorizonDriving.exe"
+          
+          # Create a copy of the LOVE executable
+          Copy-Item -Path $loveExePath -Destination $outputExePath
+          
+          # Append the game.love file to the executable
+          $loveExeStream = [System.IO.File]::OpenWrite($outputExePath)
+          $gameLoveStream = [System.IO.File]::OpenRead($gameLovePath)
+          $gameLoveStream.CopyTo($loveExeStream)
+          $gameLoveStream.Close()
+          $loveExeStream.Close()
+        } else {
+          Write-Error "game.love file not found in build directory."
+        }
 
     - name: Package the game
       run: |
