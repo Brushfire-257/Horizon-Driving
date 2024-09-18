@@ -35,8 +35,9 @@ jobs:
     - name: Build the game
       run: |
         mkdir build
+        cd build
         cmd /c "powershell Compress-Archive -Path * -DestinationPath build\game.love"
-        dir build
+        # dir build
 
     - name: Create game executable
       run: |
