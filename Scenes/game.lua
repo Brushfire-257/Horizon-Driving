@@ -39,9 +39,9 @@ policeAnimationSequence = {
 font1 = love.graphics.newFont("fonts/VCR_OSD_MONO.ttf", 75 * math.min(scaleStuff("w"), scaleStuff("h")))
 
 -- Libraries
-HC = require 'HardonCollider'
-local Camera = require 'hump.camera'
-local CScreen = require "cscreen"
+HC = require 'libraries/HardonCollider'
+local Camera = require 'libraries/hump.camera'
+local CScreen = require 'libraries/cscreen'
 
 function arcadeGame.load() -- Runs once at the start of the game.
     love.graphics.setFont(font1)

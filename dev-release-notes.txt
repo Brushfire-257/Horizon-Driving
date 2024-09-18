@@ -1,0 +1,8 @@
+Horizon Driving - Dev Release
+
+This is a development build of Horizon Driving!
+The game is still a work in progress, and this version may include experimental features and bug fixes.
+
+Feel free to share feedback or report any issues on the Discord server: https://discord.gg/K7FWthRsmv.
+
+Thank you for supporting the development!

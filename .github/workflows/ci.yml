@@ -1,0 +1,56 @@
+name: Build LOVE2D Game
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup LOVE2D
+      run: |
+        mkdir C:\love
+        Invoke-WebRequest -Uri "https://github.com/love2d/love/releases/download/11.4/love-11.4-win64.zip" -OutFile "C:\love\love.zip"
+        Expand-Archive -Path "C:\love\love.zip" -DestinationPath "C:\love"
+        $env:Path += ";C:\love\love-11.4-win64"
+
+    - name: Download Libraries
+      run: |
+        git clone https://github.com/vrld/hump.git
+        git clone https://github.com/vrld/suit.git
+        git clone https://github.com/vrld/HardonCollider.git
+        git clone https://github.com/love2d-community/splashes.git
+        mkdir libraries
+        Move-Item -Path "hump" -Destination "libraries\hump"
+        Move-Item -Path "suit" -Destination "libraries\suit"
+        Move-Item -Path "HardonCollider" -Destination "libraries\HardonCollider"
+        Move-Item -Path "splashes" -Destination "libraries\splashes"
+
+    - name: Build the game
+      run: |
+        mkdir build
+        love . --console --extract --output build\game.love
+
+    - name: Create game executable
+      run: |
+        cd build
+        cp ../dev-release-notes.txt .
+        copy /b C:\love\love-11.4-win64\love.exe+game.love HorizonDriving.exe
+        Copy-Item C:\love\love-11.4-win64\*.dll . # Copy all necessary LOVE2D DLLs
+
+    - name: Package the game
+      run: |
+        Compress-Archive -Path "HorizonDriving.exe, *.dll, dev-release-notes.txt" -DestinationPath HorizonDriving.zip
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: game-build
+        path: build\HorizonDriving.zip

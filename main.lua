@@ -9,8 +9,8 @@ gameVersion = 0.2
 local state = {}
 
 -- Load libraries
-local CScreen = require "cscreen"
-local splash = require("splashes.o-ten-one")
+local CScreen = require "libraries/cscreen"
+local splash = require("libraries/splashes.o-ten-one")
 
 local splashDone = 0
 

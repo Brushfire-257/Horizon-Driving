@@ -194,11 +194,9 @@ speedLevelImages = {
 local guiPositionx = 900
 local guiPositiony = 600
 
--- SUIT setup (This is gonna make the GUI so much easier to make..)
-local suit = require("SUIT")
-
 -- library setup
-local CScreen = require "cscreen"
+local suit = require("libraries/SUIT")
+local CScreen = require("libraries/cscreen")
 
 -- odd bug fix
 firstMenuLoad = 1

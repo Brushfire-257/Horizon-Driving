@@ -2,8 +2,8 @@
 deathAnim = {}
 
 -- library setup
-local CScreen = require "cscreen"
-local suit = require("SUIT")
+local CScreen = require("libraries/cscreen")
+local suit = require("libraries/SUIT")
 
 -- misc. setup
 local screenWidthA = love.graphics.getWidth()
